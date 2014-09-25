@@ -1,3 +1,5 @@
+package syntax;
+
 /**
  * A Name object represents a Pi-Calculus name.
  */
@@ -35,6 +37,6 @@ class Name {
     public boolean equals(Object obj) {
         // This is safe from ClassCastException since the right-hand-side is
         // only evaluated in the case that obj is a Name.
-        return (obj instanceof Name) && ((Name) obj).get() == this.name;
+        return (obj instanceof Name) && ((Name) obj).get() == this.nameID;
     }
 }

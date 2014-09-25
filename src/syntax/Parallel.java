@@ -1,3 +1,5 @@
+package syntax;
+
 /**
  * The Parallel class represents parallel composition - it contains two
  * concurrently executing processes.
