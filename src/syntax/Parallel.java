@@ -4,7 +4,7 @@ package syntax;
  * The Parallel class represents parallel composition - it contains two
  * concurrently executing processes.
  */
-class Parallel extends SyntaxElement {
+public class Parallel extends SyntaxElement {
 
     private SyntaxElement subprocess1;
     private SyntaxElement subprocess2;

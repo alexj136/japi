@@ -3,7 +3,7 @@ package syntax;
 /**
  * A Name object represents a Pi-Calculus name.
  */
-class Name {
+public class Name {
 
     private final int nameID;
 
