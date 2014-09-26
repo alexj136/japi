@@ -15,4 +15,9 @@ public class Replicate extends SyntaxElement {
     public Replicate(SyntaxElement toReplicate) {
         this.toReplicate = toReplicate;
     }
+
+    @Override
+    public void rename(Name from, Name to) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
 }

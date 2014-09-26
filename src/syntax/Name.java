@@ -3,9 +3,9 @@ package syntax;
 /**
  * A Name object represents a Pi-Calculus name.
  */
-public class Name {
+public class Name extends SyntaxElement {
 
-    private final int nameID;
+    private int nameID;
 
     /**
      * Construct a new Name object.
@@ -38,5 +38,18 @@ public class Name {
         // This is safe from ClassCastException since the right-hand-side is
         // only evaluated in the case that obj is a Name.
         return (obj instanceof Name) && ((Name) obj).get() == this.nameID;
+    }
+
+    /**
+     * Change the value of this name to that of 'to', only if the initial value
+     * was that of 'from'.
+     * @param from change if this object has the same name value
+     * @param to if changing, change to this value
+     */
+    @Override
+    public void rename(Name from, Name to) {
+        if(this.equals(from.get())) {
+            this.nameID = to.get();
+        }
     }
 }

@@ -23,4 +23,15 @@ public class Receive extends SyntaxElement {
         this.bindTo = bindTo;
         this.subprocess = subprocess;
     }
+
+    @Override
+    public void rename(Name from, Name to) {
+        this.receiveOn.rename(from, to);
+        // Do not rename bindTo, in accordance with the semantics of the pi
+        // calculus. Only rename in the subprocess if bindTo was not equal to
+        // from.
+        if(!(this.bindTo.equals(from))) {
+            this.subprocess.rename(from, to);
+        }
+    }
 }

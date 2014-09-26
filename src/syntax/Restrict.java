@@ -19,4 +19,9 @@ public class Restrict extends SyntaxElement {
         this.boundName = boundName;
         this.restrictIn = restrictIn;
     }
+
+    @Override
+    public void rename(Name from, Name to) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
 }

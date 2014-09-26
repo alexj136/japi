@@ -22,4 +22,11 @@ public class Send extends SyntaxElement {
         this.toSend = toSend;
         this.subprocess = subprocess;
     }
+
+    @Override
+    public void rename(Name from, Name to) {
+        this.sendOn.rename(from, to);
+        this.toSend.rename(from, to);
+        this.subprocess.rename(from, to);
+    }
 }

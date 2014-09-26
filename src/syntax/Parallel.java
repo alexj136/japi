@@ -19,4 +19,10 @@ public class Parallel extends SyntaxElement {
         this.subprocess1 = subprocess1;
         this.subprocess2 = subprocess2;
     }
+
+    @Override
+    public void rename(Name from, Name to) {
+        this.subprocess1.rename(from, to);
+        this.subprocess2.rename(from, to);
+    }
 }
