@@ -1,0 +1,38 @@
+PARSER_BEGIN(Parser)
+
+public class Parser {
+
+}
+
+PARSER_END(Parser)
+
+SKIP :
+    { " "
+    | "\t"
+    | "\n"
+    | "\r"
+    }
+
+TOKEN :
+    { "receive"
+    | "send"
+    | "over"
+    | "then"
+    | "concurrently"
+    | "and"
+    | "restricting"
+    | "in"
+    | "repeatedly"
+    | "end"
+    | <ID: (["a"-"z"])+> }
+
+void Input() : {} { Expression() <EOF> }
+
+void Expression() : {}
+    { "receive" <ID> "over" <ID> "then" Expression()
+    | "send" <ID> "over" <ID> "then" Expression()
+    | "concurrently" Expression() "and" Expression()
+    | "restricting" <ID> "in" Expression()
+    | "repeatedly" Expression()
+    | "end"
+    }
