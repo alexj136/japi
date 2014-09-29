@@ -1,0 +1,9 @@
+concurrently
+    concurrently
+        send y over x
+        then end
+    and
+        receive z over x
+        then end
+and
+    repeatedly end

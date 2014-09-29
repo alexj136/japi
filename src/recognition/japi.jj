@@ -1,10 +1,12 @@
-PARSER_BEGIN(Parser)
+PARSER_BEGIN(Recognise)
 
-public class Parser {
+import syntax.*;
+
+public class Recognise {
 
 }
 
-PARSER_END(Parser)
+PARSER_END(Recognise)
 
 SKIP :
     { " "
@@ -28,11 +30,11 @@ TOKEN :
 
 void Input() : {} { Expression() <EOF> }
 
-void Expression() : {}
-    { "receive" <ID> "over" <ID> "then" Expression()
-    | "send" <ID> "over" <ID> "then" Expression()
-    | "concurrently" Expression() "and" Expression()
-    | "restricting" <ID> "in" Expression()
-    | "repeatedly" Expression()
-    | "end"
+void Expression() : { Expression e1, e2; Token n1, n2; }
+    { "receive" n1=<ID> "over" n2=<ID> "then" e1=Expression() { return new Receive(new Name(), new Name(), e1); }
+    | "send" n1=<ID> "over" n2=<ID> "then" e1=Expression() { return new Send(new Name(), new Name(), e1); }
+    | "concurrently" e1=Expression() "and" e2=Expression() { return new Parallel(e1, e2); }
+    | "restricting" n1=<ID> "in" e1=Expression() { return new Restrict(new Name(), e1); }
+    | "repeatedly" e1=Expression() { return new Replicate(e1); }
+    | "end" { return new Done(); }
     }
