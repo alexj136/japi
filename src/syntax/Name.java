@@ -1,55 +1,25 @@
 package syntax;
 
 /**
- * A Name object represents a Pi-Calculus name.
+ * A name represents a channel name in the Pi calculus. The user supplies names
+ * represented by strings, however we prefer to use a more efficient
+ * representation (integers) during execution. The Name interface abstracts over
+ * the implementation detail of name representaion.
  */
-public class Name extends SyntaxElement {
-
-    private int nameID;
+public interface Name<R> {
 
     /**
-     * Construct a new Name object.
-     * @param nameID the 'name' to store. A name is an integer for the sake of
-     * efficiency. User-supplied names may be Strings, but they must be
-     * converted into integers.
-     * @return a Name object storing the suppied ID/name/whatever you want to
-     * call it.
+     * Access the underlying name, represented by an object of type R.
      */
-    public Name(int nameID) {
-        this.nameID = nameID;
-    }
-
+    public R get();
+    
     /**
-     * Access the nameID
-     * @return the name value.
+     * The only real requirement of a Name is that it be comparable to others,
+     * i.e. that we can determine whether or not it is equal to another Name.
+     * @param other The Name to compare this Name with
+     * @return true if the names match, false otherwise
      */
-    public int get() {
-        return this.nameID;
-    }
+    public boolean matches(Name other) throws NameRepresentationException;
 
-    /**
-     * Compare this Name to another object.
-     * @param obj the object to compare
-     * @return true if the passed object is a Name with the same ID value, false
-     * otherwise
-     */
-    @Override
-    public boolean equals(Object obj) {
-        // This is safe from ClassCastException since the right-hand-side is
-        // only evaluated in the case that obj is a Name.
-        return (obj instanceof Name) && ((Name) obj).get() == this.nameID;
-    }
-
-    /**
-     * Change the value of this name to that of 'to', only if the initial value
-     * was that of 'from'.
-     * @param from change if this object has the same name value
-     * @param to if changing, change to this value
-     */
-    @Override
-    public void rename(Name from, Name to) {
-        if(this.equals(from.get())) {
-            this.nameID = to.get();
-        }
-    }
+    public void rename(Name from, Name to) throws NameRepresentationException;
 }

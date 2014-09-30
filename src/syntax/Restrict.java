@@ -21,7 +21,7 @@ public class Restrict extends SyntaxElement {
     }
 
     @Override
-    public void rename(Name from, Name to) {
+    public void rename(Name from, Name to) throws NameRepresentationException {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 }

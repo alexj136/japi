@@ -12,5 +12,6 @@ public abstract class SyntaxElement {
      * @param from All occurences of this Name will be renamed
      * @param to any renamed occurences recieve this as their new name
      */
-    public abstract void rename(Name from, Name to);
+    public abstract void rename(Name from, Name to)
+    throws NameRepresentationException;
 }

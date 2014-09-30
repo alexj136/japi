@@ -21,7 +21,7 @@ public class Parallel extends SyntaxElement {
     }
 
     @Override
-    public void rename(Name from, Name to) {
+    public void rename(Name from, Name to) throws NameRepresentationException {
         this.subprocess1.rename(from, to);
         this.subprocess2.rename(from, to);
     }

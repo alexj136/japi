@@ -24,7 +24,7 @@ public class Send extends SyntaxElement {
     }
 
     @Override
-    public void rename(Name from, Name to) {
+    public void rename(Name from, Name to) throws NameRepresentationException {
         this.sendOn.rename(from, to);
         this.toSend.rename(from, to);
         this.subprocess.rename(from, to);

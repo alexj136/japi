@@ -25,12 +25,12 @@ public class Receive extends SyntaxElement {
     }
 
     @Override
-    public void rename(Name from, Name to) {
+    public void rename(Name from, Name to) throws NameRepresentationException {
         this.receiveOn.rename(from, to);
         // Do not rename bindTo, in accordance with the semantics of the pi
         // calculus. Only rename in the subprocess if bindTo was not equal to
         // from.
-        if(!(this.bindTo.equals(from))) {
+        if(!(this.bindTo.matches(from))) {
             this.subprocess.rename(from, to);
         }
     }
