@@ -22,4 +22,5 @@ public interface Name<R> {
     public boolean matches(Name other) throws NameRepresentationException;
 
     public void rename(Name from, Name to) throws NameRepresentationException;
+    public String prettyPrint(int indentationLevel);
 }

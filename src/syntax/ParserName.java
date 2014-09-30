@@ -55,4 +55,9 @@ public class ParserName extends SyntaxElement implements Name<String> {
             this.nameString = ((ParserName) to).get();
         }
     }
+
+    @Override
+    public String prettyPrint(int indentationLevel) {
+        return this.nameString;
+    }
 }

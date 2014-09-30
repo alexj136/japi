@@ -57,4 +57,9 @@ public class IntName extends SyntaxElement implements Name<Integer> {
             this.nameID = new Integer(((IntName) to).get().intValue());
         }
     }
+
+    @Override
+    public String prettyPrint(int indentationLevel) {
+        return this.nameID.toString();
+    }
 }

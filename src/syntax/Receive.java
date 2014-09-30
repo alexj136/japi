@@ -34,4 +34,15 @@ public class Receive extends SyntaxElement {
             this.subprocess.rename(from, to);
         }
     }
+
+    @Override
+    public String prettyPrint(int indentationLevel) {
+        return SyntaxElement.generateIndent(indentationLevel) +
+                "receive " +
+                bindTo.prettyPrint(indentationLevel) +
+                " over " +
+                receiveOn.prettyPrint(indentationLevel) +
+                "then\n" +
+                subprocess.prettyPrint(indentationLevel);
+    }
 }

@@ -29,4 +29,15 @@ public class Send extends SyntaxElement {
         this.toSend.rename(from, to);
         this.subprocess.rename(from, to);
     }
+
+    @Override
+    public String prettyPrint(int indentationLevel) {
+        return SyntaxElement.generateIndent(indentationLevel) +
+                "send " +
+                toSend.prettyPrint(indentationLevel) +
+                " over " +
+                sendOn.prettyPrint(indentationLevel) +
+                "then\n" +
+                subprocess.prettyPrint(indentationLevel);
+    }
 }

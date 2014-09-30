@@ -20,4 +20,11 @@ public class Replicate extends SyntaxElement {
     public void rename(Name from, Name to) throws NameRepresentationException {
         throw new UnsupportedOperationException("Not yet implemented");
     }
+
+    @Override
+    public String prettyPrint(int indentationLevel) {
+        return SyntaxElement.generateIndent(indentationLevel) +
+                "repeatedly\n" +
+                toReplicate.prettyPrint(indentationLevel + 1);
+    }
 }

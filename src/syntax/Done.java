@@ -15,4 +15,9 @@ public class Done extends SyntaxElement {
     public void rename(Name from, Name to) {
         return;
     }
+
+    @Override
+    public String prettyPrint(int indentationLevel) {
+        return "end\n";
+    }
 }

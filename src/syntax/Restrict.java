@@ -24,4 +24,13 @@ public class Restrict extends SyntaxElement {
     public void rename(Name from, Name to) throws NameRepresentationException {
         throw new UnsupportedOperationException("Not yet implemented");
     }
+
+    @Override
+    public String prettyPrint(int indentationLevel) {
+        return SyntaxElement.generateIndent(indentationLevel) +
+                "restricting " +
+                boundName.prettyPrint(indentationLevel) +
+                " in\n" +
+                restrictIn.prettyPrint(indentationLevel + 1);
+    }
 }
