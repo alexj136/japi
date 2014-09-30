@@ -1,4 +1,5 @@
 PARSER_BEGIN(Recognise)
+package recognition;
 
 import syntax.*;
 
