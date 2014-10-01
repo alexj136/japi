@@ -6,22 +6,19 @@ case $@ in
     "")         echo "Building..."
                 mkdir -p ./bin/
                 javac -sourcepath ./src/ ./src/syntax/*.java -d ./bin/
-                pushd ./src/genparser/
+                pushd ./src/parser/
                 java -cp ../../lib/javacc.jar javacc japi.jj
                 popd
-                javac -sourcepath ./src/ -cp ./bin/ ./src/genparser/*.java -d ./bin/
                 javac -sourcepath ./src/ -cp ./bin/ ./src/parser/*.java -d ./bin/
                 echo "Done." ;;
 
     # Clean the build if the argument was "clean"
     "clean")    echo "Cleaning build..."
-                rm ./src/genparser/*.java
+                rm ./src/parser/*.java
                 rm ./bin/syntax/*.class
                 rm ./bin/parser/*.class
-                rm ./bin/genparser/*.class
                 rmdir ./bin/syntax/
                 rmdir ./bin/parser/
-                rmdir ./bin/genparser/
                 rmdir ./bin/
                 echo "Done." ;;
 

@@ -1,13 +1,30 @@
-PARSER_BEGIN(GenParser)
-package genparser;
+PARSER_BEGIN(Parser)
+package parser;
 
 import syntax.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
-public class GenParser {
+public class Parser {
 
+    /**
+     * Main method parses and pretty-prints the contents of the japi source file
+     * whose name is provided as the sole command line argument.
+     * @param args The command line arguments - should be a single file name
+     */
+    public static void main(String[] args)
+    throws ParseException, FileNotFoundException {
+        if(!(args.length == 1)) {
+            System.out.println("Please provide exactly one filename.");
+            return;
+        }
+        Parser parser = new Parser(new FileInputStream(args[0]));
+        SyntaxElement prog = parser.Expression();
+        System.out.print(prog.prettyPrint(0));
+    }
 }
 
-PARSER_END(GenParser)
+PARSER_END(Parser)
 
 SKIP :
     { " "
