@@ -30,11 +30,9 @@ public class Parallel extends SyntaxElement {
     public String prettyPrint(int indentationLevel) {
         return SyntaxElement.generateIndent(indentationLevel) +
                 "concurrently\n" +
-                SyntaxElement.generateIndent(indentationLevel) +
                 this.subprocess1.prettyPrint(indentationLevel + 1) +
                 SyntaxElement.generateIndent(indentationLevel) +
                 "and\n" +
-                SyntaxElement.generateIndent(indentationLevel) +
                 this.subprocess2.prettyPrint(indentationLevel + 1);
     }
 }

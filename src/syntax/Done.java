@@ -18,6 +18,6 @@ public class Done extends SyntaxElement {
 
     @Override
     public String prettyPrint(int indentationLevel) {
-        return "end\n";
+        return SyntaxElement.generateIndent(indentationLevel) + "end\n";
     }
 }

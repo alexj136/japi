@@ -42,7 +42,7 @@ public class Receive extends SyntaxElement {
                 bindTo.prettyPrint(indentationLevel) +
                 " over " +
                 receiveOn.prettyPrint(indentationLevel) +
-                "then\n" +
+                " then\n" +
                 subprocess.prettyPrint(indentationLevel);
     }
 }

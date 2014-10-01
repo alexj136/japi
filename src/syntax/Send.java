@@ -37,7 +37,7 @@ public class Send extends SyntaxElement {
                 toSend.prettyPrint(indentationLevel) +
                 " over " +
                 sendOn.prettyPrint(indentationLevel) +
-                "then\n" +
+                " then\n" +
                 subprocess.prettyPrint(indentationLevel);
     }
 }
