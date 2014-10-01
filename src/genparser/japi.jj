@@ -1,13 +1,13 @@
-PARSER_BEGIN(Recognise)
-package recognition;
+PARSER_BEGIN(GenParser)
+package genparser;
 
 import syntax.*;
 
-public class Recognise {
+public class GenParser {
 
 }
 
-PARSER_END(Recognise)
+PARSER_END(GenParser)
 
 SKIP :
     { " "

@@ -1,4 +1,7 @@
-package recognition;
+package parser;
+
+import genparser.GenParser;
+import genparser.ParseException;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,7 +13,7 @@ public class Parser {
             System.out.println("Please provide exactly one filename.");
             return;
         }
-        Recognise recog = new Recognise(new FileInputStream(args[0]));
-        recog.Expression();
+        GenParser p = new GenParser(new FileInputStream(args[0]));
+        p.Expression();
     }
 }

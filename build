@@ -4,19 +4,26 @@ case $@ in
 
     # Do the build operation if no arguments are supplied
     "")         echo "Building..."
-                mkdir -p ./lib/
-                javac ./src/syntax/*.java -d ./lib/
+                mkdir -p ./bin/
+                javac ./src/syntax/*.java -d ./bin/
+                pushd ./src/genparser/
                 java -cp ~/javacc-6.0/bin/lib/javacc.jar javacc \
-                    ./src/recognition/japi.jj -outputdirectory ./src/recognition/
-                javac ./src/recognition/*.java -d ./lib/
+                    ./src/genparser/japi.jj
+                popd
+                javac -cp ./bin/ ./src/genparser/*.java -d ./bin/
+                javac -cp ./bin/ ./src/parser/*.java -d ./bin/
                 echo "Done." ;;
 
     # Clean the build if the argument was "clean"
     "clean")    echo "Cleaning build..."
-                rm ./lib/syntax/*.class
-                rmdir ./lib/syntax/
-                rmdir ./lib/recognition/
-                rmdir ./lib/
+                rm ./src/genparser/*.java
+                rm ./bin/syntax/*.class
+                rm ./bin/parser/*.class
+                rm ./bin/genparser/*.class
+                rmdir ./bin/syntax/
+                rmdir ./bin/parser/
+                rmdir ./bin/genparser/
+                rmdir ./bin/
                 echo "Done." ;;
 
     # If the arguments were anything else, print an error message and exit with
