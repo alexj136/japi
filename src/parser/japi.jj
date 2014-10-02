@@ -2,6 +2,8 @@ PARSER_BEGIN(Parser)
 package parser;
 
 import syntax.*;
+import java.io.File;
+import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
@@ -12,15 +14,61 @@ public class Parser {
      * whose name is provided as the sole command line argument.
      * @param args The command line arguments - should be a single file name
      */
-    public static void main(String[] args)
-    throws ParseException, FileNotFoundException {
+    public static void main(String[] args) {
+
+        // Check arguments were supplied correctly
         if(!(args.length == 1)) {
             System.out.println("Please provide exactly one filename.");
             return;
         }
-        Parser parser = new Parser(new FileInputStream(args[0]));
-        SyntaxElement prog = parser.Expression();
-        System.out.print(prog.prettyPrint(0));
+
+        File file = new File(args[0]);
+
+        // Check the supplied file exists
+        if(!file.exists()) {
+            System.out.println("File does not exist.");
+            return;
+        }
+
+        // Check the supplied file isn't a directory
+        if(file.isDirectory()) {
+            System.out.println("File is a directory.");
+            return;
+        }
+
+        // Try to open the file
+        FileInputStream input;
+        try {
+            input = new FileInputStream(file);
+        }
+        catch(FileNotFoundException e) {
+            System.out.println("File could not be opened.");
+            return;
+        }
+
+        // Print either the prettyPrint of the AST or the error message supplied
+        // with the ParseException if parsing fails.
+        String toPrint;
+        try {
+            toPrint = parseStream(input).prettyPrint(0);
+        }
+        catch(ParseException e) {
+            toPrint = "Could not parse the file:\n" + e.getMessage();
+        }
+        System.out.println(toPrint);
+    }
+
+    /**
+     * Parse some input to obtain an AST.
+     * @param input a java.io.InputStream containing text (ideally) representing
+     * a japi program
+     * @return an AST (a SyntaxElement object) representing the parsed program
+     * @throws ParseException if the input could not be parsed (i.e. if there
+     * was a syntax error in the program)
+     */
+    public static SyntaxElement parseStream(InputStream input)
+    throws ParseException {
+        return new Parser(input).Expression();
     }
 }
 
