@@ -1,4 +1,3 @@
 *.swp
-./bin/
-./bin/*
-./src/parser/*.java
+bin/*
+src/parser/*.java
