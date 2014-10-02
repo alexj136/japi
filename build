@@ -7,7 +7,7 @@ case $@ in
                 mkdir -p ./bin/
                 javac -sourcepath ./src/ ./src/syntax/*.java -d ./bin/
                 pushd ./src/parser/
-                java -cp ../../lib/javacc.jar javacc japi.jj
+                java -cp ../../lib/javacc-6.0.jar javacc japi.jj
                 popd
                 javac -sourcepath ./src/ -cp ./bin/ ./src/parser/*.java -d ./bin/
                 echo "Done." ;;
