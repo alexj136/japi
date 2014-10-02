@@ -16,6 +16,12 @@ public class Done extends Term {
         return;
     }
 
+    /**
+     * Obtain a pretty-printout of this Done.
+     * @param indentationLevel the number of tabs that should appear before the
+     * text
+     * @return a string representing this Done
+     */
     @Override
     public String prettyPrint(int indentationLevel) {
         return SyntaxElement.generateIndent(indentationLevel) + "end\n";

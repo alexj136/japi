@@ -23,6 +23,31 @@ public class Send extends Term {
         this.subprocess = subprocess;
     }
 
+    /**
+     * Access the channel over which the message is to be sent.
+     * @return the channel over which the message is to be sent
+     */
+    public Name getSendOn() { return this.sendOn; }
+
+    /**
+     * Access the channel name which is to be sent as a message.
+     * @return the channel name which is to be sent as a message
+     */
+    public Name getToSend() { return this.toSend; }
+
+    /**
+     * Access the process to be executed once the message has been sent.
+     * @return the process to be executed once the message has been sent.
+     */
+    public Term getSubprocess() { return this.subprocess; }
+
+    /**
+     * In a Send Term, both the message content and sending channel are to be
+     * renamed if they match the name that was sent.
+     * @param from The channel name on which a name was received
+     * @param to The name that was sent - names should be renamed to this if
+     * they match 'from'
+     */
     @Override
     public void rename(Name from, Name to) throws NameRepresentationException {
         this.sendOn.rename(from, to);
@@ -30,6 +55,12 @@ public class Send extends Term {
         this.subprocess.rename(from, to);
     }
 
+    /**
+     * Obtain a pretty-printout of this Send.
+     * @param indentationLevel the number of tabs that should appear before the
+     * text
+     * @return a string representing this Send
+     */
     @Override
     public String prettyPrint(int indentationLevel) {
         return SyntaxElement.generateIndent(indentationLevel) +

@@ -20,11 +20,33 @@ public class Restrict extends Term {
         this.restrictIn = restrictIn;
     }
 
+    /**
+     * Access the name bound in this restriction.
+     * @return the name bound in this restriction
+     */
+    public Name getBoundName() { return this.boundName; }
+
+    /**
+     * Access the process within which this restriction binds a name.
+     * @return the process within which this restriction binds a name
+     */
+    public Term getRestrictIn() { return this.restrictIn; }
+
+    /**
+     * Renaming of Restrict Terms is not yet implemented as I don't yet fully
+     * understand their semantics.
+     */
     @Override
     public void rename(Name from, Name to) throws NameRepresentationException {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
+    /**
+     * Obtain a pretty-printout of this Restrict.
+     * @param indentationLevel the number of tabs that should appear before the
+     * text
+     * @return a string representing this Restrict
+     */
     @Override
     public String prettyPrint(int indentationLevel) {
         return SyntaxElement.generateIndent(indentationLevel) +
