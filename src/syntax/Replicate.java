@@ -3,16 +3,16 @@ package syntax;
 /**
  * Replicate elements repeatedly copy a process.
  */
-public class Replicate extends SyntaxElement {
+public class Replicate extends Term {
 
-    private SyntaxElement toReplicate;
+    private Term toReplicate;
 
     /**
      * Construct a new replicating process.
      * @param toReplicate the process that will be replicated
      * @return a new Replicate object
      */
-    public Replicate(SyntaxElement toReplicate) {
+    public Replicate(Term toReplicate) {
         this.toReplicate = toReplicate;
     }
 

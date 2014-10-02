@@ -4,10 +4,10 @@ package syntax;
  * The Parallel class represents parallel composition - it contains two
  * concurrently executing processes.
  */
-public class Parallel extends SyntaxElement {
+public class Parallel extends Term {
 
-    private SyntaxElement subprocess1;
-    private SyntaxElement subprocess2;
+    private Term subprocess1;
+    private Term subprocess2;
 
     /**
      * Construct a new Parallel object using the two concurrent processes.
@@ -15,7 +15,7 @@ public class Parallel extends SyntaxElement {
      * @param subprocess2 the second of the two concurrent processes
      * @return a new Parallel object
      */
-    public Parallel(SyntaxElement subprocess1, SyntaxElement subprocess2) {
+    public Parallel(Term subprocess1, Term subprocess2) {
         this.subprocess1 = subprocess1;
         this.subprocess2 = subprocess2;
     }

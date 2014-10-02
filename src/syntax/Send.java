@@ -4,11 +4,11 @@ package syntax;
  * A Send object sends a message (a name) on a particular channel when there is
  * a corresponding Receive process to receive it.
  */
-public class Send extends SyntaxElement {
+public class Send extends Term {
 
     private Name sendOn;
     private Name toSend;
-    private SyntaxElement subprocess;
+    private Term subprocess;
 
     /**
      * Construct a new Send object.
@@ -17,7 +17,7 @@ public class Send extends SyntaxElement {
      * @param subprocess the process to 'become' once the message is sent
      * @return a new Send object
      */
-    public Send(Name sendOn, Name toSend, SyntaxElement subprocess) {
+    public Send(Name sendOn, Name toSend, Term subprocess) {
         this.sendOn = sendOn;
         this.toSend = toSend;
         this.subprocess = subprocess;

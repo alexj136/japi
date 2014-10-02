@@ -4,10 +4,10 @@ package syntax;
  * Restrict objects behave somewhat like lambda abstractions - they bind
  * occurences of names in a process.
  */
-public class Restrict extends SyntaxElement {
+public class Restrict extends Term {
 
     private Name boundName;
-    private SyntaxElement restrictIn;
+    private Term restrictIn;
 
     /**
      * Construct a new Restrict object.
@@ -15,7 +15,7 @@ public class Restrict extends SyntaxElement {
      * @param restrictIn the subprocess within which to restrict the name
      * @return a new Restrict object
      */
-    public Restrict(Name boundName, SyntaxElement restrictIn) {
+    public Restrict(Name boundName, Term restrictIn) {
         this.boundName = boundName;
         this.restrictIn = restrictIn;
     }

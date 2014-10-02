@@ -5,11 +5,11 @@ package syntax;
  * receives its message, it binds the message to a variable and 'disappears',
  * leaving behind its subprocess in its place.
  */
-public class Receive extends SyntaxElement {
+public class Receive extends Term {
 
     private Name receiveOn;
     private Name bindTo;
-    private SyntaxElement subprocess;
+    private Term subprocess;
 
     /**
      * Construct a new recieving process
@@ -18,7 +18,7 @@ public class Receive extends SyntaxElement {
      * @param subprocess the process to 'become' when the message is received
      * @return a new Receive object
      */
-    public Receive(Name receiveOn, Name bindTo, SyntaxElement subprocess) {
+    public Receive(Name receiveOn, Name bindTo, Term subprocess) {
         this.receiveOn = receiveOn;
         this.bindTo = bindTo;
         this.subprocess = subprocess;

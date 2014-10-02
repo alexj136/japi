@@ -3,7 +3,7 @@ package syntax;
 /**
  * A IntName object represents a Pi-Calculus name as an integer.
  */
-public class IntName extends SyntaxElement implements Name<Integer> {
+public class IntName extends Name<Integer> {
 
     private Integer nameID;
 
@@ -58,6 +58,11 @@ public class IntName extends SyntaxElement implements Name<Integer> {
         }
     }
 
+    /**
+     * Get a pretty-printout for this IntName
+     * @param indentationLevel this parameter is ignored
+     * @return a pretty-printout for this IntName
+     */
     @Override
     public String prettyPrint(int indentationLevel) {
         return this.nameID.toString();

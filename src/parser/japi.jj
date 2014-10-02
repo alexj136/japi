@@ -62,13 +62,12 @@ public class Parser {
      * Parse some input to obtain an AST.
      * @param input a java.io.InputStream containing text (ideally) representing
      * a japi program
-     * @return an AST (a SyntaxElement object) representing the parsed program
+     * @return an AST (a Term object) representing the parsed program
      * @throws ParseException if the input could not be parsed (i.e. if there
      * was a syntax error in the program)
      */
-    public static SyntaxElement parseStream(InputStream input)
-    throws ParseException {
-        return new Parser(input).Expression();
+    public static Term parseStream(InputStream input) throws ParseException {
+        return new Parser(input).expression();
     }
 }
 
@@ -94,28 +93,28 @@ TOKEN :
     | "end"
     | <ID: (["a"-"z"])+> }
 
-void Input() : {} { Expression() <EOF> }
+void input() : {} { expression() <EOF> }
 
-SyntaxElement Expression() : { SyntaxElement e1, e2; Token n1, n2; }
-    { "receive" n1=<ID> "over" n2=<ID> "then" e1=Expression()
+Term expression() : { Term e1, e2; Token n1, n2; }
+    { "receive" n1=<ID> "over" n2=<ID> "then" e1=expression()
         {
             return new Receive(new ParserName(n2.toString()),
                     new ParserName(n1.toString()), e1);
         }
-    | "send" n1=<ID> "over" n2=<ID> "then" e1=Expression()
+    | "send" n1=<ID> "over" n2=<ID> "then" e1=expression()
         {
             return new Send(new ParserName(n2.toString()),
                     new ParserName(n1.toString()), e1);
         }
-    | "concurrently" e1=Expression() "and" e2=Expression()
+    | "concurrently" e1=expression() "and" e2=expression()
         {
             return new Parallel(e1, e2);
         }
-    | "restricting" n1=<ID> "in" e1=Expression()
+    | "restricting" n1=<ID> "in" e1=expression()
         {
             return new Restrict(new ParserName(n1.toString()), e1);
         }
-    | "repeatedly" e1=Expression()
+    | "repeatedly" e1=expression()
         {
             return new Replicate(e1);
         }

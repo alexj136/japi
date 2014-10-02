@@ -4,7 +4,7 @@ package syntax;
  * ParserNames are a representation of names that simply use the user-supplied
  * string representation of names from source code.
  */
-public class ParserName extends SyntaxElement implements Name<String> {
+public class ParserName extends Name<String> {
 
     private String nameString;
     
@@ -56,6 +56,11 @@ public class ParserName extends SyntaxElement implements Name<String> {
         }
     }
 
+    /**
+     * Get a pretty-printout for this ParserName
+     * @param indentationLevel this parameter is ignored
+     * @return a pretty-printout for this ParserName
+     */
     @Override
     public String prettyPrint(int indentationLevel) {
         return this.nameString;
