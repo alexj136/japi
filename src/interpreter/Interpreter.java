@@ -2,40 +2,75 @@ package interpreter;
 
 import syntax.*;
 
+import java.util.ArrayList;
+
 /**
  * The Interpreter class contains methods used for interpreting pi calculus
  * ASTs.
  */
 public class Interpreter {
 
-    /**
-     * Perform reduction on a Term passed inside a TermContainer object. No
-     * external pointers should be kept to the underlying term, as it will be
-     * muted by this method or callouts from this method.
-     * @param term the term to reduce
-     */
-    public static void reduceTerm(TermContainer tc)
-    throws NameRepresentationException {
-        Term term = tc.get();
+    private class MultiParallels extends Term {
 
+        private ArrayList<Send> senders;
+        private ArrayList<Receive> receivers;
+        private ArrayList<Replicate> replicators;
+
+        private MultiParallels(Term term) {
+            this.assimilate(term);
+        }
+
+        // Collect as many parallel terms as possible into one MultiParallels
+        // Term
+        private void assimilate(Term term) {
+            throw new UnsupportedOperationException("Not implemented");
+        }
+
+        // Take all collected parallel terms and build them back into a 'pure'
+        // term with only binary parallel composition
+        private Term collapse() {
+            throw new UnsupportedOperationException("Not implemented");
+        }
+
+        public void rename(Name from, Name to) {
+            throw new UnsupportedOperationException("Not implemented");
+        }
+        public String prettyPrint(int indentationLevel) {
+            throw new UnsupportedOperationException("Not implemented");
+        }
+    }
+
+    private Term term;
+
+    /**
+     * Construct an Interpreter to operate on the given Term.
+     * @param term the term to be interpreted
+     * @return a new Interpreter
+     */
+    public Interpreter(Term term) { this.term = term; }
+
+    /**
+     * Perform reduction on the stored Term.
+     */
+    public void reduceTerm() throws NameRepresentationException {
         // Propagate the call to the appropriate handler for each type of Term
-        if(term instanceof Send) {
-            term = reduceSend((Send) term);
+        if(this.term instanceof Send) {
+            this.term = reduceSend((Send) this.term);
         }
-        else if(term instanceof Receive) {
-            term = reduceReceive((Receive) term);
+        else if(this.term instanceof Receive) {
+            this.term = reduceReceive((Receive) this.term);
         }
-        else if(term instanceof Parallel) {
-            term = reduceParallel((Parallel) term);
+        else if(this.term instanceof Parallel) {
+            this.term = reduceParallel((Parallel) this.term);
         }
-        else if(term instanceof Restrict) {
-            term = reduceRestrict((Restrict) term);
+        else if(this.term instanceof Restrict) {
+            this.term = reduceRestrict((Restrict) this.term);
         }
-        else if(term instanceof Replicate) {
-            term = reduceReplicate((Replicate) term);
+        else if(this.term instanceof Replicate) {
+            this.term = reduceReplicate((Replicate) this.term);
         }
-        else if(term instanceof Done) {
-            term = reduceDone((Done) term);
+        else if(this.term instanceof Done) {
+            this.term = reduceDone((Done) this.term);
         }
 
         // This block should be unreachable.
@@ -43,8 +78,6 @@ public class Interpreter {
             throw new IllegalArgumentException("Found a Term that isn't " +
                     "recognised by Interpreter.reduceTerm()");
         }
-
-        tc.set(term);
     }
 
     /**
