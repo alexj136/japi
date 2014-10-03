@@ -17,12 +17,31 @@ public class Interpreter {
         private ArrayList<Replicate> replicators;
 
         private MultiParallels(Term term) {
+            this.senders = new ArrayList<Send>();
+            this.receivers = new ArrayList<Receive>();
+            this.replicators = new ArrayList<Replicate>();
             this.assimilate(term);
         }
 
         // Collect as many parallel terms as possible into one MultiParallels
         // Term
         private void assimilate(Term term) {
+            if(!(term instanceof Parallel)) {
+                throw new IllegalArgumentException("Attempted to construct a " +
+                        "MultiParallels with a non-Parallel Term");
+            }
+
+            Parallel para = (Parallel) term;
+            Term sub1 = para.getSubprocess1();
+            Term sub2 = para.getSubprocess2();
+
+            if(sub1 instanceof Send) {
+                this.senders.add((Send) sub1);
+            }
+            if(sub2 instanceof Parallel) {
+                this.assimilate(sub2);
+            }
+
             throw new UnsupportedOperationException("Not implemented");
         }
 
@@ -109,24 +128,9 @@ public class Interpreter {
      * @param para the Parallel Term to reduce
      * @return a term that is a reduction of the given term
      */
-    public static Term reduceParallel(Parallel para)
-    throws NameRepresentationException {
-        Term lhs = para.getSubprocess1();
-        Term rhs = para.getSubprocess2();
-
-        // The simple case of a sender and receiver on the same channel
-        if(lhs instanceof Send && rhs instanceof Receive &&
-                ((Send) lhs).getSendOn().matches(((Receive) rhs).getReceiveOn())) {
-
-            Term newLhs = ((Send) lhs).getSubprocess();
-            Term newRhs = ((Receive) rhs).getSubprocess();
-            newRhs.rename(((Receive) rhs).getBindTo(), ((Send) lhs).getToSend());
-
-            return new Parallel(newLhs, newRhs);
-        }
-        
+    public static Term reduceParallel(Parallel para) {
         throw new UnsupportedOperationException("Reduction of Parallel Terms " +
-                "not yet fully implemented");
+                "not yet implemented");
     }
 
     /**
