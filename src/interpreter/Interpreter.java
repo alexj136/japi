@@ -38,9 +38,17 @@ public class Interpreter {
             if(sub1 instanceof Send) {
                 this.senders.add((Send) sub1);
             }
+            if(sub1 instanceof Receive) {
+                this.receivers.add((Receive) sub1);
+            }
+
+            // ...
+
             if(sub2 instanceof Parallel) {
                 this.assimilate(sub2);
             }
+
+            // ...
 
             throw new UnsupportedOperationException("Not implemented");
         }
