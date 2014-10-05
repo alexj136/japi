@@ -32,25 +32,36 @@ public class Interpreter {
             }
 
             Parallel para = (Parallel) term;
-            Term sub1 = para.getSubprocess1();
-            Term sub2 = para.getSubprocess2();
-
-            if(sub1 instanceof Send) {
-                this.senders.add((Send) sub1);
-            }
-            if(sub1 instanceof Receive) {
-                this.receivers.add((Receive) sub1);
-            }
-
-            // ...
-
-            if(sub2 instanceof Parallel) {
-                this.assimilate(sub2);
-            }
-
-            // ...
+            this.handleTerm(para.getSubprocess1());
+            this.handleTerm(para.getSubprocess2());
 
             throw new UnsupportedOperationException("Not implemented");
+        }
+
+        // Add a newly encountered term to the appropriate arraylist
+        private void handleTerm(Term term) {
+            if(term instanceof Send) {
+                this.senders.add((Send) term);
+            }
+            else if(term instanceof Receive) {
+                this.receivers.add((Receive) term);
+            }
+            else if(term instanceof Replicate) {
+                this.replicators.add((Replicate) term);
+            }
+            else if(term instanceof Parallel) {
+                this.assimilate(term);
+            }
+            else if(term instanceof Restrict) {
+                throw new UnsupportedOperationException("Not implemented");
+            }
+            else if(term instanceof Done) {
+                // Do nothing
+            }
+            else {
+                throw new IllegalArgumentException("Non-standard Term found " +
+                        "in handleTerm()");
+            }
         }
 
         // Take all collected parallel terms and build them back into a 'pure'
