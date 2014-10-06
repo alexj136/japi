@@ -1,5 +1,8 @@
 package runsyntax;
 
+/**
+ * A Term object represents any pi calculus term, with names as integers.
+ */
 public abstract class Term {
 
     /**

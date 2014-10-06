@@ -1,12 +1,12 @@
-package parsersyntax;
+package runsyntax;
 
 /**
- * Restrict objects behave somewhat like lambda abstractions - they bind
- * occurences of names in a process.
+ * Represents name restriction within a process - creates a new name whose scope
+ * is limited to the contained term.
  */
 public class Restrict extends Term {
 
-    private bound boundName;
+    private int boundName;
     private Term restrictIn;
 
     /**

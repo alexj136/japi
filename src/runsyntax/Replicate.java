@@ -9,6 +9,6 @@ public class Replicate extends Term {
     }
 
     public void rename(int from, int to) {
-        this.toReplicate(from, to);
+        this.toReplicate.rename(from, to);
     }
 }

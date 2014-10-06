@@ -1,6 +1,7 @@
 # Japi
 
-Japi is a Java implementation of the Pi-Calculus.
+Japi is a Java implementation of the pi calculus. More specifically, the
+synchronous, monadic pi calculus.
 
 ## Usage
 

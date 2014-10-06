@@ -6,6 +6,7 @@ case $@ in
     "")         echo "Building..."
                 mkdir -p ./bin/
                 javac -sourcepath ./src/ ./src/parsersyntax/*.java -d ./bin/
+                javac -sourcepath ./src/ ./src/runsyntax/*.java -d ./bin/
                 javac -sourcepath ./src/ ./src/interpreter/*.java -d ./bin/
                 pushd ./src/parser/
                 java -cp ../../lib/javacc-6.0.jar javacc japi.jj
@@ -17,9 +18,11 @@ case $@ in
     "clean")    echo "Cleaning build..."
                 rm ./src/parser/*.java
                 rm ./bin/parsersyntax/*.class
+                rm ./bin/runsyntax/*.class
                 rm ./bin/interpreter/*.class
                 rm ./bin/parser/*.class
                 rmdir ./bin/parsersyntax/
+                rmdir ./bin/runsyntax/
                 rmdir ./bin/interpreter/
                 rmdir ./bin/parser/
                 rmdir ./bin/

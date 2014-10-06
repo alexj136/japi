@@ -1,6 +1,6 @@
 package interpreter;
 
-import syntax.*;
+import runsyntax.*;
 
 import java.util.ArrayList;
 
@@ -9,74 +9,6 @@ import java.util.ArrayList;
  * ASTs.
  */
 public class Interpreter {
-
-    private class MultiParallels extends Term {
-
-        private ArrayList<Send> senders;
-        private ArrayList<Receive> receivers;
-        private ArrayList<Replicate> replicators;
-
-        private MultiParallels(Term term) {
-            this.senders = new ArrayList<Send>();
-            this.receivers = new ArrayList<Receive>();
-            this.replicators = new ArrayList<Replicate>();
-            this.assimilate(term);
-        }
-
-        // Collect as many parallel terms as possible into one MultiParallels
-        // Term
-        private void assimilate(Term term) {
-            if(!(term instanceof Parallel)) {
-                throw new IllegalArgumentException("Attempted to construct a " +
-                        "MultiParallels with a non-Parallel Term");
-            }
-
-            Parallel para = (Parallel) term;
-            this.handleTerm(para.getSubprocess1());
-            this.handleTerm(para.getSubprocess2());
-
-            throw new UnsupportedOperationException("Not implemented");
-        }
-
-        // Add a newly encountered term to the appropriate arraylist
-        private void handleTerm(Term term) {
-            if(term instanceof Send) {
-                this.senders.add((Send) term);
-            }
-            else if(term instanceof Receive) {
-                this.receivers.add((Receive) term);
-            }
-            else if(term instanceof Replicate) {
-                this.replicators.add((Replicate) term);
-            }
-            else if(term instanceof Parallel) {
-                this.assimilate(term);
-            }
-            else if(term instanceof Restrict) {
-                throw new UnsupportedOperationException("Not implemented");
-            }
-            else if(term instanceof Done) {
-                // Do nothing
-            }
-            else {
-                throw new IllegalArgumentException("Non-standard Term found " +
-                        "in handleTerm()");
-            }
-        }
-
-        // Take all collected parallel terms and build them back into a 'pure'
-        // term with only binary parallel composition
-        private Term collapse() {
-            throw new UnsupportedOperationException("Not implemented");
-        }
-
-        public void rename(Name from, Name to) {
-            throw new UnsupportedOperationException("Not implemented");
-        }
-        public String prettyPrint(int indentationLevel) {
-            throw new UnsupportedOperationException("Not implemented");
-        }
-    }
 
     private Term term;
 
@@ -90,8 +22,8 @@ public class Interpreter {
     /**
      * Perform reduction on the stored Term.
      */
-    public void reduceTerm() throws NameRepresentationException {
-        // Propagate the call to the appropriate handler for each type of Term
+    public void reduceTerm() {
+        // Reduce the stored term
         if(this.term instanceof Send) {
             this.term = reduceSend((Send) this.term);
         }
@@ -107,8 +39,8 @@ public class Interpreter {
         else if(this.term instanceof Replicate) {
             this.term = reduceReplicate((Replicate) this.term);
         }
-        else if(this.term instanceof Done) {
-            this.term = reduceDone((Done) this.term);
+        else if(this.term instanceof End) {
+            this.term = reduceEnd((End) this.term);
         }
 
         // This block should be unreachable.
@@ -173,12 +105,12 @@ public class Interpreter {
     }
 
     /**
-     * Perform reduction on a given Done Term.
-     * @param done the Done Term to reduce
+     * Perform reduction on a given End Term.
+     * @param done the End Term to reduce
      * @return a term that is a reduction of the given term
      */
-    public static Term reduceDone(Done done) {
+    public static Term reduceEnd(End end) {
         // Nothing to do
-        return done;
+        return end;
     }
 }
