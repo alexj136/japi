@@ -39,8 +39,7 @@ public class Restrict extends Term {
      */
     @Override
     public String prettyPrint(int indentLevel) {
-        return Term.indent(indentLevel) + "restricting " +
-                boundName.prettyPrint(indentLevel) + " in\n" +
-                restrictIn.prettyPrint(indentLevel + 1);
+        return Term.indent(indentLevel) + "restricting " + this.boundName +
+                " in\n" + restrictIn.prettyPrint(indentLevel + 1);
     }
 }

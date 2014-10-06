@@ -1,7 +1,7 @@
 PARSER_BEGIN(Parser)
 package parser;
 
-import syntax.*;
+import parsersyntax.*;
 import java.io.File;
 import java.io.InputStream;
 import java.io.FileInputStream;
@@ -98,13 +98,11 @@ void input() : {} { expression() <EOF> }
 Term expression() : { Term e1, e2; Token n1, n2; }
     { "receive" n1=<ID> "over" n2=<ID> "then" e1=expression()
         {
-            return new Receive(new ParserName(n2.toString()),
-                    new ParserName(n1.toString()), e1);
+            return new Receive(n2.toString(), n1.toString(), e1);
         }
     | "send" n1=<ID> "over" n2=<ID> "then" e1=expression()
         {
-            return new Send(new ParserName(n2.toString()),
-                    new ParserName(n1.toString()), e1);
+            return new Send(n2.toString(), n1.toString(), e1);
         }
     | "concurrently" e1=expression() "and" e2=expression()
         {
@@ -112,7 +110,7 @@ Term expression() : { Term e1, e2; Token n1, n2; }
         }
     | "restricting" n1=<ID> "in" e1=expression()
         {
-            return new Restrict(new ParserName(n1.toString()), e1);
+            return new Restrict(n1.toString(), e1);
         }
     | "repeatedly" e1=expression()
         {
@@ -120,6 +118,6 @@ Term expression() : { Term e1, e2; Token n1, n2; }
         }
     | "end"
         {
-            return new Done();
+            return new End();
         }
     }

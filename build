@@ -5,7 +5,7 @@ case $@ in
     # Do the build operation if no arguments are supplied
     "")         echo "Building..."
                 mkdir -p ./bin/
-                javac -sourcepath ./src/ ./src/syntax/*.java -d ./bin/
+                javac -sourcepath ./src/ ./src/parsersyntax/*.java -d ./bin/
                 javac -sourcepath ./src/ ./src/interpreter/*.java -d ./bin/
                 pushd ./src/parser/
                 java -cp ../../lib/javacc-6.0.jar javacc japi.jj
@@ -16,10 +16,10 @@ case $@ in
     # Clean the build if the argument was "clean"
     "clean")    echo "Cleaning build..."
                 rm ./src/parser/*.java
-                rm ./bin/syntax/*.class
+                rm ./bin/parsersyntax/*.class
                 rm ./bin/interpreter/*.class
                 rm ./bin/parser/*.class
-                rmdir ./bin/syntax/
+                rmdir ./bin/parsersyntax/
                 rmdir ./bin/interpreter/
                 rmdir ./bin/parser/
                 rmdir ./bin/
