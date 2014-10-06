@@ -1,4 +1,4 @@
-package syntax;
+package parsersyntax;
 
 /**
  * Replicate elements repeatedly copy a process.
@@ -23,24 +23,14 @@ public class Replicate extends Term {
     public Term getToReplicate() { return this.toReplicate; }
 
     /**
-     * Renaming of Replicate Terms is not yet implemented as I don't yet fully
-     * understand the semantics of this operation.
-     */
-    @Override
-    public void rename(Name from, Name to) throws NameRepresentationException {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    /**
      * Obtain a pretty-printout of this Replicate.
-     * @param indentationLevel the number of tabs that should appear before the
+     * @param indentLevel the number of tabs that should appear before the
      * text
      * @return a string representing this Replicate
      */
     @Override
-    public String prettyPrint(int indentationLevel) {
-        return SyntaxElement.generateIndent(indentationLevel) +
-                "repeatedly\n" +
-                toReplicate.prettyPrint(indentationLevel + 1);
+    public String prettyPrint(int indentLevel) {
+        return Term.indent(indentLevel) + "repeatedly\n" +
+                toReplicate.prettyPrint(indentLevel + 1);
     }
 }

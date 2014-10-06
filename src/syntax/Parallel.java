@@ -1,4 +1,4 @@
-package syntax;
+package parsersyntax;
 
 /**
  * The Parallel class represents parallel composition - it contains two
@@ -33,29 +33,15 @@ public class Parallel extends Term {
     public Term getSubprocess2() { return this.subprocess2; }
 
     /**
-     * With parallel composition, renaming is propagated down both subprocesses.
-     * @param from the name that was sent, occurences of which should be renamed
-     * in both subprocesses
-     * @param to the name to which captured names should be renamed
-     */
-    @Override
-    public void rename(Name from, Name to) throws NameRepresentationException {
-        this.subprocess1.rename(from, to);
-        this.subprocess2.rename(from, to);
-    }
-
-    /**
      * Obtain a pretty-printout of this Parallel.
-     * @param indentationLevel the number of tabs that should appear before text
+     * @param indentLevel the number of tabs that should appear before text
      * @return a pretty string representing this Parallel
      */
     @Override
-    public String prettyPrint(int indentationLevel) {
-        return SyntaxElement.generateIndent(indentationLevel) +
-                "concurrently\n" +
-                this.subprocess1.prettyPrint(indentationLevel + 1) +
-                SyntaxElement.generateIndent(indentationLevel) +
-                "and\n" +
-                this.subprocess2.prettyPrint(indentationLevel + 1);
+    public String prettyPrint(int indentLevel) {
+        return Term.indent(indentLevel) + "concurrently\n" +
+                this.subprocess1.prettyPrint(indentLevel + 1) +
+                Term.indent(indentLevel) + "and\n" +
+                this.subprocess2.prettyPrint(indentLevel + 1);
     }
 }

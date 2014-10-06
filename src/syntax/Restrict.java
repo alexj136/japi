@@ -1,4 +1,4 @@
-package syntax;
+package parsersyntax;
 
 /**
  * Restrict objects behave somewhat like lambda abstractions - they bind
@@ -6,7 +6,7 @@ package syntax;
  */
 public class Restrict extends Term {
 
-    private Name boundName;
+    private String boundName;
     private Term restrictIn;
 
     /**
@@ -15,7 +15,7 @@ public class Restrict extends Term {
      * @param restrictIn the subprocess within which to restrict the name
      * @return a new Restrict object
      */
-    public Restrict(Name boundName, Term restrictIn) {
+    public Restrict(String boundName, Term restrictIn) {
         this.boundName = boundName;
         this.restrictIn = restrictIn;
     }
@@ -24,7 +24,7 @@ public class Restrict extends Term {
      * Access the name bound in this restriction.
      * @return the name bound in this restriction
      */
-    public Name getBoundName() { return this.boundName; }
+    public String getBoundName() { return this.boundName; }
 
     /**
      * Access the process within which this restriction binds a name.
@@ -33,26 +33,14 @@ public class Restrict extends Term {
     public Term getRestrictIn() { return this.restrictIn; }
 
     /**
-     * Renaming of Restrict Terms is not yet implemented as I don't yet fully
-     * understand their semantics.
-     */
-    @Override
-    public void rename(Name from, Name to) throws NameRepresentationException {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    /**
      * Obtain a pretty-printout of this Restrict.
-     * @param indentationLevel the number of tabs that should appear before the
-     * text
+     * @param indentLevel the number of tabs that should appear before the text
      * @return a string representing this Restrict
      */
     @Override
-    public String prettyPrint(int indentationLevel) {
-        return SyntaxElement.generateIndent(indentationLevel) +
-                "restricting " +
-                boundName.prettyPrint(indentationLevel) +
-                " in\n" +
-                restrictIn.prettyPrint(indentationLevel + 1);
+    public String prettyPrint(int indentLevel) {
+        return Term.indent(indentLevel) + "restricting " +
+                boundName.prettyPrint(indentLevel) + " in\n" +
+                restrictIn.prettyPrint(indentLevel + 1);
     }
 }
