@@ -1,2 +1,2 @@
 #!/bin/sh
-java -cp bin parser.Parser $@
+java -cp bin main.Main $@

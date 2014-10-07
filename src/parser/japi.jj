@@ -10,55 +10,6 @@ import java.io.FileNotFoundException;
 public class Parser {
 
     /**
-     * Main method parses and pretty-prints the contents of the japi source file
-     * whose name is provided as the sole command line argument.
-     * @param args The command line arguments - should be a single file name
-     */
-    public static void main(String[] args) {
-
-        // Check arguments were supplied correctly
-        if(!(args.length == 1)) {
-            System.out.println("Please provide exactly one filename.");
-            return;
-        }
-
-        File file = new File(args[0]);
-
-        // Check the supplied file exists
-        if(!file.exists()) {
-            System.out.println("File does not exist.");
-            return;
-        }
-
-        // Check the supplied file isn't a directory
-        if(file.isDirectory()) {
-            System.out.println("File is a directory.");
-            return;
-        }
-
-        // Try to open the file
-        FileInputStream input;
-        try {
-            input = new FileInputStream(file);
-        }
-        catch(FileNotFoundException e) {
-            System.out.println("File could not be opened.");
-            return;
-        }
-
-        // Print either the prettyPrint of the AST or the error message supplied
-        // with the ParseException if parsing fails.
-        String toPrint;
-        try {
-            toPrint = parseStream(input).prettyPrint(0);
-        }
-        catch(ParseException e) {
-            toPrint = "Could not parse the file:\n" + e.getMessage();
-        }
-        System.out.println(toPrint);
-    }
-
-    /**
      * Parse some input to obtain an AST.
      * @param input a java.io.InputStream containing text (ideally) representing
      * a japi program
