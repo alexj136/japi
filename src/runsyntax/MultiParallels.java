@@ -1,4 +1,6 @@
-package runsyntax
+package runsyntax;
+
+import java.util.ArrayList;
 
 /**
  * Represents n-ary parallel composition, and contains methods to handle
@@ -10,22 +12,23 @@ public class MultiParallels extends Term {
     private ArrayList<Receive> receivers;
     private ArrayList<Replicate> replicators;
 
-    public MultiParallels(Term term) {
+    /**
+     * Construct a new MultiParallels from the given Parallel Term.
+     * @param para the Parallel term to build the MultiParallels with
+     * @return a new MultiParallels Term representing the same term
+     * that the given Parallel represented
+     */
+    public MultiParallels(Parallel para) {
         this.senders = new ArrayList<Send>();
         this.receivers = new ArrayList<Receive>();
         this.replicators = new ArrayList<Replicate>();
-        this.assimilate(term);
+        this.assimilate(para);
     }
 
     // Collect as many parallel terms as possible into one MultiParallels
     // Term
-    public void assimilate(Term term) {
-        if(!(term instanceof Parallel)) {
-            throw new IllegalArgumentException("Attempted to construct a " +
-                    "MultiParallels with a non-Parallel Term");
-        }
+    private void assimilate(Parallel para) {
 
-        Parallel para = (Parallel) term;
         this.handleTerm(para.getSubprocess1());
         this.handleTerm(para.getSubprocess2());
 
@@ -44,7 +47,7 @@ public class MultiParallels extends Term {
             this.replicators.add((Replicate) term);
         }
         else if(term instanceof Parallel) {
-            this.assimilate(term);
+            this.assimilate((Parallel) term);
         }
         else if(term instanceof Restrict) {
             throw new UnsupportedOperationException("Not implemented");

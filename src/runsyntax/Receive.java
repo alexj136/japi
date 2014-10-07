@@ -24,6 +24,24 @@ public class Receive extends Term {
     }
 
     /**
+     * Access the channel name on which a message can be received.
+     * @return the channel name on which a message can be received
+     */
+    public int getReceiveOn() { return this.receiveOn; }
+
+    /**
+     * Access the channel name to which the received name is to be bound.
+     * @return the channel name to which the received name is to be bound
+     */
+    public int getBindTo() { return this.bindTo; }
+
+    /**
+     * Access the process to be executed once a message has be received.
+     * @return the process to be executed once a message has be received
+     */
+    public Term getSubprocess() { return this.subprocess; }
+
+    /**
      * Rename this Receive Term as appropriate when a message is received by a
      * 'higher-up' Receive Term.
      * @param from names with this value are renamed if they are free and not
