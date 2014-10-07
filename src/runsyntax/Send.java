@@ -52,4 +52,8 @@ public class Send extends Term {
         if(this.toSend == from) { this.toSend = to; }
         this.subprocess.rename(from, to);
     }
+
+    public String toString() {
+        return "-c" + this.sendOn + "<c" + this.toSend + ">." + this.subprocess;
+    }
 }

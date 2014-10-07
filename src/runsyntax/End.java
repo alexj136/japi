@@ -12,4 +12,6 @@ public class End extends Term {
      * @param to renamed names are renamed to this name
      */
     public void rename(int from, int to) {}
+
+    public String toString() { return "0"; }
 }

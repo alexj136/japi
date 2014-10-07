@@ -31,4 +31,6 @@ public class Replicate extends Term {
     public void rename(int from, int to) {
         this.toReplicate.rename(from, to);
     }
+
+    public String toString() { return "!" + this.toReplicate; }
 }

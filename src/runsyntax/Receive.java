@@ -57,4 +57,9 @@ public class Receive extends Term {
             this.subprocess.rename(from, to);
         }
     }
+
+    public String toString() {
+        return "c" + this.receiveOn + "(c" + this.bindTo + ")." +
+                this.subprocess;
+    }
 }

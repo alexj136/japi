@@ -42,4 +42,8 @@ public class Parallel extends Term {
         this.subprocess1.rename(from, to);
         this.subprocess2.rename(from, to);
     }
+
+    public String toString() {
+        return this.subprocess1 + "|" + this.subprocess2;
+    }
 }

@@ -40,4 +40,8 @@ public class Restrict extends Term {
     public void rename(int from, int to) {
         if(this.boundName != from) { this.restrictIn.rename(from, to); }
     }
+
+    public String toString() {
+        return "(Vc" + this.boundName + ") " + this.restrictIn;
+    }
 }
