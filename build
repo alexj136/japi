@@ -17,15 +17,7 @@ case $@ in
     # Clean the build if the argument was "clean"
     "clean")    echo "Cleaning build..."
                 rm ./src/parser/*.java
-                rm ./bin/parsersyntax/*.class
-                rm ./bin/runsyntax/*.class
-                rm ./bin/interpreter/*.class
-                rm ./bin/parser/*.class
-                rmdir ./bin/parsersyntax/
-                rmdir ./bin/runsyntax/
-                rmdir ./bin/interpreter/
-                rmdir ./bin/parser/
-                rmdir ./bin/
+                rm -r ./bin/
                 echo "Done." ;;
 
     # If the arguments were anything else, print an error message and exit with
