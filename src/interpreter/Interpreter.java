@@ -20,6 +20,12 @@ public class Interpreter {
     private ArrayList<Integer> boundNames;
 
     /**
+     * Construct a new Interpreter.
+     * @param term the Term to interpret
+     * @param nameMap a mapping from the user's String names to integer names
+     * used for interpretation
+     * @param nextAvailableName the value to use next time a fresh name is
+     * required
      */
     public Interpreter(Term term, HashMap<String, Integer> nameMap,
             int nextAvailableName) {
@@ -36,6 +42,30 @@ public class Interpreter {
         this.integrateNewlyExposedTerm(term);
     }
 
+    /**
+     * Perform a reduction step.
+     */
+    public void doReduction() {
+
+        // Find a match in senders and receivers
+        int sendIdx = 0, receiveIdx = 0;
+        boolean reductionFound = false;
+        while(sendIdx < this.senders.size() && !reductionFound) {
+            while(receiveIdx < this.receivers.size() && !reductionFound) {
+                if(this.senders.get(sendIdx).getSendOn() ==
+                        this.receivers.get(receiveIdx).getReceiveOn()) {
+
+                    reductionFound = true;
+                }
+                else { receiveIdx++; }
+            }
+            if(!reductionFound) { sendIdx++; }
+        }
+
+        if(reductionFound) {
+            // Do the reduction
+        }
+    }
 
     // Add a newly exposed term to the appropriate arraylist
     private void integrateNewlyExposedTerm(Term term) {
@@ -60,7 +90,7 @@ public class Interpreter {
         }
         else {
             throw new IllegalArgumentException("Non-standard Term found " +
-                    "in handleTerm()");
+                    "in program");
         }
     }
 
@@ -74,12 +104,8 @@ public class Interpreter {
         for(Receive rece : receivers) { termStrings.add(rece.toString()); }
         for(Replicate repl : replicators) { termStrings.add(repl.toString()); }
         for(Restrict rest : restrictions) { termStrings.add(rest.toString()); }
-        if(termStrings.isEmpty()) { return ""; }
-        else {
-            String str = termStrings.remove(0)
-            while(!termStrings.isEmpty()) {
-                str += "|" + termStrings.remove(0);
-            }
-        }
+        String str = termStrings.isEmpty() ? "" : termStrings.remove(0);
+        while(!termStrings.isEmpty()) { str += "|" + termStrings.remove(0); }
+        return str;
     }
 }
