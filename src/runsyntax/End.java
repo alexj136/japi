@@ -13,5 +13,7 @@ public class End extends Term {
      */
     public void rename(int from, int to) {}
 
+    public End copy() { return new End(); }
+
     public String toString() { return "0"; }
 }

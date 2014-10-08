@@ -1,27 +1,28 @@
-package runsyntax;
+package interpreter;
 
+import runsyntax.*;
 import java.util.ArrayList;
 
 /**
  * Represents n-ary parallel composition, and contains methods to handle
  * integration of newly exposed terms into that n-ary parallel composition.
  */
-public class MultiParallels extends Term {
+public class InterpreterState {
 
     private ArrayList<Send> senders;
     private ArrayList<Receive> receivers;
     private ArrayList<Replicate> replicators;
+    private ArrayList<Restrict> inactiveRestrictions;
+    private ArrayList<Integer> activeRestrictions;
 
     /**
-     * Construct a new MultiParallels from the given Parallel Term.
-     * @param para the Parallel term to build the MultiParallels with
-     * @return a new MultiParallels Term representing the same term
-     * that the given Parallel represented
      */
-    public MultiParallels(Parallel para) {
+    public InterpreterState(Parallel para) {
         this.senders = new ArrayList<Send>();
         this.receivers = new ArrayList<Receive>();
         this.replicators = new ArrayList<Replicate>();
+        this.inactiveRestrictions = new ArrayList<Restrict>();
+        this.activeRestrictions = new ArrayList<Integer>();
         this.assimilate(para);
     }
 
@@ -64,10 +65,6 @@ public class MultiParallels extends Term {
     // Take all collected parallel terms and build them back into a 'pure'
     // term with only binary parallel composition
     public Term collapse() {
-        throw new UnsupportedOperationException("Not implemented");
-    }
-
-    public void rename(int from, int to) {
         throw new UnsupportedOperationException("Not implemented");
     }
 }

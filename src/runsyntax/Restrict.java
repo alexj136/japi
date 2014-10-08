@@ -41,6 +41,10 @@ public class Restrict extends Term {
         if(this.boundName != from) { this.restrictIn.rename(from, to); }
     }
 
+    public Restrict copy() {
+        return new Restrict(this.boundName, this.restrictIn.copy());
+    }
+
     public String toString() {
         return "(Vc" + this.boundName + ") " + this.restrictIn;
     }

@@ -114,8 +114,27 @@ public abstract class SyntaxTranslator {
             return result;
         }
 
+        // With Restrict, we determine what integer will represent the bound
+        // name and update the map accordingly. Then we use the updated map to
+        // rename the subterm.
         else if(term instanceof parsersyntax.Restrict) {
-            throw new UnsupportedOperationException("Not yet implemented");
+            parsersyntax.Restrict rest = (parsersyntax.Restrict) term;
+
+            int boundName;
+
+            if(nameMap.containsKey(rest.getBoundName())) {
+                boundName = nameMap.get(rest.getBoundName());
+            }
+            else {
+                boundName = nextAvailableName;
+                nextAvailableName++;
+                nameMap.put(rest.getBoundName(), boundName);
+            }
+
+            SyntaxTranslationResult result = _translate(rest.getRestrictIn(),
+                    nameMap, nextAvailableName);
+            result.setTerm(new runsyntax.Restrict(boundName, result.getTerm()));
+            return result;
         }
 
         // This is the simplest case - return a new End node with an unchanged

@@ -58,6 +58,10 @@ public class Receive extends Term {
         }
     }
 
+    public Receive copy() {
+        return new Receive(this.receiveOn, this.bindTo, this.subprocess.copy());
+    }
+
     public String toString() {
         return "c" + this.receiveOn + "(c" + this.bindTo + ")." +
                 this.subprocess;

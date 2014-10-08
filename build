@@ -5,9 +5,9 @@ case $@ in
     # Do the build operation if no arguments are supplied
     "")         echo "Building..."
                 mkdir -p ./bin/
-                javac -sourcepath ./src/ ./src/parsersyntax/*.java -d ./bin/
-                javac -sourcepath ./src/ ./src/runsyntax/*.java -d ./bin/
-                javac -sourcepath ./src/ ./src/interpreter/*.java -d ./bin/
+                #javac -sourcepath ./src/ ./src/parsersyntax/*.java -d ./bin/
+                #javac -sourcepath ./src/ ./src/runsyntax/*.java -d ./bin/
+                #javac -sourcepath ./src/ ./src/interpreter/*.java -d ./bin/
                 javac -sourcepath ./src/ ./src/main/*.java -d ./bin/
                 pushd ./src/parser/ > /dev/null
                 java -cp ../../lib/javacc-6.0.jar javacc japi.jj

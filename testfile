@@ -6,4 +6,6 @@ concurrently
         receive z over x
         then end
 and
-    repeatedly end
+    repeatedly
+        restricting z in
+            end

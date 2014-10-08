@@ -53,6 +53,10 @@ public class Send extends Term {
         this.subprocess.rename(from, to);
     }
 
+    public Send copy() {
+        return new Send(this.sendOn, this.toSend, this.subprocess.copy());
+    }
+
     public String toString() {
         return "-c" + this.sendOn + "<c" + this.toSend + ">." + this.subprocess;
     }

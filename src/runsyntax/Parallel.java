@@ -43,6 +43,10 @@ public class Parallel extends Term {
         this.subprocess2.rename(from, to);
     }
 
+    public Parallel copy() {
+        return new Parallel(this.subprocess1.copy(), this.subprocess2.copy());
+    }
+
     public String toString() {
         return this.subprocess1 + "|" + this.subprocess2;
     }

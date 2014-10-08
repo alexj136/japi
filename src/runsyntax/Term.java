@@ -12,4 +12,6 @@ public abstract class Term {
      * @param to names being renamed are renamed to this value
      */
     public abstract void rename(int from, int to);
+
+    public abstract Term copy();
 }

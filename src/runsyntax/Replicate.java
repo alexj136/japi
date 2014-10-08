@@ -32,5 +32,7 @@ public class Replicate extends Term {
         this.toReplicate.rename(from, to);
     }
 
+    public Replicate copy() { return new Replicate(this.toReplicate.copy()); }
+
     public String toString() { return "!" + this.toReplicate; }
 }
