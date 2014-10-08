@@ -3,7 +3,6 @@ package interpreter;
 import runsyntax.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * The Interpreter class contains methods used for interpreting pi calculus
@@ -12,8 +11,6 @@ import java.util.HashMap;
 public class Interpreter {
 
     private Term term;
-    private HashMap<String, Integer> nameMap;
-    private int nextAvailableName;
 
     /**
      * Construct an Interpreter to operate on the given Term.
