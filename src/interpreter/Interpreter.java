@@ -8,7 +8,7 @@ import java.util.HashMap;
  * Represents n-ary parallel composition, and contains methods to handle
  * integration of newly exposed terms into that n-ary parallel composition.
  */
-public class InterpreterState {
+public class Interpreter {
 
     private HashMap<String, Integer> nameMap;
     private int nextAvailableName;
@@ -21,7 +21,7 @@ public class InterpreterState {
 
     /**
      */
-    public InterpreterState(Term term, HashMap<String, Integer> nameMap,
+    public Interpreter(Term term, HashMap<String, Integer> nameMap,
             int nextAvailableName) {
 
         this.nameMap = nameMap;
