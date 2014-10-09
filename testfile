@@ -1,9 +1,10 @@
 concurrently
     concurrently
-        send y over x
+        over x send y
         then end
     and
-        receive z over x
+        over x receive z
+        then over z send z
         then end
 and
     repeatedly

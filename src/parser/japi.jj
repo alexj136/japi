@@ -47,27 +47,34 @@ TOKEN :
 void input() : {} { expression() <EOF> }
 
 Term expression() : { Term e1, e2; Token n1, n2; }
-    { "receive" n1=<ID> "over" n2=<ID> "then" e1=expression()
+    {
+        LOOKAHEAD(3)
+        "over" n1=<ID> "receive" n2=<ID> "then" e1=expression()
         {
-            return new Receive(n2.toString(), n1.toString(), e1);
+            return new Receive(n1.toString(), n2.toString(), e1);
         }
-    | "send" n1=<ID> "over" n2=<ID> "then" e1=expression()
+        |
+        "over" n1=<ID> "send" n2=<ID> "then" e1=expression()
         {
-            return new Send(n2.toString(), n1.toString(), e1);
+            return new Send(n1.toString(), n2.toString(), e1);
         }
-    | "concurrently" e1=expression() "and" e2=expression()
+        |
+        "concurrently" e1=expression() "and" e2=expression()
         {
             return new Parallel(e1, e2);
         }
-    | "restricting" n1=<ID> "in" e1=expression()
+        |
+        "restricting" n1=<ID> "in" e1=expression()
         {
             return new Restrict(n1.toString(), e1);
         }
-    | "repeatedly" e1=expression()
+        |
+        "repeatedly" e1=expression()
         {
             return new Replicate(e1);
         }
-    | "end"
+        |
+        "end"
         {
             return new End();
         }

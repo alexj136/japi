@@ -19,8 +19,8 @@ To invoke the interpreter, first build, and then run:
 
 The syntax of source files is as shown:
 
-    P, Q ::= receive Y over X then P
-           | send Y over X then P
+    P, Q ::= over X receive Y then P
+           | over X send Y then P
            | concurrently P and Q
            | restricting X in P
            | repeatedly P
