@@ -1,4 +1,6 @@
 [ x<y>.0
 | x(z).z<z>.0
-| !new z in 0
+| !new z in [0|0|0|0|0|0]
+| /* comment */ 0
+| 0 // comment
 ]
