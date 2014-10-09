@@ -42,13 +42,13 @@ public class Interpreter {
         this.integrateNewlyExposedTerm(term);
     }
 
-    /**
-     * Perform a reduction step.
+    /*
+     * Look for a matching channel accross the senders and receivers. If one is
+     * found, reduce it and return true, otherwise do nothing and return false.
      */
-    public void doReduction() {
-
-        // Find a match in senders and receivers
-        int sendIdx = 0, receiveIdx = 0;
+    private boolean trySendReceiveReduction() {
+        int sendIdx = 0;
+        int receiveIdx = 0;
         boolean reductionFound = false;
         while(sendIdx < this.senders.size() && !reductionFound) {
             while(receiveIdx < this.receivers.size() && !reductionFound) {
@@ -63,7 +63,6 @@ public class Interpreter {
         }
 
         if(reductionFound) {
-            // Do the reduction
             Send sender = senders.remove(sendIdx);
             Receive receiver = receivers.remove(receiveIdx);
 
@@ -74,6 +73,34 @@ public class Interpreter {
 
             this.integrateNewlyExposedTerm(receiverSub);
         }
+
+        return reductionFound;
+    }
+    
+    private boolean findReducibleReplication() {
+        int sendIdx = 0;
+        int replicateIdx = 0;
+        boolean reductionFound = false;
+
+        while(sendIdx < this.senders.size() && !reductionFound) {
+            while(replicateIdx < this.replicators.size() && !reductionFound) {
+
+                int sendChannel = this.senders.get(sendIdx).getSendOn();
+
+                boolean replicatorIsReceive =
+                        this.replicators.get(replicateIdx).getToReplicate()
+                        instanceof Receive;
+
+                int receiveChannel = (!replicatorIsReceive) ? 0 :
+                        ((Receive) this.replicators.get(replicateIdx)
+                        .getToReplicate()).getReceiveOn();
+
+                if(replicatorIsReceive && (sendChannel == receiveChannel)) {
+                    
+                }
+            }
+        }
+        return reductionFound;
     }
 
     // Add a newly exposed term to the appropriate arraylist
