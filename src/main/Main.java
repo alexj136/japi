@@ -57,7 +57,6 @@ public class Main {
             return;
         }
 
-        System.out.println(term.prettyPrint(0));
         SyntaxTranslationResult res = SyntaxTranslator.translate(term);
         Interpreter interpreter = new Interpreter(res.getTerm(),
                 res.getNameMap(), res.getNextAvailableName());

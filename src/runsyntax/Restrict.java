@@ -46,6 +46,6 @@ public class Restrict extends Term {
     }
 
     public String toString() {
-        return "(Vc" + this.boundName + ") " + this.restrictIn;
+        return "new c" + this.boundName + " in " + this.restrictIn;
     }
 }

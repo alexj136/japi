@@ -19,11 +19,11 @@ To invoke the interpreter, first build, and then run:
 
 The syntax of source files is as shown:
 
-    P, Q ::= over X receive Y then P
-           | over X send Y then P
-           | concurrently P and Q
-           | restricting X in P
-           | repeatedly P
-           | end
+    P, Q ::= X<Y>.P         # Send prefix
+           | X(Y).p         # Receive prefix
+           | [P|P|...P]     # N-ary parallel composition
+           | new X in P     # Name restriction
+           | !P             # Replication
+           | 0              # Completed process
 
     X, Y ::= [a-z]+

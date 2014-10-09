@@ -1,12 +1,4 @@
-concurrently
-    concurrently
-        over x send y
-        then end
-    and
-        over x receive z
-        then over z send z
-        then end
-and
-    repeatedly
-        restricting z in
-            end
+[ x<y>.0
+| x(z).z<z>.0
+| !new z in 0
+]

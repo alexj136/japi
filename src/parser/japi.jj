@@ -32,50 +32,81 @@ SKIP :
     }
 
 TOKEN :
-    { "receive"
-    | "send"
-    | "over"
-    | "then"
-    | "concurrently"
-    | "and"
-    | "restricting"
+    { "<"
+    | ">"
+    | "("
+    | ")"
+    | "."
+    | "["
+    | "|"
+    | "]"
+    | "new"
     | "in"
-    | "repeatedly"
-    | "end"
+    | "!"
+    | "0"
     | <ID: (["a"-"z"])+> }
 
 void input() : {} { expression() <EOF> }
 
-Term expression() : { Term e1, e2; Token n1, n2; }
+/* The pi-calculus grammar used is as follows:
+ *
+ *     P ::= "x(y).P" | "x<y>.P" | "[P|P|...P]" | "new x in P" | "!P" | "0"
+ *
+ * which, in more concrete notation is:
+ *
+ *     P ::= "x(y).P" | "x<y>.P" | "[P|PQ" | "new x in P" | "!P" | "0"
+ *     Q ::= "]" | "|PQ"
+ *
+ * This is the grammar used in the implementation below.
+ */
+Term expression() : { Term e1, e2, e3; Token n1, n2; }
+{
+    LOOKAHEAD(2)
+    n1=<ID> "(" n2=<ID> ")" "." e1=expression()
     {
-        LOOKAHEAD(3)
-        "over" n1=<ID> "receive" n2=<ID> "then" e1=expression()
-        {
-            return new Receive(n1.toString(), n2.toString(), e1);
-        }
-        |
-        "over" n1=<ID> "send" n2=<ID> "then" e1=expression()
-        {
-            return new Send(n1.toString(), n2.toString(), e1);
-        }
-        |
-        "concurrently" e1=expression() "and" e2=expression()
-        {
+        return new Receive(n1.toString(), n2.toString(), e1);
+    }
+    |
+    n1=<ID> "<" n2=<ID> ">" "." e1=expression()
+    {
+        return new Send(n1.toString(), n2.toString(), e1);
+    }
+    |
+    "[" e1=expression() "|" e2=expression() e3=parallelCont()
+    {
+        if(e3 == null) {
             return new Parallel(e1, e2);
         }
-        |
-        "restricting" n1=<ID> "in" e1=expression()
-        {
-            return new Restrict(n1.toString(), e1);
-        }
-        |
-        "repeatedly" e1=expression()
-        {
-            return new Replicate(e1);
-        }
-        |
-        "end"
-        {
-            return new End();
+        else {
+            return new Parallel(e1, new Parallel(e2, e3));
         }
     }
+    |
+    "new" n1=<ID> "in" e1=expression()
+    {
+        return new Restrict(n1.toString(), e1);
+    }
+    |
+    "!" e1=expression()
+    {
+        return new Replicate(e1);
+    }
+    |
+    "0"
+    {
+        return new End();
+    }
+}
+
+Term parallelCont() : { Term e1, e2; }
+{
+    "|" e1=expression() e2=parallelCont()
+    {
+        return (e2 == null) ? e1 : new Parallel(e1, e2);
+    }
+    |
+    "]"
+    {
+        return null;
+    }
+}

@@ -1,5 +1,6 @@
 package runsyntax;
 
+import java.util.ArrayList;
 /**
  * Binary parallel composition.
  */
@@ -48,6 +49,21 @@ public class Parallel extends Term {
     }
 
     public String toString() {
-        return this.subprocess1 + "|" + this.subprocess2;
+        ArrayList<String> subTermStrings = this.allParallelStrings();
+        String all = subTermStrings.remove(0);
+        for(String s : subTermStrings) { all += "|" + s; }
+        return "[" + all + "]";
+    }
+    public ArrayList<String> allParallelStrings() {
+        ArrayList<String> strings = new ArrayList<String>();
+        if(this.subprocess1 instanceof Parallel) {
+            strings.addAll(((Parallel) this.subprocess1).allParallelStrings());
+        }
+        else { strings.add(this.subprocess1.toString()); }
+        if(this.subprocess2 instanceof Parallel) {
+            strings.addAll(((Parallel) this.subprocess2).allParallelStrings());
+        }
+        else { strings.add(this.subprocess2.toString()); }
+        return strings;
     }
 }

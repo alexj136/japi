@@ -115,6 +115,6 @@ public class Interpreter {
         for(Restrict rest : restrictions) { termStrings.add(rest.toString()); }
         String str = termStrings.isEmpty() ? "" : termStrings.remove(0);
         while(!termStrings.isEmpty()) { str += "|" + termStrings.remove(0); }
-        return str;
+        return "[" + str + "]";
     }
 }

@@ -58,6 +58,6 @@ public class Send extends Term {
     }
 
     public String toString() {
-        return "-c" + this.sendOn + "<c" + this.toSend + ">." + this.subprocess;
+        return "c" + this.sendOn + "<c" + this.toSend + ">." + this.subprocess;
     }
 }
