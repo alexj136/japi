@@ -64,6 +64,15 @@ public class Interpreter {
 
         if(reductionFound) {
             // Do the reduction
+            Send sender = senders.remove(sendIdx);
+            Receive receiver = receivers.remove(receiveIdx);
+
+            this.integrateNewlyExposedTerm(sender.getSubprocess());
+
+            Term receiverSub = receiver.getSubprocess();
+            receiverSub.rename(receiver.getBindTo(), sender.getToSend());
+
+            this.integrateNewlyExposedTerm(receiverSub);
         }
     }
 

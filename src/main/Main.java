@@ -63,5 +63,7 @@ public class Main {
         Interpreter interpreter = new Interpreter(res.getTerm(),
                 res.getNameMap(), res.getNextAvailableName());
         System.out.println(interpreter);
+        interpreter.doReduction();
+        System.out.println(interpreter);
     }
 }
