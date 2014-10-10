@@ -41,6 +41,10 @@ public class Restrict extends Term {
         if(this.boundName != from) { this.restrictIn.rename(from, to); }
     }
 
+    /**
+     * Deep-copy this Restrict.
+     * @return a deep-copy of this Restrict
+     */
     public Restrict copy() {
         return new Restrict(this.boundName, this.restrictIn.copy());
     }

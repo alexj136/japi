@@ -44,6 +44,10 @@ public class Parallel extends Term {
         this.subprocess2.rename(from, to);
     }
 
+    /**
+     * Deep-copy this Parallel.
+     * @return a deep-copy of this Parallel
+     */
     public Parallel copy() {
         return new Parallel(this.subprocess1.copy(), this.subprocess2.copy());
     }

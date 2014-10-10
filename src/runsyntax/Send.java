@@ -53,6 +53,10 @@ public class Send extends Term {
         this.subprocess.rename(from, to);
     }
 
+    /**
+     * Deep-copy this Send.
+     * @return a deep-copy of this Send
+     */
     public Send copy() {
         return new Send(this.sendOn, this.toSend, this.subprocess.copy());
     }

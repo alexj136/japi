@@ -58,6 +58,10 @@ public class Receive extends Term {
         }
     }
 
+    /**
+     * Deep-copy this Receive.
+     * @return a deep-copy of this Receive
+     */
     public Receive copy() {
         return new Receive(this.receiveOn, this.bindTo, this.subprocess.copy());
     }

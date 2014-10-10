@@ -94,12 +94,11 @@ public class Interpreter {
      * without doing anything) if the restrictions list is empty.
      */
     private boolean tryScopeExtrusion() {
-        throw new UnsupportedOperationException("Not yet implemented");/*
-        if(this.restrictions.isEmpty) { return false; }
+        throw new UnsupportedOperationException("Not yet implemented");
+        /*if(this.restrictions.isEmpty) { return false; }
 
         Restrict rest = this.restrictions.remove(0);
-        rest.alphaConvert(rest.getBoundName(),
-                this.nameMap, this.nextAvailableName);
+        rest.alphaConvert(rest.getBoundName(), this.nextAvailableName);
         this.integrateNewlyExposedTerm(rest.getRestrictIn());
         this.boundNames.add(rest.getBoundName());
 
