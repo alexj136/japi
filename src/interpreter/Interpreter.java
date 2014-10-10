@@ -88,7 +88,24 @@ public class Interpreter {
 
         return reductionFound;
     }
-    
+
+    /*
+     * Attempt scope extrusion via alpha conversion. Fails (i.e. returns false
+     * without doing anything) if the restrictions list is empty.
+     */
+    private boolean tryScopeExtrusion() {
+        throw new UnsupportedOperationException("Not yet implemented");/*
+        if(this.restrictions.isEmpty) { return false; }
+
+        Restrict rest = this.restrictions.remove(0);
+        rest.alphaConvert(rest.getBoundName(),
+                this.nameMap, this.nextAvailableName);
+        this.integrateNewlyExposedTerm(rest.getRestrictIn());
+        this.boundNames.add(rest.getBoundName());
+
+        return true;*/
+    }
+
     /*
      * Look for a Replicate node, where the subterm is a Send with a match in
      * the recievers list, or a Receive with a match in the senders list. If
@@ -207,8 +224,18 @@ public class Interpreter {
         for(Receive rece : receivers) { termStrings.add(rece.toString()); }
         for(Replicate repl : replicators) { termStrings.add(repl.toString()); }
         for(Restrict rest : restrictions) { termStrings.add(rest.toString()); }
-        String str = termStrings.isEmpty() ? "" : termStrings.remove(0);
-        while(!termStrings.isEmpty()) { str += "|" + termStrings.remove(0); }
-        return "[" + str + "]";
+        String procs = termStrings.isEmpty() ? "" : termStrings.remove(0);
+        while(!termStrings.isEmpty()) { procs += "|" + termStrings.remove(0); }
+        return "[" + procs + "]";
+    }
+
+    /**
+     * Obtain a nice string representation of the 'term' in its current state,
+     * using the user's names rather than integer representations, where
+     * possible.
+     * @return a nice string representation of the contained 'term'
+     */
+    public String niceToString() {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 }
