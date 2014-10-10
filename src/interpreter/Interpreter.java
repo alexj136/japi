@@ -42,14 +42,27 @@ public class Interpreter {
         this.integrateNewlyExposedTerm(term);
     }
 
+    /**
+     * Try to do a reduction.
+     * @return true if a reduction was performed, false otherwise
+     */
+    public boolean reduce() {
+        return trySendReceiveReduction() || tryReducibleReplication();
+    }
+
     /*
      * Look for a matching channel accross the senders and receivers. If one is
      * found, reduce it and return true, otherwise do nothing and return false.
      */
     private boolean trySendReceiveReduction() {
+
         int sendIdx = 0;
         int receiveIdx = 0;
         boolean reductionFound = false;
+
+        // Scan the sender and receiver lists until a match is found or until
+        // all combinations have been checked. TODO: Optimise this search using
+        // sorted lists.
         while(sendIdx < this.senders.size() && !reductionFound) {
             while(receiveIdx < this.receivers.size() && !reductionFound) {
                 if(this.senders.get(sendIdx).getSendOn() ==
@@ -62,26 +75,33 @@ public class Interpreter {
             if(!reductionFound) { sendIdx++; }
         }
 
+        // If a match was found, perform the reduction, renaming in the receiver
+        // subterm.
         if(reductionFound) {
             Send sender = senders.remove(sendIdx);
             Receive receiver = receivers.remove(receiveIdx);
-
             this.integrateNewlyExposedTerm(sender.getSubprocess());
-
             Term receiverSub = receiver.getSubprocess();
             receiverSub.rename(receiver.getBindTo(), sender.getToSend());
-
             this.integrateNewlyExposedTerm(receiverSub);
         }
 
         return reductionFound;
     }
     
-    private boolean findReducibleReplication() {
+    /*
+     * Look for a Replicate node, where the subterm is a Send with a match in
+     * the recievers list, or a Receive with a match in the senders list. If
+     * such a term is found, replicate it.
+     */
+    private boolean tryReducibleReplication() {
+
         int sendIdx = 0;
         int replicateIdx = 0;
         boolean reductionFound = false;
 
+        // Look for a Send that matches a Receive subterm of a member of the
+        // replicators list.
         while(sendIdx < this.senders.size() && !reductionFound) {
             while(replicateIdx < this.replicators.size() && !reductionFound) {
 
@@ -96,11 +116,58 @@ public class Interpreter {
                         .getToReplicate()).getReceiveOn();
 
                 if(replicatorIsReceive && (sendChannel == receiveChannel)) {
-                    
+                    reductionFound = true;
                 }
+                else { replicateIdx++; }
             }
+            if(!reductionFound) { sendIdx++; }
         }
-        return reductionFound;
+
+        // If a match was found, replicate the body of the matching replicator,
+        // and return. If we did not return here, we would look for a match with
+        // a receiver.
+        if(reductionFound) {
+            this.integrateNewlyExposedTerm(
+                    this.replicators.get(replicateIdx).getToReplicate().copy());
+            return reductionFound; // always true
+        }
+
+        int receiveIdx = 0;
+        replicateIdx = 0;
+
+        // Look for a Receive that matches a Send subterm of a member of the
+        // replicators list.
+        while(receiveIdx < this.receivers.size() && !reductionFound) {
+            while(replicateIdx < this.replicators.size() && !reductionFound) {
+
+                int receiveChannel =
+                        this.receivers.get(receiveIdx).getReceiveOn();
+
+                boolean replicatorIsSend =
+                        this.replicators.get(replicateIdx).getToReplicate()
+                        instanceof Send;
+
+                int sendChannel = (!replicatorIsSend) ? 0 :
+                        ((Send) this.replicators.get(replicateIdx)
+                        .getToReplicate()).getSendOn();
+
+                if(replicatorIsSend && (sendChannel == receiveChannel)) {
+                    reductionFound = true;
+                }
+                else { replicateIdx++; }
+            }
+            if(!reductionFound) { receiveIdx++; }
+        }
+
+        // If a match was found, replicate the body of the matching replicator,
+        // and return.
+        if(reductionFound) {
+            this.integrateNewlyExposedTerm(
+                    this.replicators.get(replicateIdx).getToReplicate().copy());
+            return reductionFound; // always true
+        }
+
+        return reductionFound; // always false
     }
 
     // Add a newly exposed term to the appropriate arraylist

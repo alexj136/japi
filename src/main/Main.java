@@ -61,5 +61,10 @@ public class Main {
         Interpreter interpreter = new Interpreter(res.getTerm(),
                 res.getNameMap(), res.getNextAvailableName());
         System.out.println(interpreter);
+        boolean reductionOccurred = true;
+        while(reductionOccurred) {
+            reductionOccurred = interpreter.reduce();
+            if(reductionOccurred) { System.out.println(interpreter); }
+        }
     }
 }
