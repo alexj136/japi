@@ -1,6 +1,5 @@
-[ x<y>.0
-| x(z).z<z>.0
-| !new z in [0|0|0|0|0|0]
-| /* comment */ 0
-| 0 // comment
+// A simple test program
+
+[ ! x<x> . 0
+| x(x) . x(x) . x(x) . x(x) . 0
 ]
