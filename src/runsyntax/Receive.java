@@ -1,5 +1,7 @@
 package runsyntax;
 
+import java.util.HashMap;
+
 /**
  * Represents a process waiting to send a message.
  */
@@ -85,5 +87,13 @@ public class Receive extends Term {
     public String toString() {
         return "c" + this.receiveOn + "(c" + this.bindTo + ")." +
                 this.subprocess;
+    }
+
+    /**
+     *
+     */
+    public String toNiceString(HashMap<Integer, String> nameMap) {
+        return nameMap.get(this.receiveOn) + " ( " + nameMap.get(this.bindTo) +
+                " ) . " + this.subprocess.toNiceString(nameMap);
     }
 }

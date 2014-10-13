@@ -1,5 +1,7 @@
 package runsyntax;
 
+import java.util.HashMap;
+
 /**
  * Represents name restriction within a process - creates a new name whose scope
  * is limited to the contained term.
@@ -66,5 +68,13 @@ public class Restrict extends Term {
      */
     public String toString() {
         return "new c" + this.boundName + " in " + this.restrictIn;
+    }
+
+    /**
+     *
+     */
+    public String toNiceString(HashMap<Integer, String> nameMap) {
+        return "new " + nameMap.get(this.boundName) + " in " +
+                this.restrictIn.toNiceString(nameMap);
     }
 }

@@ -198,15 +198,18 @@ public class Interpreter {
     private boolean tryScopeExtrusion() {
         if(this.restrictions.isEmpty()) { return false; }
 
-        // Alpha convert and reintegrate
         Restrict rest = this.restrictions.remove(0);
+
+        // Update nameMap
+        String printableName = this.nameMap.get(rest.getBoundName()) + "'";
+        this.nameMap.put(this.nextAvailableName, printableName);
+
+        // Alpha convert and reintegrate
         rest.alphaConvert(rest.getBoundName(), this.nextAvailableName);
         this.integrateNewlyExposedTerm(rest.getRestrictIn());
         this.boundNames.add(rest.getBoundName());
 
-        // Update nameMap and nextAvailableName fields
-        String printableName = this.nameMap.get(rest.getBoundName()) + "'";
-        this.nameMap.put(this.nextAvailableName, printableName);
+        // Update nextAvailableName
         this.nextAvailableName++;
 
         return true;
@@ -245,24 +248,26 @@ public class Interpreter {
      */
     public String toString() {
         ArrayList<String> termStrings = new ArrayList<String>();
-        for(Send send : senders) { termStrings.add(send.toString()); }
-        for(Receive rece : receivers) { termStrings.add(rece.toString()); }
-        for(Replicate repl : replicators) { termStrings.add(repl.toString()); }
-        for(Restrict rest : restrictions) { termStrings.add(rest.toString()); }
+        for(Send send : senders) {
+            termStrings.add(send.toNiceString(this.nameMap));
+        }
+        for(Receive rece : receivers) {
+            termStrings.add(rece.toNiceString(this.nameMap));
+        }
+        for(Replicate repl : replicators) {
+            termStrings.add(repl.toNiceString(this.nameMap));
+        }
+        for(Restrict rest : restrictions) {
+            termStrings.add(rest.toNiceString(this.nameMap));
+        }
         String procs = termStrings.isEmpty() ? "" : termStrings.remove(0);
-        while(!termStrings.isEmpty()) { procs += "|" + termStrings.remove(0); }
+        while(!termStrings.isEmpty()) {
+            procs += " | " + termStrings.remove(0);
+        }
         String scope = "";
-        for(Integer i : boundNames) { scope += "new c" + i + " in "; }
-        return scope + "[" + procs + "]";
-    }
-
-    /**
-     * Obtain a nice string representation of the 'term' in its current state,
-     * using the user's names rather than integer representations, where
-     * possible.
-     * @return a nice string representation of the contained 'term'
-     */
-    public String niceToString() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        for(Integer i : boundNames) {
+            scope += "new " + this.nameMap.get(i) + " in ";
+        }
+        return scope + "[ " + procs + " ]";
     }
 }

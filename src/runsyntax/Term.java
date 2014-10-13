@@ -1,5 +1,7 @@
 package runsyntax;
 
+import java.util.HashMap;
+
 /**
  * A Term object represents any pi calculus term, with names as integers.
  */
@@ -35,4 +37,13 @@ public abstract class Term {
      */
     @Override
     public abstract String toString();
+
+    /**
+     * Prettier stringification method that converts variable names back to
+     * those given by the user.
+     * @param nameMap a HashMap used to obtain user variable names from
+     * interpreter ones
+     * @return a string representation of this Term
+     */
+    public abstract String toNiceString(HashMap<Integer, String> nameMap);
 }

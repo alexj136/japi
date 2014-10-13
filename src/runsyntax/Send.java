@@ -1,5 +1,7 @@
 package runsyntax;
 
+import java.util.HashMap;
+
 /**
  * A Send object sends a message (a name i.e. an int) on a particular channel
  * when there is a corresponding Receive process to receive it.
@@ -79,5 +81,13 @@ public class Send extends Term {
      */
     public String toString() {
         return "c" + this.sendOn + "<c" + this.toSend + ">." + this.subprocess;
+    }
+
+    /**
+     *
+     */
+    public String toNiceString(HashMap<Integer, String> nameMap) {
+        return nameMap.get(this.sendOn) + " < " + nameMap.get(this.toSend) +
+            " > . " + this.subprocess.toNiceString(nameMap);
     }
 }

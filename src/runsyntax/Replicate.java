@@ -1,5 +1,7 @@
 package runsyntax;
 
+import java.util.HashMap;
+
 /**
  * Replicate elements repeatedly copy a process.
  */
@@ -53,4 +55,11 @@ public class Replicate extends Term {
      * @return a not-very-nice string representation of this object
      */
     public String toString() { return "!" + this.toReplicate; }
+
+    /**
+     *
+     */
+    public String toNiceString(HashMap<Integer, String> nameMap) {
+        return "! " + this.toReplicate.toNiceString(nameMap);
+    }
 }

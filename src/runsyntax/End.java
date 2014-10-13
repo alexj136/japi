@@ -1,5 +1,7 @@
 package runsyntax;
 
+import java.util.HashMap;
+
 /**
  * A concluded process.
  */
@@ -27,8 +29,15 @@ public class End extends Term {
     public End copy() { return new End(); }
 
     /**
-     * Simple toString that just uses the integer names.
-     * @return a not-very-nice string representation of this object
+     * Obtain the String "0".
+     * @return "0"
      */
     public String toString() { return "0"; }
+
+    /**
+     * Obtain the String "0".
+     * @param nameMap an arbitrary HashMap<Integer, String>.
+     * @return "0"
+     */
+    public String toNiceString(HashMap<Integer, String> nameMap) { return "0"; }
 }

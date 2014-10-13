@@ -1,6 +1,8 @@
 package runsyntax;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * Binary parallel composition.
  */
@@ -89,6 +91,34 @@ public class Parallel extends Term {
             strings.addAll(((Parallel) this.subprocess2).allParallelStrings());
         }
         else { strings.add(this.subprocess2.toString()); }
+        return strings;
+    }
+
+    /**
+     * 
+     */
+    public String toNiceString(HashMap<Integer, String> nameMap) {
+        ArrayList<String> subTermStrings = this.allParallelNiceStrings(nameMap);
+        String all = subTermStrings.remove(0);
+        for(String s : subTermStrings) { all += "|" + s; }
+        return "[" + all + "]";
+    }
+
+    /**
+     *
+     */
+    public ArrayList<String> allParallelNiceStrings(
+            HashMap<Integer, String> nameMap) {
+
+        ArrayList<String> strings = new ArrayList<String>();
+        if(this.subprocess1 instanceof Parallel) {
+            strings.addAll(((Parallel) this.subprocess1).allParallelNiceStrings(nameMap));
+        }
+        else { strings.add(this.subprocess1.toNiceString(nameMap)); }
+        if(this.subprocess2 instanceof Parallel) {
+            strings.addAll(((Parallel) this.subprocess2).allParallelNiceStrings(nameMap));
+        }
+        else { strings.add(this.subprocess2.toNiceString(nameMap)); }
         return strings;
     }
 }
