@@ -10,7 +10,7 @@ import java.util.HashMap;
  */
 public class Interpreter {
 
-    private HashMap<String, Integer> nameMap;
+    private HashMap<Integer, String> nameMap;
     private int nextAvailableName;
 
     private ArrayList<Send> senders;
@@ -30,7 +30,14 @@ public class Interpreter {
     public Interpreter(Term term, HashMap<String, Integer> nameMap,
             int nextAvailableName) {
 
-        this.nameMap = nameMap;
+        // Use the SyntaxTranslationResult's String to Integer map, useful for
+        // translation, to an Integer to String map, useful for printing terms
+        // during or after interpretation.
+        this.nameMap = new HashMap<Integer, String>();
+        for(String name : nameMap.keySet()) {
+            this.nameMap.put(nameMap.get(name), name);
+        }
+
         this.nextAvailableName = nextAvailableName;
 
         this.senders = new ArrayList<Send>();
@@ -43,11 +50,23 @@ public class Interpreter {
     }
 
     /**
+     * Construct a new Interpreter from the given SyntaxTranslationResult.
+     * @param SyntaxTranslationResult the result of translating a source program
+     * into an interpretable program.
+     */
+    public static Interpreter fromTranslation(SyntaxTranslationResult result) {
+        return new Interpreter(result.getTerm(), result.getNameMap(),
+                result.getNextAvailableName());
+    }
+
+    /**
      * Try to do a reduction.
      * @return true if a reduction was performed, false otherwise
      */
     public boolean reduce() {
-        return trySendReceiveReduction() || tryReducibleReplication();
+        return trySendReceiveReduction()
+                || tryReducibleReplication()
+                || tryScopeExtrusion();
     }
 
     /*
@@ -94,20 +113,25 @@ public class Interpreter {
      * without doing anything) if the restrictions list is empty.
      */
     private boolean tryScopeExtrusion() {
-        throw new UnsupportedOperationException("Not yet implemented");
-        /*if(this.restrictions.isEmpty) { return false; }
+        if(this.restrictions.isEmpty()) { return false; }
 
+        // Alpha convert and reintegrate
         Restrict rest = this.restrictions.remove(0);
         rest.alphaConvert(rest.getBoundName(), this.nextAvailableName);
         this.integrateNewlyExposedTerm(rest.getRestrictIn());
         this.boundNames.add(rest.getBoundName());
 
-        return true;*/
+        // Update nameMap and nextAvailableName fields
+        String printableName = this.nameMap.get(rest.getBoundName()) + "'";
+        this.nameMap.put(this.nextAvailableName, printableName);
+        this.nextAvailableName++;
+
+        return true;
     }
 
     /*
      * Look for a Replicate node, where the subterm is a Send with a match in
-     * the recievers list, or a Receive with a match in the senders list. If
+     * the receivers list, or a Receive with a match in the senders list. If
      * such a term is found, replicate it.
      */
     private boolean tryReducibleReplication() {
@@ -225,7 +249,9 @@ public class Interpreter {
         for(Restrict rest : restrictions) { termStrings.add(rest.toString()); }
         String procs = termStrings.isEmpty() ? "" : termStrings.remove(0);
         while(!termStrings.isEmpty()) { procs += "|" + termStrings.remove(0); }
-        return "[" + procs + "]";
+        String scope = "";
+        for(Integer i : boundNames) { scope += "new c" + i + " in "; }
+        return scope + "[" + procs + "]";
     }
 
     /**

@@ -58,8 +58,7 @@ public class Main {
         }
 
         SyntaxTranslationResult res = SyntaxTranslator.translate(term);
-        Interpreter interpreter = new Interpreter(res.getTerm(),
-                res.getNameMap(), res.getNextAvailableName());
+        Interpreter interpreter = Interpreter.fromTranslation(res);
         System.out.println(interpreter);
         boolean reductionOccurred = true;
         while(reductionOccurred) {
