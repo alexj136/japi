@@ -26,4 +26,13 @@ public abstract class Term {
      * @return a deep-copy of this Term
      */
     public abstract Term copy();
+
+    /**
+     * Force subclasses to override toString. This is not supposed to be a
+     * particularly nice pretty-print, just something simple to use for casual
+     * tests.
+     * @return a string representation of this Term
+     */
+    @Override
+    public abstract String toString();
 }

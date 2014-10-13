@@ -54,6 +54,18 @@ public class Send extends Term {
     }
 
     /**
+     * Alpha-convert names in a Send node as is required when performing
+     * scope-extrusion.
+     * @param from all names of this value are alpha-converted
+     * @param to alpha-converted names are alpha-converted to this name
+     */
+    public void alphaConvert(int from, int to) {
+        if(this.sendOn == from) { this.sendOn = to; }
+        if(this.toSend == from) { this.toSend = to; }
+        this.subprocess.alphaConvert(from, to);
+    }
+
+    /**
      * Deep-copy this Send.
      * @return a deep-copy of this Send
      */
@@ -61,6 +73,10 @@ public class Send extends Term {
         return new Send(this.sendOn, this.toSend, this.subprocess.copy());
     }
 
+    /**
+     * Simple toString that just uses the integer names.
+     * @return a not-very-nice string representation of this object
+     */
     public String toString() {
         return "c" + this.sendOn + "<c" + this.toSend + ">." + this.subprocess;
     }

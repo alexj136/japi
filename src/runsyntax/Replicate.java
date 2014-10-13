@@ -33,10 +33,24 @@ public class Replicate extends Term {
     }
 
     /**
+     * Alpha-convert names in a Replicate node as is required when performing
+     * scope-extrusion.
+     * @param from all names of this value are alpha-converted
+     * @param to alpha-converted names are alpha-converted to this name
+     */
+    public void alphaConvert(int from, int to) {
+        this.toReplicate.alphaConvert(from, to);
+    }
+
+    /**
      * Deep-copy this Replicate.
      * @return a deep-copy of this Replicate
      */
     public Replicate copy() { return new Replicate(this.toReplicate.copy()); }
 
+    /**
+     * Simple toString that just uses the integer names.
+     * @return a not-very-nice string representation of this object
+     */
     public String toString() { return "!" + this.toReplicate; }
 }

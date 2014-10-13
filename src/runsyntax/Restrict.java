@@ -42,6 +42,17 @@ public class Restrict extends Term {
     }
 
     /**
+     * Alpha-convert names in a Restrict node as is required when performing
+     * scope-extrusion.
+     * @param from all names of this value are alpha-converted
+     * @param to alpha-converted names are alpha-converted to this name
+     */
+    public void alphaConvert(int from, int to) {
+        if(this.boundName == from) { this.boundName = to; }
+        this.restrictIn.alphaConvert(from, to);
+    }
+
+    /**
      * Deep-copy this Restrict.
      * @return a deep-copy of this Restrict
      */
@@ -49,6 +60,10 @@ public class Restrict extends Term {
         return new Restrict(this.boundName, this.restrictIn.copy());
     }
 
+    /**
+     * Simple toString that just uses the integer names.
+     * @return a not-very-nice string representation of this object
+     */
     public String toString() {
         return "new c" + this.boundName + " in " + this.restrictIn;
     }

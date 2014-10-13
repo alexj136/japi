@@ -45,6 +45,17 @@ public class Parallel extends Term {
     }
 
     /**
+     * Alpha-convert names in a Parallel node as is required when performing
+     * scope-extrusion.
+     * @param from all names of this value are alpha-converted
+     * @param to alpha-converted names are alpha-converted to this name
+     */
+    public void alphaConvert(int from, int to) {
+        this.subprocess1.alphaConvert(from, to);
+        this.subprocess2.alphaConvert(from, to);
+    }
+
+    /**
      * Deep-copy this Parallel.
      * @return a deep-copy of this Parallel
      */
@@ -52,12 +63,22 @@ public class Parallel extends Term {
         return new Parallel(this.subprocess1.copy(), this.subprocess2.copy());
     }
 
+    /**
+     * Simple toString that just uses the integer names.
+     * @return a not-very-nice string representation of this object
+     */
     public String toString() {
         ArrayList<String> subTermStrings = this.allParallelStrings();
         String all = subTermStrings.remove(0);
         for(String s : subTermStrings) { all += "|" + s; }
         return "[" + all + "]";
     }
+
+    /**
+     * Helper method for toString.
+     * @return a list of toStrings of all Terms in a Parallel composition with
+     * this one, allowing for the structural congruence (P|Q)|R === P|(Q|R).
+     */
     public ArrayList<String> allParallelStrings() {
         ArrayList<String> strings = new ArrayList<String>();
         if(this.subprocess1 instanceof Parallel) {

@@ -59,6 +59,18 @@ public class Receive extends Term {
     }
 
     /**
+     * Alpha-convert names in a Receive node as is required when performing
+     * scope-extrusion.
+     * @param from all names of this value are alpha-converted
+     * @param to alpha-converted names are alpha-converted to this name
+     */
+    public void alphaConvert(int from, int to) {
+        if(this.receiveOn == from) { this.receiveOn = to; }
+        if(this.bindTo == from) { this.bindTo = to; }
+        this.subprocess.alphaConvert(from, to);
+    }
+
+    /**
      * Deep-copy this Receive.
      * @return a deep-copy of this Receive
      */
@@ -66,6 +78,10 @@ public class Receive extends Term {
         return new Receive(this.receiveOn, this.bindTo, this.subprocess.copy());
     }
 
+    /**
+     * Simple toString that just uses the integer names.
+     * @return a not-very-nice string representation of this object
+     */
     public String toString() {
         return "c" + this.receiveOn + "(c" + this.bindTo + ")." +
                 this.subprocess;
