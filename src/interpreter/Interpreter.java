@@ -83,6 +83,7 @@ public class Interpreter {
         // all combinations have been checked. TODO: Optimise this search using
         // sorted lists.
         while(sendIdx < this.senders.size() && !reductionFound) {
+            receiveIdx = 0;
             while(receiveIdx < this.receivers.size() && !reductionFound) {
                 if(this.senders.get(sendIdx).getSendOn() ==
                         this.receivers.get(receiveIdx).getReceiveOn()) {
@@ -109,27 +110,6 @@ public class Interpreter {
     }
 
     /*
-     * Attempt scope extrusion via alpha conversion. Fails (i.e. returns false
-     * without doing anything) if the restrictions list is empty.
-     */
-    private boolean tryScopeExtrusion() {
-        if(this.restrictions.isEmpty()) { return false; }
-
-        // Alpha convert and reintegrate
-        Restrict rest = this.restrictions.remove(0);
-        rest.alphaConvert(rest.getBoundName(), this.nextAvailableName);
-        this.integrateNewlyExposedTerm(rest.getRestrictIn());
-        this.boundNames.add(rest.getBoundName());
-
-        // Update nameMap and nextAvailableName fields
-        String printableName = this.nameMap.get(rest.getBoundName()) + "'";
-        this.nameMap.put(this.nextAvailableName, printableName);
-        this.nextAvailableName++;
-
-        return true;
-    }
-
-    /*
      * Look for a Replicate node, where the subterm is a Send with a match in
      * the receivers list, or a Receive with a match in the senders list. If
      * such a term is found, replicate it.
@@ -143,6 +123,7 @@ public class Interpreter {
         // Look for a Send that matches a Receive subterm of a member of the
         // replicators list.
         while(sendIdx < this.senders.size() && !reductionFound) {
+            replicateIdx = 0;
             while(replicateIdx < this.replicators.size() && !reductionFound) {
 
                 int sendChannel = this.senders.get(sendIdx).getSendOn();
@@ -173,11 +154,11 @@ public class Interpreter {
         }
 
         int receiveIdx = 0;
-        replicateIdx = 0;
 
         // Look for a Receive that matches a Send subterm of a member of the
         // replicators list.
         while(receiveIdx < this.receivers.size() && !reductionFound) {
+            replicateIdx = 0;
             while(replicateIdx < this.replicators.size() && !reductionFound) {
 
                 int receiveChannel =
@@ -208,6 +189,27 @@ public class Interpreter {
         }
 
         return reductionFound; // always false
+    }
+
+    /*
+     * Attempt scope extrusion via alpha conversion. Fails (i.e. returns false
+     * without doing anything) if the restrictions list is empty.
+     */
+    private boolean tryScopeExtrusion() {
+        if(this.restrictions.isEmpty()) { return false; }
+
+        // Alpha convert and reintegrate
+        Restrict rest = this.restrictions.remove(0);
+        rest.alphaConvert(rest.getBoundName(), this.nextAvailableName);
+        this.integrateNewlyExposedTerm(rest.getRestrictIn());
+        this.boundNames.add(rest.getBoundName());
+
+        // Update nameMap and nextAvailableName fields
+        String printableName = this.nameMap.get(rest.getBoundName()) + "'";
+        this.nameMap.put(this.nextAvailableName, printableName);
+        this.nextAvailableName++;
+
+        return true;
     }
 
     // Add a newly exposed term to the appropriate arraylist

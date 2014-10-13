@@ -8,7 +8,7 @@ case $@ in
                 pushd ./src/parser/ > /dev/null
                 java -cp ../../lib/javacc-6.0.jar javacc japi.jj
                 popd > /dev/null
-                javac -sourcepath ./src/ ./src/main/*.java -d ./bin/
+                javac -g -sourcepath ./src/ ./src/main/*.java -d ./bin/
                 echo "Done." ;;
 
     # Clean the build if the argument was "clean"
