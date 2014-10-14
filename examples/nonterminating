@@ -1,0 +1,9 @@
+// A simple example of a nonterminating program
+
+[
+    // Copies itself to match the "x ( y ) . 0" process, and leaves such a
+    // process behind, and will therefore copy itself again, ad infinitum.
+    ! x < y > . x ( y ) . 0
+|
+    x ( y ) . 0
+]
