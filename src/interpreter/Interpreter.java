@@ -19,7 +19,7 @@ public class Interpreter {
     private ArrayList<Receive> receivers;
     private ArrayList<Replicate> replicators;
     private ArrayList<Restrict> restrictions;
-    private ArrayList<Integer> boundNames;
+    private HashSet<Integer> boundNames;
 
     /**
      * Construct a new Interpreter.
@@ -48,7 +48,7 @@ public class Interpreter {
         this.receivers = new ArrayList<Receive>();
         this.replicators = new ArrayList<Replicate>();
         this.restrictions = new ArrayList<Restrict>();
-        this.boundNames = new ArrayList<Integer>();
+        this.boundNames = new HashSet<Integer>();
 
         this.integrateNewlyExposedTerm(term);
     }
@@ -89,8 +89,8 @@ public class Interpreter {
         while(sendIdx < this.senders.size() && !reductionFound) {
             receiveIdx = 0;
             while(receiveIdx < this.receivers.size() && !reductionFound) {
-                if(this.senders.get(sendIdx).getSendOn() ==
-                        this.receivers.get(receiveIdx).getReceiveOn()) {
+                if(Term.talksTo(this.senders.get(sendIdx),
+                            this.receivers.get(receiveIdx))) {
 
                     reductionFound = true;
                 }
