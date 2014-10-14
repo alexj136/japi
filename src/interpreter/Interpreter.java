@@ -3,6 +3,7 @@ package interpreter;
 import runsyntax.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Represents n-ary parallel composition, and contains methods to handle
@@ -11,6 +12,7 @@ import java.util.HashMap;
 public class Interpreter {
 
     private HashMap<Integer, String> nameMap;
+    private HashSet<String> usedNames;
     private int nextAvailableName;
 
     private ArrayList<Send> senders;
@@ -34,8 +36,10 @@ public class Interpreter {
         // translation, to an Integer to String map, useful for printing terms
         // during or after interpretation.
         this.nameMap = new HashMap<Integer, String>();
+        this.usedNames = new HashSet<String>();
         for(String name : nameMap.keySet()) {
             this.nameMap.put(nameMap.get(name), name);
+            this.usedNames.add(name);
         }
 
         this.nextAvailableName = nextAvailableName;
@@ -200,8 +204,10 @@ public class Interpreter {
 
         Restrict rest = this.restrictions.remove(0);
 
-        // Update nameMap
-        String printableName = this.nameMap.get(rest.getBoundName()) + "'";
+        // Update nameMap and usedNames
+        String baseName = this.nameMap.get(rest.getBoundName());
+        String printableName = this.nextStringName(baseName);
+        this.usedNames.add(printableName);
         this.nameMap.put(this.nextAvailableName, printableName);
 
         // Alpha convert and reintegrate
@@ -213,6 +219,14 @@ public class Interpreter {
         this.nextAvailableName++;
 
         return true;
+    }
+
+    // Add ' to a name until it is one that does not appear in the usedNames set
+    private String nextStringName(String baseName) {
+        while(this.usedNames.contains(baseName)) {
+            baseName += "'";
+        }
+        return baseName;
     }
 
     // Add a newly exposed term to the appropriate arraylist
