@@ -129,18 +129,9 @@ public class Interpreter {
         while(sendIdx < this.senders.size() && !reductionFound) {
             replicateIdx = 0;
             while(replicateIdx < this.replicators.size() && !reductionFound) {
+                if(Term.talksTo(this.senders.get(sendIdx),
+                            this.replicators.get(replicateIdx))) {
 
-                int sendChannel = this.senders.get(sendIdx).getSendOn();
-
-                boolean replicatorIsReceive =
-                        this.replicators.get(replicateIdx).getToReplicate()
-                        instanceof Receive;
-
-                int receiveChannel = (!replicatorIsReceive) ? 0 :
-                        ((Receive) this.replicators.get(replicateIdx)
-                        .getToReplicate()).getReceiveOn();
-
-                if(replicatorIsReceive && (sendChannel == receiveChannel)) {
                     reductionFound = true;
                 }
                 else { replicateIdx++; }
@@ -164,19 +155,8 @@ public class Interpreter {
         while(receiveIdx < this.receivers.size() && !reductionFound) {
             replicateIdx = 0;
             while(replicateIdx < this.replicators.size() && !reductionFound) {
-
-                int receiveChannel =
-                        this.receivers.get(receiveIdx).getReceiveOn();
-
-                boolean replicatorIsSend =
-                        this.replicators.get(replicateIdx).getToReplicate()
-                        instanceof Send;
-
-                int sendChannel = (!replicatorIsSend) ? 0 :
-                        ((Send) this.replicators.get(replicateIdx)
-                        .getToReplicate()).getSendOn();
-
-                if(replicatorIsSend && (sendChannel == receiveChannel)) {
+                if(Term.talksTo(this.receivers.get(receiveIdx),
+                            this.replicators.get(replicateIdx))) {
                     reductionFound = true;
                 }
                 else { replicateIdx++; }
