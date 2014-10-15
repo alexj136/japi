@@ -9,10 +9,11 @@
     f ( d ) .
     0
 |
-    new x in
-        x ( y ) .
+    new y in
+        x < y > .
         0
 |
     x ( y ) .
+    y < y > .
     0
 ]
