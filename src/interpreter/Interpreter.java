@@ -4,6 +4,7 @@ import runsyntax.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Random;
 
 /**
  * Represents n-ary parallel composition, and contains methods to handle
@@ -11,14 +12,20 @@ import java.util.HashSet;
  */
 public class Interpreter {
 
+    private static Random rand = new Random();
+
     private HashMap<Integer, String> nameMap;
     private HashSet<String> usedNames;
     private int nextAvailableName;
 
     private ArrayList<Send> senders;
     private ArrayList<Receive> receivers;
-    private ArrayList<Replicate> replicators;
     private ArrayList<Restrict> restrictions;
+
+    private ArrayList<Send> replSenders;
+    private ArrayList<Receive> replReceivers;
+    private ArrayList<Restrict> replRestrictions;
+
     private HashSet<Integer> boundNames;
 
     /**
@@ -68,121 +75,57 @@ public class Interpreter {
      * @return true if a reduction was performed, false otherwise
      */
     public boolean reduce() {
-        return trySendReceiveReduction()
-                || tryReducibleReplication()
-                || tryScopeExtrusion();
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     /*
-     * Look for a matching channel accross the senders and receivers. If one is
-     * found, reduce it and return true, otherwise do nothing and return false.
+     * Reduce the given Send and Receive that are members of senders and
+     * receivers respectively
      */
-    private boolean trySendReceiveReduction() {
+    private void doSendReceiveReduction(Send send, Receive rece) {
 
-        int sendIdx = 0;
-        int receiveIdx = 0;
-        boolean reductionFound = false;
-
-        // Scan the sender and receiver lists until a match is found or until
-        // all combinations have been checked. TODO: Optimise this search using
-        // sorted lists.
-        while(sendIdx < this.senders.size() && !reductionFound) {
-            receiveIdx = 0;
-            while(receiveIdx < this.receivers.size() && !reductionFound) {
-                if(Term.talksTo(this.senders.get(sendIdx),
-                            this.receivers.get(receiveIdx))) {
-
-                    reductionFound = true;
-                }
-                else { receiveIdx++; }
-            }
-            if(!reductionFound) { sendIdx++; }
+        if(!(this.senders.contains(send) && this.receivers.contains(rece))) {
+            throw new IllegalArgumentException("Send send and Receive " +
+                    "rece parameters must be members of the senders and " +
+                    "receivers ArrayLists, respectively");
         }
 
-        // If a match was found, perform the reduction, renaming in the receiver
-        // subterm.
-        if(reductionFound) {
-            Send sender = senders.remove(sendIdx);
-            Receive receiver = receivers.remove(receiveIdx);
-            this.integrateNewlyExposedTerm(sender.getSubprocess());
-            Term receiverSub = receiver.getSubprocess();
-            receiverSub.rename(receiver.getBindTo(), sender.getToSend());
-            this.integrateNewlyExposedTerm(receiverSub);
-        }
-
-        return reductionFound;
+        this.senders.remove(sender);
+        this.receivers.remove(receiver);
+        this.integrateNewlyExposedTerm(sender.getSubprocess());
+        Term receiverSub = receiver.getSubprocess();
+        receiverSub.rename(receiver.getBindTo(), sender.getToSend());
+        this.integrateNewlyExposedTerm(receiverSub);
     }
 
     /*
-     * Look for a Replicate node, where the subterm is a Send with a match in
-     * the receivers list, or a Receive with a match in the senders list. If
-     * such a term is found, replicate it.
+     * Replicate the given member of the replicators ArrayList
      */
-    private boolean tryReducibleReplication() {
+    private void doReplication(Replicate repl) {
 
-        int sendIdx = 0;
-        int replicateIdx = 0;
-        boolean reductionFound = false;
-
-        // Look for a Send that matches a Receive subterm of a member of the
-        // replicators list.
-        while(sendIdx < this.senders.size() && !reductionFound) {
-            replicateIdx = 0;
-            while(replicateIdx < this.replicators.size() && !reductionFound) {
-                if(Term.talksTo(this.senders.get(sendIdx),
-                            this.replicators.get(replicateIdx))) {
-
-                    reductionFound = true;
-                }
-                else { replicateIdx++; }
-            }
-            if(!reductionFound) { sendIdx++; }
+        if(!this.replicators.contains(repl)) {
+            throw new IllegalArgumentException("Replicator repl parameter " +
+                    "must be a member of the replicators ArrayList");
         }
 
-        // If a match was found, replicate the body of the matching replicator,
-        // and return. If we did not return here, we would look for a match with
-        // a receiver.
-        if(reductionFound) {
-            this.integrateNewlyExposedTerm(
-                    this.replicators.get(replicateIdx).getToReplicate().copy());
-            return reductionFound; // always true
-        }
+        Replicate repl =
+                (Replicate) matches.get(rand.nextInt(matches.size())).t2;
+        this.integrateNewlyExposedTerm(repl.getToReplicate().copy());
 
-        int receiveIdx = 0;
-
-        // Look for a Receive that matches a Send subterm of a member of the
-        // replicators list.
-        while(receiveIdx < this.receivers.size() && !reductionFound) {
-            replicateIdx = 0;
-            while(replicateIdx < this.replicators.size() && !reductionFound) {
-                if(Term.talksTo(this.receivers.get(receiveIdx),
-                            this.replicators.get(replicateIdx))) {
-                    reductionFound = true;
-                }
-                else { replicateIdx++; }
-            }
-            if(!reductionFound) { receiveIdx++; }
-        }
-
-        // If a match was found, replicate the body of the matching replicator,
-        // and return.
-        if(reductionFound) {
-            this.integrateNewlyExposedTerm(
-                    this.replicators.get(replicateIdx).getToReplicate().copy());
-            return reductionFound; // always true
-        }
-
-        return reductionFound; // always false
+        return true;
     }
 
     /*
-     * Attempt scope extrusion via alpha conversion. Fails (i.e. returns false
-     * without doing anything) if the restrictions list is empty.
+     * Perform scope extrusion to the given member of the restrictions ArrayList
      */
-    private boolean tryScopeExtrusion() {
-        if(this.restrictions.isEmpty()) { return false; }
+    private void doScopeExtrusion(Restrict rest) {
 
-        Restrict rest = this.restrictions.remove(0);
+        if(!this.restrictions.contains(rest)) {
+            throw new IllegalArgumentException("Restrict rest parameter " +
+                    "must be a member of the restrictions ArrayList");
+        }
+
+        this.restrictions.remove(rest);
 
         // Update nameMap and usedNames
         String baseName = this.nameMap.get(rest.getBoundName());
@@ -218,6 +161,17 @@ public class Interpreter {
             this.receivers.add((Receive) term);
         }
         else if(term instanceof Replicate) {
+
+            /*if(term instanceof Send) {
+                this.senders.add((Send) term);
+            }
+            else if(term instanceof Receive) {
+                this.receivers.add((Receive) term);
+            }
+            else if(term instanceof Restrict) {
+                this.restrictions.add((Restrict) term);
+            }*/
+
             this.replicators.add((Replicate) term);
         }
         else if(term instanceof Parallel) {
@@ -264,4 +218,33 @@ public class Interpreter {
         }
         return scope + "[ " + procs + " ]";
     }
+
+    /**
+     * Enumerate all matches possible matches between two lists of Terms.
+     * @param list1 the first list of terms
+     * @param list2 the second list of terms
+     * @return an ArrayList of Match objects, one for each possible matching
+     * between the given lists
+     */
+    public static ArrayList<Match> findMatches(ArrayList<? extends Term> list1,
+            ArrayList<? extends Term> list2) {
+
+        ArrayList<Match> matches = new ArrayList<Match>();
+        for(Term t1 : list1) {
+            for(Term t2 : list2) {
+                if(Term.talksTo(t1, t2)) {
+                    matches.add(new Match(t1, t2));
+                }
+            }
+        }
+        return matches;
+    }
+}
+
+/**
+ * Contains references to two terms that will talk to each other.
+ */
+class Match {
+    public final Term t1, t2;
+    public Match(Term t1, Term t2) { this.t1 = t1; this.t2 = t2; }
 }
