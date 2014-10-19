@@ -25,7 +25,6 @@ public class Interpreter {
     private ArrayList<Send> replSenders;
     private ArrayList<Receive> replReceivers;
     private ArrayList<Restrict> replRestrictions;
-    private ArrayList<Parallel> replParallels;
 
     private HashSet<Integer> boundNames;
 
@@ -59,7 +58,6 @@ public class Interpreter {
         this.replSenders = new ArrayList<Send>();
         this.replReceivers = new ArrayList<Receive>();
         this.replRestrictions = new ArrayList<Restrict>();
-        this.replParallels = new ArrayList<Parallel>();
 
         this.boundNames = new HashSet<Integer>();
 
@@ -178,7 +176,20 @@ public class Interpreter {
                 this.replRestrictions.add((Restrict) subterm);
             }
             else if(subterm instanceof Parallel) {
-                this.replParallels.add((Parallel) subterm);
+                this.integrateNewlyExposedTerm(
+                        new Replicate(((Parallel) subterm).getSubprocess1()));
+                this.integrateNewlyExposedTerm(
+                        new Replicate(((Parallel) subterm).getSubprocess2()));
+            }
+            else if(subterm instanceof Replicate) {
+                this.integrateNewlyExposedTerm(subterm);
+            }
+            else if(subterm instanceof End) {
+                // Do nothing
+            }
+            else {
+                throw new IllegalArgumentException("Non-standard Term found " +
+                        "in program");
             }
 
         }
@@ -221,9 +232,6 @@ public class Interpreter {
         }
         for(Restrict rest : replRestrictions) {
             termStrings.add("!" + rest.toNiceString(this.nameMap));
-        }
-        for(Parallel para : replParallels) {
-            termStrings.add("!" + para.toNiceString(this.nameMap));
         }
         String procs = termStrings.isEmpty() ? "" : termStrings.remove(0);
         while(!termStrings.isEmpty()) {

@@ -27,3 +27,9 @@ The syntax of source files is as shown:
            | 0              # Completed process
 
     X, Y ::= [a-z]+
+
+## Structural Congruences
+
+    !(P|Q) = (!P)|(!Q)
+     !(!P) = !P
+        !0 = 0
