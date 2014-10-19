@@ -25,6 +25,7 @@ public class Interpreter {
     private ArrayList<Send> replSenders;
     private ArrayList<Receive> replReceivers;
     private ArrayList<Restrict> replRestrictions;
+    private ArrayList<Parallel> replParallels;
 
     private HashSet<Integer> boundNames;
 
@@ -53,8 +54,13 @@ public class Interpreter {
 
         this.senders = new ArrayList<Send>();
         this.receivers = new ArrayList<Receive>();
-        this.replicators = new ArrayList<Replicate>();
         this.restrictions = new ArrayList<Restrict>();
+
+        this.replSenders = new ArrayList<Send>();
+        this.replReceivers = new ArrayList<Receive>();
+        this.replRestrictions = new ArrayList<Restrict>();
+        this.replParallels = new ArrayList<Parallel>();
+
         this.boundNames = new HashSet<Integer>();
 
         this.integrateNewlyExposedTerm(term);
@@ -90,18 +96,18 @@ public class Interpreter {
                     "receivers ArrayLists, respectively");
         }
 
-        this.senders.remove(sender);
-        this.receivers.remove(receiver);
-        this.integrateNewlyExposedTerm(sender.getSubprocess());
-        Term receiverSub = receiver.getSubprocess();
-        receiverSub.rename(receiver.getBindTo(), sender.getToSend());
+        this.senders.remove(send);
+        this.receivers.remove(rece);
+        this.integrateNewlyExposedTerm(send.getSubprocess());
+        Term receiverSub = rece.getSubprocess();
+        receiverSub.rename(rece.getBindTo(), send.getToSend());
         this.integrateNewlyExposedTerm(receiverSub);
     }
 
     /*
      * Replicate the given member of the replicators ArrayList
      */
-    private void doReplication(Replicate repl) {
+    /*private void doReplication(Replicate repl) {
 
         if(!this.replicators.contains(repl)) {
             throw new IllegalArgumentException("Replicator repl parameter " +
@@ -113,7 +119,7 @@ public class Interpreter {
         this.integrateNewlyExposedTerm(repl.getToReplicate().copy());
 
         return true;
-    }
+    }*/
 
     /*
      * Perform scope extrusion to the given member of the restrictions ArrayList
@@ -140,8 +146,6 @@ public class Interpreter {
 
         // Update nextAvailableName
         this.nextAvailableName++;
-
-        return true;
     }
 
     // Add ' to a name until it is one that does not appear in the usedNames set
@@ -162,17 +166,21 @@ public class Interpreter {
         }
         else if(term instanceof Replicate) {
 
-            /*if(term instanceof Send) {
-                this.senders.add((Send) term);
-            }
-            else if(term instanceof Receive) {
-                this.receivers.add((Receive) term);
-            }
-            else if(term instanceof Restrict) {
-                this.restrictions.add((Restrict) term);
-            }*/
+            Term subterm = ((Replicate) term).getToReplicate();
 
-            this.replicators.add((Replicate) term);
+            if(subterm instanceof Send) {
+                this.replSenders.add((Send) subterm);
+            }
+            else if(subterm instanceof Receive) {
+                this.replReceivers.add((Receive) subterm);
+            }
+            else if(subterm instanceof Restrict) {
+                this.replRestrictions.add((Restrict) subterm);
+            }
+            else if(subterm instanceof Parallel) {
+                this.replParallels.add((Parallel) subterm);
+            }
+
         }
         else if(term instanceof Parallel) {
             this.integrateNewlyExposedTerm(((Parallel) term).getSubprocess1());
@@ -202,11 +210,20 @@ public class Interpreter {
         for(Receive rece : receivers) {
             termStrings.add(rece.toNiceString(this.nameMap));
         }
-        for(Replicate repl : replicators) {
-            termStrings.add(repl.toNiceString(this.nameMap));
-        }
         for(Restrict rest : restrictions) {
             termStrings.add(rest.toNiceString(this.nameMap));
+        }
+        for(Send send : replSenders) {
+            termStrings.add("!" + send.toNiceString(this.nameMap));
+        }
+        for(Receive rece : replReceivers) {
+            termStrings.add("!" + rece.toNiceString(this.nameMap));
+        }
+        for(Restrict rest : replRestrictions) {
+            termStrings.add("!" + rest.toNiceString(this.nameMap));
+        }
+        for(Parallel para : replParallels) {
+            termStrings.add("!" + para.toNiceString(this.nameMap));
         }
         String procs = termStrings.isEmpty() ? "" : termStrings.remove(0);
         while(!termStrings.isEmpty()) {
