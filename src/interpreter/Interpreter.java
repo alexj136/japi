@@ -4,7 +4,6 @@ import runsyntax.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Random;
 
 /**
  * Represents n-ary parallel composition, and contains methods to handle
@@ -12,19 +11,17 @@ import java.util.Random;
  */
 public class Interpreter {
 
-    private static Random rand = new Random();
-
     private HashMap<Integer, String> nameMap;
     private HashSet<String> usedNames;
     private int nextAvailableName;
 
     private ArrayList<Send> senders;
     private ArrayList<Receive> receivers;
-    private ArrayList<Restrict> restrictions;
+    private ArrayList<Restrict> restricts;
 
     private ArrayList<Send> replSenders;
     private ArrayList<Receive> replReceivers;
-    private ArrayList<Restrict> replRestrictions;
+    private ArrayList<Restrict> replRestricts;
 
     private HashSet<Integer> boundNames;
 
@@ -53,11 +50,11 @@ public class Interpreter {
 
         this.senders = new ArrayList<Send>();
         this.receivers = new ArrayList<Receive>();
-        this.restrictions = new ArrayList<Restrict>();
+        this.restricts = new ArrayList<Restrict>();
 
         this.replSenders = new ArrayList<Send>();
         this.replReceivers = new ArrayList<Receive>();
-        this.replRestrictions = new ArrayList<Restrict>();
+        this.replRestricts = new ArrayList<Restrict>();
 
         this.boundNames = new HashSet<Integer>();
 
@@ -79,7 +76,72 @@ public class Interpreter {
      * @return true if a reduction was performed, false otherwise
      */
     public boolean reduce() {
-        throw new UnsupportedOperationException("Not yet implemented");
+
+        // Look for simple matches between senders and receivers - perform one
+        // if any are found.
+        ArrayList<Match> matches =
+            Match.findMatches(this.senders, this.receivers);
+        if(!matches.isEmpty()) {
+            Match match = Match.arbitraryMatch(matches);
+            this.doSendReceiveReduction((Send) match.t1, (Receive) match.t2);
+            return true;
+        }
+
+        // Look for matches between senders and replicating receivers. If any
+        // are found, replicate one of the receivers.
+        matches = Match.findMatches(this.senders, this.replReceivers);
+        if(!matches.isEmpty()) {
+            Match match = Match.arbitraryMatch(matches);
+            this.doReceiveReplication((Receive) match.t2);
+            return true;
+        }
+        
+        // Look for matches between receivers and replicating senders. If any
+        // are found, replicate one of the senders.
+        matches = Match.findMatches(this.replSenders, this.receivers);
+        if(!matches.isEmpty()) {
+            Match match = Match.arbitraryMatch(matches);
+            this.doSendReplication((Send) match.t1);
+            return true;
+        }
+
+        // Look for a match between the senders and the restricts. If any are
+        // found, perform scope extrusion on one of the restricts.
+        matches = Match.findMatches(this.senders, this.restricts);
+        if(!matches.isEmpty()) {
+            Match match = Match.arbitraryMatch(matches);
+            this.doScopeExtrusion((Restrict) match.t2);
+            return true;
+        }
+
+        // Look for a match between the receivers and the restricts. If any are
+        // found, perform scope extrusion on one of the restricts.
+        matches = Match.findMatches(this.receivers, this.restricts);
+        if(!matches.isEmpty()) {
+            Match match = Match.arbitraryMatch(matches);
+            this.doScopeExtrusion((Restrict) match.t2);
+            return true;
+        }
+
+        // Look for a match between the senders and the replicating restricts.
+        // If any are found, replicate one of the restricts.
+        matches = Match.findMatches(this.senders, this.replRestricts);
+        if(!matches.isEmpty()) {
+            Match match = Match.arbitraryMatch(matches);
+            this.doRestrictReplication((Restrict) match.t2);
+            return true;
+        }
+
+        // Look for a match between the receivers and the replicating restricts.
+        // If any are found, replicate one of the restricts.
+        matches = Match.findMatches(this.receivers, this.replRestricts);
+        if(!matches.isEmpty()) {
+            Match match = Match.arbitraryMatch(matches);
+            this.doRestrictReplication((Restrict) match.t2);
+            return true;
+        }
+        
+        return false;
     }
 
     /*
@@ -103,33 +165,55 @@ public class Interpreter {
     }
 
     /*
-     * Replicate the given member of the replicators ArrayList
+     * Replicate the given member of the replSenders ArrayList
      */
-    /*private void doReplication(Replicate repl) {
+    private void doSendReplication(Send send) {
 
-        if(!this.replicators.contains(repl)) {
-            throw new IllegalArgumentException("Replicator repl parameter " +
-                    "must be a member of the replicators ArrayList");
+        if(!this.replSenders.contains(send)) {
+            throw new IllegalArgumentException("Send send parameter " +
+                    "must be a member of the replSenders ArrayList");
         }
 
-        Replicate repl =
-                (Replicate) matches.get(rand.nextInt(matches.size())).t2;
-        this.integrateNewlyExposedTerm(repl.getToReplicate().copy());
-
-        return true;
-    }*/
+        this.integrateNewlyExposedTerm(send);
+    }
 
     /*
-     * Perform scope extrusion to the given member of the restrictions ArrayList
+     * Replicate the given member of the replReceivers ArrayList
+     */
+    private void doReceiveReplication(Receive rece) {
+
+        if(!this.replReceivers.contains(rece)) {
+            throw new IllegalArgumentException("Receive rece parameter " +
+                    "must be a member of the replReceivers ArrayList");
+        }
+
+        this.integrateNewlyExposedTerm(rece);
+    }
+
+    /*
+     * Replicate the given member of the replRestricts ArrayList
+     */
+    private void doRestrictReplication(Restrict rest) {
+
+        if(!this.replRestricts.contains(rest)) {
+            throw new IllegalArgumentException("Restrict rest parameter " +
+                    "must be a member of the replRestricts ArrayList");
+        }
+
+        this.integrateNewlyExposedTerm(rest);
+    }
+
+    /*
+     * Perform scope extrusion to the given member of the restricts ArrayList
      */
     private void doScopeExtrusion(Restrict rest) {
 
-        if(!this.restrictions.contains(rest)) {
+        if(!this.restricts.contains(rest)) {
             throw new IllegalArgumentException("Restrict rest parameter " +
-                    "must be a member of the restrictions ArrayList");
+                    "must be a member of the restricts ArrayList");
         }
 
-        this.restrictions.remove(rest);
+        this.restricts.remove(rest);
 
         // Update nameMap and usedNames
         String baseName = this.nameMap.get(rest.getBoundName());
@@ -173,7 +257,7 @@ public class Interpreter {
                 this.replReceivers.add((Receive) subterm);
             }
             else if(subterm instanceof Restrict) {
-                this.replRestrictions.add((Restrict) subterm);
+                this.replRestricts.add((Restrict) subterm);
             }
             else if(subterm instanceof Parallel) {
                 this.integrateNewlyExposedTerm(
@@ -198,7 +282,7 @@ public class Interpreter {
             this.integrateNewlyExposedTerm(((Parallel) term).getSubprocess2());
         }
         else if(term instanceof Restrict) {
-            this.restrictions.add((Restrict) term);
+            this.restricts.add((Restrict) term);
         }
         else if(term instanceof End) {
             // Do nothing
@@ -215,22 +299,22 @@ public class Interpreter {
      */
     public String toString() {
         ArrayList<String> termStrings = new ArrayList<String>();
-        for(Send send : senders) {
+        for(Send send : this.senders) {
             termStrings.add(send.toNiceString(this.nameMap));
         }
-        for(Receive rece : receivers) {
+        for(Receive rece : this.receivers) {
             termStrings.add(rece.toNiceString(this.nameMap));
         }
-        for(Restrict rest : restrictions) {
+        for(Restrict rest : this.restricts) {
             termStrings.add(rest.toNiceString(this.nameMap));
         }
-        for(Send send : replSenders) {
+        for(Send send : this.replSenders) {
             termStrings.add("!" + send.toNiceString(this.nameMap));
         }
-        for(Receive rece : replReceivers) {
+        for(Receive rece : this.replReceivers) {
             termStrings.add("!" + rece.toNiceString(this.nameMap));
         }
-        for(Restrict rest : replRestrictions) {
+        for(Restrict rest : this.replRestricts) {
             termStrings.add("!" + rest.toNiceString(this.nameMap));
         }
         String procs = termStrings.isEmpty() ? "" : termStrings.remove(0);
@@ -238,38 +322,9 @@ public class Interpreter {
             procs += " | " + termStrings.remove(0);
         }
         String scope = "";
-        for(Integer i : boundNames) {
+        for(Integer i : this.boundNames) {
             scope += "new " + this.nameMap.get(i) + " in ";
         }
         return scope + "[ " + procs + " ]";
     }
-
-    /**
-     * Enumerate all matches possible matches between two lists of Terms.
-     * @param list1 the first list of terms
-     * @param list2 the second list of terms
-     * @return an ArrayList of Match objects, one for each possible matching
-     * between the given lists
-     */
-    public static ArrayList<Match> findMatches(ArrayList<? extends Term> list1,
-            ArrayList<? extends Term> list2) {
-
-        ArrayList<Match> matches = new ArrayList<Match>();
-        for(Term t1 : list1) {
-            for(Term t2 : list2) {
-                if(Term.talksTo(t1, t2)) {
-                    matches.add(new Match(t1, t2));
-                }
-            }
-        }
-        return matches;
-    }
-}
-
-/**
- * Contains references to two terms that will talk to each other.
- */
-class Match {
-    public final Term t1, t2;
-    public Match(Term t1, Term t2) { this.t1 = t1; this.t2 = t2; }
 }
