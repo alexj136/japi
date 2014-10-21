@@ -5,32 +5,27 @@ package parsersyntax;
  */
 public class Replicate extends Term {
 
-    private Term toReplicate;
+    private Term subterm;
 
     /**
      * Construct a new replicating process.
-     * @param toReplicate the process that will be replicated
+     * @param subterm the process that will be replicated
      * @return a new Replicate object
      */
-    public Replicate(Term toReplicate) {
-        this.toReplicate = toReplicate;
+    public Replicate(Term subterm) {
+        this.subterm = subterm;
     }
 
     /**
      * Access the term to be replicated.
      * @return the term to be replicated
      */
-    public Term getToReplicate() { return this.toReplicate; }
+    public Term subterm() { return this.subterm; }
 
     /**
-     * Obtain a pretty-printout of this Replicate.
-     * @param indentLevel the number of tabs that should appear before the
-     * text
+     * Obtain a string representation of this Replicate.
      * @return a string representing this Replicate
      */
     @Override
-    public String prettyPrint(int indentLevel) {
-        return Term.indent(indentLevel) + "repeatedly\n" +
-                toReplicate.prettyPrint(indentLevel + 1);
-    }
+    public String toString() { return "! " + this.subterm.toString(); }
 }

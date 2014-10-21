@@ -1,47 +1,36 @@
 package parsersyntax;
 
+import java.util.ArrayList;
+
 /**
  * The Parallel class represents parallel composition - it contains two
  * concurrently executing processes.
  */
 public class Parallel extends Term {
 
-    private Term subprocess1;
-    private Term subprocess2;
+    private ArrayList<Term> subterms;
 
     /**
      * Construct a new Parallel object using the two concurrent processes.
-     * @param subprocess1 the first of the two concurrent processes
-     * @param subprocess2 the second of the two concurrent processes
-     * @return a new Parallel object
+     * @param subterms a list of the subterms of this Parallel
      */
-    public Parallel(Term subprocess1, Term subprocess2) {
-        this.subprocess1 = subprocess1;
-        this.subprocess2 = subprocess2;
+    public Parallel(ArrayList<Term> subterms) {
+        this.subterms = subterms;
     }
 
     /**
-     * Access the first subprocess in this parallel composition.
-     * @return the first subprocess in this parallel composition
+     * Access a subprocess in this parallel composition.
+     * @param i the index of the subterm to retreive
+     * @return the i^th subterm in this parallel composition
      */
-    public Term getSubprocess1() { return this.subprocess1; }
+    public Term subterm(int i) { return this.subterms.get(i); }
 
     /**
-     * Access the second subprocess in this parallel composition.
-     * @return the second subprocess in this parallel composition
-     */
-    public Term getSubprocess2() { return this.subprocess2; }
-
-    /**
-     * Obtain a pretty-printout of this Parallel.
-     * @param indentLevel the number of tabs that should appear before text
-     * @return a pretty string representing this Parallel
+     * Obtain a string representation of this Parallel.
+     * @return a string representation of this Parallel
      */
     @Override
-    public String prettyPrint(int indentLevel) {
-        return Term.indent(indentLevel) + "concurrently\n" +
-                this.subprocess1.prettyPrint(indentLevel + 1) +
-                Term.indent(indentLevel) + "and\n" +
-                this.subprocess2.prettyPrint(indentLevel + 1);
+    public String toString() {
+        return Term.stringifyList("[", "]", " |", this.msg);
     }
 }

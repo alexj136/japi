@@ -17,10 +17,22 @@ public abstract class Term {
     }
 
     /**
-     * Pretty-print this term starting at the given level of indentation. (Don't
-     * actually print, just return the String)
-     * @param indentLevel how many tabs before the content
+     * Obtain a string representation of this Term.
      * @return a string representing the Term
      */
-    public abstract String prettyPrint(int indentLevel);
+    public abstract String toString();
+
+    public static String stringifyList(String open, String close,
+            String delimiter, ArrayList elems) {
+
+        if(elems.isEmpty()) { return open + close; }
+        else {
+            String out = open + elems.get(0).toString();
+            for(int i = 1; i < elems.size(); i++) {
+                out += delimiter + " " + elems.get(i).toString();
+            }
+            return out + " " + close;
+
+        }
+    }
 }

@@ -31,7 +31,8 @@ public class Send extends Term {
     /**
      * Access a particular channel name which is to be sent as part of the
      * message.
-     * @return the channel name which is to be sent as the ith part of the
+     * @param i the index of the message component to be retrieved
+     * @return the channel name which is to be sent as the i^th part of the
      * message
      */
     public String msg(int i) { return this.msg[i]; }
@@ -54,13 +55,6 @@ public class Send extends Term {
      */
     @Override
     public String toString() {
-        if(this.arity() < 1) { return this.chnl + "<>"; }
-        else {
-            String out = this.chnl + " < " + this.msg[0];
-            for(int i = 1; i < this.arity(); i++) {
-                out += ", " + msg[i];
-            }
-            return out + " >";
-        }
+        return Term.stringifyList("<", ">", ",", this.msg);
     }
 }
