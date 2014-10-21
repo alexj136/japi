@@ -123,6 +123,24 @@ public class Interpreter {
             return true;
         }
 
+        // Look for matches between replicating senders and restricts. If any
+        // are found, perform scope extrusion on one of the restricts.
+        matches = Match.findMatches(this.replSenders, this.restricts);
+        if(!matches.isEmpty()) {
+            Match match = Match.arbitraryMatch(matches);
+            this.doScopeExtrusion((Restrict) match.t2);
+            return true;
+        }
+        
+        // Look for matches between replicating receivers and restricts. If any
+        // are found, perform scope extrusion on one of the restricts.
+        matches = Match.findMatches(this.replReceivers, this.restricts);
+        if(!matches.isEmpty()) {
+            Match match = Match.arbitraryMatch(matches);
+            this.doScopeExtrusion((Restrict) match.t2);
+            return true;
+        }
+
         // Look for a match between the senders and the replicating restricts.
         // If any are found, replicate one of the restricts.
         matches = Match.findMatches(this.senders, this.replRestricts);
@@ -309,13 +327,13 @@ public class Interpreter {
             termStrings.add(rest.toNiceString(this.nameMap));
         }
         for(Send send : this.replSenders) {
-            termStrings.add("!" + send.toNiceString(this.nameMap));
+            termStrings.add("! " + send.toNiceString(this.nameMap));
         }
         for(Receive rece : this.replReceivers) {
-            termStrings.add("!" + rece.toNiceString(this.nameMap));
+            termStrings.add("! " + rece.toNiceString(this.nameMap));
         }
         for(Restrict rest : this.replRestricts) {
-            termStrings.add("!" + rest.toNiceString(this.nameMap));
+            termStrings.add("! " + rest.toNiceString(this.nameMap));
         }
         String procs = termStrings.isEmpty() ? "" : termStrings.remove(0);
         while(!termStrings.isEmpty()) {
