@@ -62,7 +62,7 @@ public class Main {
         System.out.println(interpreter);
         boolean reductionOccurred = true;
         while(reductionOccurred) {
-            reductionOccurred = interpreter.reduce();
+            reductionOccurred = interpreter.doReduction();
             if(reductionOccurred) { System.out.println(interpreter); }
         }
     }

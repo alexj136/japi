@@ -2,14 +2,11 @@ package interpreter;
 
 import runsyntax.Term;
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * Contains references to two terms that will talk to each other.
  */
 public class Match {
-
-    private static Random rand = new Random();
 
     public final Term t1, t2;
 
@@ -44,14 +41,5 @@ public class Match {
             }
         }
         return matches;
-    }
-
-    /**
-     * Retreive an arbitrary element from an ArrayList<Match>.
-     * @param matches the ArrayList<Match> to use
-     * @return an arbitrary element of matches
-     */
-    public static Match arbitraryMatch(ArrayList<Match> matches) {
-        return matches.get(rand.nextInt(matches.size()));
     }
 }
