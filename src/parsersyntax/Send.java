@@ -2,54 +2,65 @@ package parsersyntax;
 
 /**
  * A Send object sends a message (a name) on a particular channel when there is
- * a corresponding Receive process to receive it.
+ * a corresponding Receive term to receive it.
  */
 public class Send extends Term {
 
-    private String sendOn;
-    private String toSend;
-    private Term subprocess;
+    private String chnl;
+    private String[] msg;
+    private Term subterm;
 
     /**
      * Construct a new Send object.
-     * @param sendOn the channel name over which to send the message
-     * @param toSend the message (a channel name) being sent
-     * @param subprocess the process to 'become' once the message is sent
-     * @return a new Send object
+     * @param chnl the channel name over which to send the message
+     * @param msg the message (a list of channel names) being sent
+     * @param subterm the term to 'become' once the message is sent
      */
-    public Send(String sendOn, String toSend, Term subprocess) {
-        this.sendOn = sendOn;
-        this.toSend = toSend;
-        this.subprocess = subprocess;
+    public Send(String chnl, String[] msg, Term subterm) {
+        this.chnl = chnl;
+        this.msg = msg;
+        this.subterm = subterm;
     }
 
     /**
      * Access the channel over which the message is to be sent.
      * @return the channel over which the message is to be sent
      */
-    public String getSendOn() { return this.sendOn; }
+    public String chnl() { return this.chnl; }
 
     /**
-     * Access the channel name which is to be sent as a message.
-     * @return the channel name which is to be sent as a message
+     * Access a particular channel name which is to be sent as part of the
+     * message.
+     * @return the channel name which is to be sent as the ith part of the
+     * message
      */
-    public String getToSend() { return this.toSend; }
+    public String msg(int i) { return this.msg[i]; }
 
     /**
      * Access the process to be executed once the message has been sent.
      * @return the process to be executed once the message has been sent.
      */
-    public Term getSubprocess() { return this.subprocess; }
+    public Term subterm() { return this.subterm; }
 
     /**
-     * Obtain a pretty-printout of this Send.
-     * @param indentLevel the number of tabs that should appear before the
-     * text
+     * Determine the arity (the number of names in the message) of this Send.
+     * @return the arity (the number of names in the message) of this Send
+     */
+    public int arity() { return this.msg.length; }
+
+    /**
+     * Obtain a string representation of this Send.
      * @return a string representing this Send
      */
     @Override
-    public String prettyPrint(int indentLevel) {
-        return Term.indent(indentLevel) + "send " + this.toSend + " over " +
-                this.sendOn + " then\n" + subprocess.prettyPrint(indentLevel);
+    public String toString() {
+        if(this.arity() < 1) { return this.chnl + "<>"; }
+        else {
+            String out = this.chnl + " < " + this.msg[0];
+            for(int i = 1; i < this.arity(); i++) {
+                out += ", " + msg[i];
+            }
+            return out + " >";
+        }
     }
 }

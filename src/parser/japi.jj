@@ -53,12 +53,17 @@ void input() : {} { expression() <EOF> }
 
 /* The pi-calculus grammar used is as follows:
  *
- *     P ::= "x(y).P" | "x<y>.P" | "[P|P|...P]" | "new x in P" | "!P" | "0"
+ *     P ::= "x(a0, a1, ... aN).P" | "x<a0, a1, ... aN>.P" | "[P0|P1|...PN]"
+ *         | "new x in P" | "!P" | "0"
  *
  * which, in more concrete notation is:
  *
- *     P ::= "x(y).P" | "x<y>.P" | "[P|PQ" | "new x in P" | "!P" | "0"
+ *     P ::= "x(R.P" | "x<S.P" | "[P|PQ" | "new x in P" | "!P" | "0"
  *     Q ::= "]" | "|PQ"
+ *     R ::= ")" | "yR'"
+ *     R'::= ")" | ", yR'"
+ *     S ::= ">" | "yS'"
+ *     S'::= ">" | ", yS'"
  *
  * This is the grammar used in the implementation below.
  */
@@ -112,4 +117,12 @@ Term parallelCont() : { Term e1, e2; }
     {
         return null;
     }
+}
+
+Term sendCont() : { Token n; }
+{
+}
+
+Term receiveCont() : { Token n; }
+{
 }
