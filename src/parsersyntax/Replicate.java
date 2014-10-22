@@ -3,9 +3,7 @@ package parsersyntax;
 /**
  * Replicate elements repeatedly copy a process.
  */
-public class Replicate extends Term {
-
-    private Term subterm;
+public class Replicate extends TermOneSub {
 
     /**
      * Construct a new replicating process.
@@ -13,14 +11,8 @@ public class Replicate extends Term {
      * @return a new Replicate object
      */
     public Replicate(Term subterm) {
-        this.subterm = subterm;
+        super(subterm);
     }
-
-    /**
-     * Access the term to be replicated.
-     * @return the term to be replicated
-     */
-    public Term subterm() { return this.subterm; }
 
     /**
      * Obtain a string representation of this Replicate.

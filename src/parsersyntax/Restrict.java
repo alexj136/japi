@@ -4,10 +4,9 @@ package parsersyntax;
  * Restrict objects behave somewhat like lambda abstractions - they bind
  * occurences of names in a process.
  */
-public class Restrict extends Term {
+public class Restrict extends TermOneSub {
 
     private String boundName;
-    private Term subterm;
 
     /**
      * Construct a new Restrict object.
@@ -16,8 +15,8 @@ public class Restrict extends Term {
      * @return a new Restrict object
      */
     public Restrict(String boundName, Term subterm) {
+        super(subterm);
         this.boundName = boundName;
-        this.subterm = subterm;
     }
 
     /**
@@ -25,12 +24,6 @@ public class Restrict extends Term {
      * @return the name bound in this restriction
      */
     public String boundName() { return this.boundName; }
-
-    /**
-     * Access the process within which this restriction binds a name.
-     * @return the process within which this restriction binds a name
-     */
-    public Term subterm() { return this.subterm; }
 
     /**
      * Obtain a pretty-printout of this Restrict.
