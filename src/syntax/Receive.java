@@ -26,6 +26,7 @@ public class Receive<T> extends TermComm<T> {
      */
     @Override
     public String toString() {
-        return Term.stringifyList("(", ")", ",", this.msg);
+        return this.chnl + " " + Term.stringifyList("(", ")", ",", this.msg) +
+            " . " + this.subterm;
     }
 }

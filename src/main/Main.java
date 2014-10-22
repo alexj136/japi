@@ -1,7 +1,8 @@
 package main;
 
 import parser.*;
-import interpreter.*;
+import syntax.Term;
+//import interpreter.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -48,7 +49,7 @@ public class Main {
 
         // Print either the prettyPrint of the AST or the error message supplied
         // with the ParseException if parsing fails.
-        parsersyntax.Term term;
+        Term<String> term;
         try {
             term = Parser.parseStream(input);
         }
@@ -56,7 +57,7 @@ public class Main {
             System.out.println("Could not parse the file:\n" + e.getMessage());
             return;
         }
-
+        /*
         SyntaxTranslationResult res = SyntaxTranslator.translate(term);
         Interpreter interpreter = Interpreter.fromTranslation(res);
         System.out.println(interpreter);
@@ -65,5 +66,7 @@ public class Main {
             reductionOccurred = interpreter.doReduction();
             if(reductionOccurred) { System.out.println(interpreter); }
         }
+        */
+        System.out.println(term);
     }
 }
