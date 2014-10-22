@@ -1,4 +1,4 @@
-package parsersyntax;
+package syntax;
 
 import java.util.ArrayList;
 
@@ -6,15 +6,15 @@ import java.util.ArrayList;
  * The Parallel class represents parallel composition - it contains two
  * concurrently executing processes.
  */
-public class Parallel extends Term {
+public class Parallel<T> extends Term<T> {
 
-    private ArrayList<Term> subterms;
+    private ArrayList<Term<T>> subterms;
 
     /**
      * Construct a new Parallel object using the two concurrent processes.
      * @param subterms a list of the subterms of this Parallel
      */
-    public Parallel(ArrayList<Term> subterms) {
+    public Parallel(ArrayList<Term<T>> subterms) {
         this.subterms = subterms;
     }
 
@@ -23,7 +23,7 @@ public class Parallel extends Term {
      * @param i the index of the subterm to retreive
      * @return the i^th subterm in this parallel composition
      */
-    public Term subterm(int i) { return this.subterms.get(i); }
+    public Term<T> subterm(int i) { return this.subterms.get(i); }
 
     /**
      * Obtain a string representation of this Parallel.
@@ -31,6 +31,6 @@ public class Parallel extends Term {
      */
     @Override
     public String toString() {
-        return Term.stringifyList("[", "]", " |", this.msg);
+        return Term.stringifyList("[", "]", " |", this.subterms);
     }
 }

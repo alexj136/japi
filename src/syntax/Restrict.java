@@ -1,12 +1,12 @@
-package parsersyntax;
+package syntax;
 
 /**
  * Restrict objects behave somewhat like lambda abstractions - they bind
  * occurences of names in a process.
  */
-public class Restrict extends TermOneSub {
+public class Restrict<T> extends TermOneSub<T> {
 
-    private String boundName;
+    private T boundName;
 
     /**
      * Construct a new Restrict object.
@@ -14,7 +14,7 @@ public class Restrict extends TermOneSub {
      * @param subterm the subprocess within which to restrict the name
      * @return a new Restrict object
      */
-    public Restrict(String boundName, Term subterm) {
+    public Restrict(T boundName, Term<T> subterm) {
         super(subterm);
         this.boundName = boundName;
     }
@@ -23,7 +23,7 @@ public class Restrict extends TermOneSub {
      * Access the name bound in this restriction.
      * @return the name bound in this restriction
      */
-    public String boundName() { return this.boundName; }
+    public T boundName() { return this.boundName; }
 
     /**
      * Obtain a pretty-printout of this Restrict.
@@ -32,6 +32,7 @@ public class Restrict extends TermOneSub {
      */
     @Override
     public String toString() {
-        return "new " + this.boundName + " in " + this.subterm.toString();
+        return "new " + this.boundName.toString() + " in " +
+                this.subterm.toString();
     }
 }

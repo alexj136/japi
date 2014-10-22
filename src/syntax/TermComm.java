@@ -1,13 +1,14 @@
-package parsersyntax;
+package syntax;
 
+import java.util.ArrayList;
 /**
  * TermComm represents at a higher level those terms that are involved in
  * message passing. This includes Send and Receive.
  */
-public abstract class TermComm extends TermOneSub {
+public abstract class TermComm<T> extends TermOneSub<T> {
 
-    private String chnl;
-    private String[] msg;
+    protected T chnl;
+    protected ArrayList<T> msg;
 
     /**
      * Construct a new communicating term
@@ -15,7 +16,7 @@ public abstract class TermComm extends TermOneSub {
      * @param msg the names to send or to bind received names to
      * @param subterm the subterm of this
      */
-    public Receive(String chnl, String[] msg, Term subterm) {
+    public TermComm(T chnl, ArrayList<T> msg, Term<T> subterm) {
         super(subterm);
         this.chnl = chnl;
         this.msg = msg;
@@ -25,21 +26,21 @@ public abstract class TermComm extends TermOneSub {
      * Access the channel name on which a message can be received or sent.
      * @return the channel name on which a message can be received or sent
      */
-    public String chnl() { return this.chnl; }
+    public T chnl() { return this.chnl; }
 
     /**
      * Access elements in the array of message content/binding names.
      * @param i the index of the value to be retreived
      * @return the i^th message/binding name
      */
-    public String msg(int i) { return this.msg[i]; }
+    public T msg(int i) { return this.msg.get(i); }
 
     /**
      * Determine the arity (the number of names to bind or send) of this
      * TermComm.
      * @return the arity (the number of names to bind or send) of this TermComm
      */
-    public int arity() { return this.msg.length; }
+    public int arity() { return this.msg.size(); }
     
     /**
      * Must be defined in the concrete classes.

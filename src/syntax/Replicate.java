@@ -1,16 +1,16 @@
-package parsersyntax;
+package syntax;
 
 /**
  * Replicate elements repeatedly copy a process.
  */
-public class Replicate extends TermOneSub {
+public class Replicate<T> extends TermOneSub<T> {
 
     /**
      * Construct a new replicating process.
      * @param subterm the process that will be replicated
      * @return a new Replicate object
      */
-    public Replicate(Term subterm) {
+    public Replicate(Term<T> subterm) {
         super(subterm);
     }
 
