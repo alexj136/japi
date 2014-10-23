@@ -3,7 +3,7 @@ package syntax;
 /**
  * Replicate elements repeatedly copy a process.
  */
-public class Replicate<T> extends TermOneSub<T> {
+public final class Replicate<T> extends TermOneSub<T> {
 
     /**
      * Construct a new replicating process.

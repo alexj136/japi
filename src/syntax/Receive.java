@@ -7,17 +7,17 @@ import java.util.ArrayList;
  * receives its message, it binds the message to a variable and 'disappears',
  * leaving behind its subterm in its place.
  */
-public class Receive<T> extends TermComm<T> {
+public final class Receive<T> extends TermComm<T> {
 
     /**
      * Construct a new recieving process
      * @param chnl the channel to listen to for a message
-     * @param binds the names to bind the received message components to
+     * @param msg the names to bind the received message components to
      * @param subterm the process to 'become' when the message is received
      * @return a new Receive object
      */
-    public Receive(T chnl, ArrayList<T> binds, Term<T> subterm) {
-        super(chnl, binds, subterm);
+    public Receive(T chnl, ArrayList<T> msg, Term<T> subterm) {
+        super(chnl, msg, subterm);
     }
 
     /**

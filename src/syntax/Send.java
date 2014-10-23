@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * A Send object sends a message (a name) on a particular channel when there is
  * a corresponding Receive term to receive it.
  */
-public class Send<T> extends TermComm<T> {
+public final class Send<T> extends TermComm<T> {
 
     /**
      * Construct a new Send object.

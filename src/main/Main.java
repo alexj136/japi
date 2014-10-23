@@ -2,7 +2,9 @@ package main;
 
 import parser.*;
 import syntax.Term;
-//import interpreter.*;
+import interpreter.SyntaxTranslator;
+import interpreter.SyntaxTranslationResult;
+//import interpreter.Interpreter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -57,8 +59,8 @@ public class Main {
             System.out.println("Could not parse the file:\n" + e.getMessage());
             return;
         }
-        /*
         SyntaxTranslationResult res = SyntaxTranslator.translate(term);
+        /*
         Interpreter interpreter = Interpreter.fromTranslation(res);
         System.out.println(interpreter);
         boolean reductionOccurred = true;
@@ -68,5 +70,6 @@ public class Main {
         }
         */
         System.out.println(term);
+        System.out.println(res.getTerm());
     }
 }

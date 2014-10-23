@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * The Parallel class represents parallel composition - it contains two
  * concurrently executing processes.
  */
-public class Parallel<T> extends Term<T> {
+public final class Parallel<T> extends Term<T> {
 
     private ArrayList<Term<T>> subterms;
 
@@ -24,6 +24,12 @@ public class Parallel<T> extends Term<T> {
      * @return the i^th subterm in this parallel composition
      */
     public Term<T> subterm(int i) { return this.subterms.get(i); }
+
+    /**
+     * Determine the number of terms in this parallel composition.
+     * @return  the number of terms in this parallel composition
+     */
+    public int arity() { return this.subterms.size(); }
 
     /**
      * Obtain a string representation of this Parallel.

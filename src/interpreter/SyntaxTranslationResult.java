@@ -1,6 +1,6 @@
 package interpreter;
 
-import runsyntax.Term;
+import syntax.Term;
 import java.util.HashMap;
 
 /**
@@ -9,7 +9,7 @@ import java.util.HashMap;
  */
 public class SyntaxTranslationResult {
 
-    private Term term;
+    private Term<Integer> term;
     private HashMap<String, Integer> nameMap;
     private int nextAvailableName;
 
@@ -19,7 +19,7 @@ public class SyntaxTranslationResult {
      * @param nameMap a mapping between the user's String names and the
      * interpreter's integer names
      */
-    public SyntaxTranslationResult(Term term,
+    public SyntaxTranslationResult(Term<Integer> term,
             HashMap<String, Integer> nameMap,
             int nextAvailableName) {
 
@@ -32,7 +32,7 @@ public class SyntaxTranslationResult {
      * Access the stored Term.
      * @return the stored Term
      */
-    public Term getTerm() { return this.term; }
+    public Term<Integer> getTerm() { return this.term; }
 
     /**
      * Access the stored name mapping.
@@ -50,7 +50,7 @@ public class SyntaxTranslationResult {
      * Set the stored Term.
      * @param term the new Term to store
      */
-    public void setTerm(Term term) { this.term = term; }
+    public void setTerm(Term<Integer> term) { this.term = term; }
 
     /**
      * Set the stored name mapping.

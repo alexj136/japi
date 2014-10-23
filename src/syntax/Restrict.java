@@ -4,7 +4,7 @@ package syntax;
  * Restrict objects behave somewhat like lambda abstractions - they bind
  * occurences of names in a process.
  */
-public class Restrict<T> extends TermOneSub<T> {
+public final class Restrict<T> extends TermOneSub<T> {
 
     private T boundName;
 
