@@ -1,12 +1,13 @@
 package syntax;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * The Parallel class represents parallel composition - it contains two
  * concurrently executing processes.
  */
-public final class Parallel<T> extends Term<T> {
+public final class Parallel<T> extends Term<T> implements Iterable<Term<T>> {
 
     private ArrayList<Term<T>> subterms;
 
@@ -30,6 +31,12 @@ public final class Parallel<T> extends Term<T> {
      * @return  the number of terms in this parallel composition
      */
     public int arity() { return this.subterms.size(); }
+
+    /**
+     * Obtain an iterator over the elements in this parallel composition.
+     * @return an iterator over the elements in this parallel composition.
+     */
+    public Iterator<Term<T>> iterator() { return this.subterms.iterator(); }
 
     /**
      * Obtain a string representation of this Parallel.

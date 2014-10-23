@@ -84,8 +84,8 @@ public abstract class SyntaxTranslator {
 
             ArrayList<Term<Integer>> subterms = new ArrayList<Term<Integer>>();
 
-            for(int i = 0; i < para.arity(); i++) {
-                result = _translate(para.subterm(i), result.getNameMap(),
+            for(Term<String> subterm : para) {
+                result = _translate(subterm, result.getNameMap(),
                         result.getNextAvailableName());
                 subterms.add(result.getTerm());
             }

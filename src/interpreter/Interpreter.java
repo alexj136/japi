@@ -289,8 +289,9 @@ public class Interpreter {
 
         }
         else if(term instanceof Parallel) {
-            this.integrateNewlyExposedTerm(((Parallel) term).getSubprocess1());
-            this.integrateNewlyExposedTerm(((Parallel) term).getSubprocess2());
+            for(Term subterm : term) {
+                this.integrateNewlyExposedTerm(subterm);
+            }
         }
         else if(term instanceof Restrict) {
             this.restricts.add((Restrict) term);
