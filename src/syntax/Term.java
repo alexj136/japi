@@ -1,6 +1,7 @@
 package syntax;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * A Term is a pi-calculus expression. This is a generic class since different
@@ -31,6 +32,28 @@ public abstract class Term<T> {
     public abstract String toString();
 
     /**
+     * Rename the names in a Term as is necessary after the exchange of a
+     * message - this is not alpha-conversion.
+     * @param from some names of this value must be renamed
+     * @param to names being renamed are renamed to this value
+     */
+    public abstract void rename(T from, T to);
+
+    /**
+     * Rename every single occurence of the first given name with the second
+     * given name.
+     * @param from all names of this value must be renamed
+     * @param to names being renamed are renamed to this value
+     */
+    public abstract void alphaConvert(T from, T to);
+
+    /**
+     * Deep-copy a Term.
+     * @return a deep-copy of this Term
+     */
+    public abstract Term<T> copy();
+
+    /**
      * Generate strings from lists of different kinds, that are nicely delimited
      * and have nice opening/closing parentheses.
      * @param open a string used as the open-parenthesis
@@ -55,5 +78,97 @@ public abstract class Term<T> {
             return out + " " + close;
 
         }
+    }
+
+    /**
+     * Determine if two terms will exchange a message. Two terms are defined as
+     * able to do so when any top-level (i.e. not to the right of a '.') send or
+     * receive nodes have matching channels. These may be within parallel
+     * compositions, replications and restrictions, although of course if the
+     * communication channel is restricted then no communication can occur. Note
+     * that is implementation is only correct when the given terms are in the
+     * same scope.
+     * @param t1 the first term
+     * @param t2 the second term
+     * @return true if the terms will exchange a message, false otherwise
+     */
+    public static <T> boolean talksTo(Term<T> t1, Term<T> t2) {
+        return Term.talksTo(t1, t2, new HashSet<T>(),
+                new HashSet<T>());
+    }
+    private static <T> boolean talksTo(Term<T> t1, Term<T> t2,
+            HashSet<T> t1Restricted, HashSet<T> t2Restricted) {
+
+        // If we have a send and a receive, return true if they are on the same
+        // channel and neither of them have that channel restricted
+        if(t1 instanceof Send && t2 instanceof Receive) {
+            Send s1 = (Send) t1;
+            Receive r2 = (Receive) t2;
+            return s1.chnl().equals(r2.chnl()) && (s1.arity() == r2.arity()) &&
+                    (!(t1Restricted.contains(s1.chnl()))) &&
+                    (!(t2Restricted.contains(s1.chnl())));
+        }
+        else if(t1 instanceof Receive && t2 instanceof Send) {
+            Receive r1 = (Receive) t1;
+            Send s2 = (Send) t2;
+            return r1.chnl().equals(s2.chnl()) && (r1.arity() == s2.arity()) &&
+                    (!(t1Restricted.contains(r1.chnl()))) &&
+                    (!(t2Restricted.contains(r1.chnl())));
+        }
+
+        // If one of the terms is a replicate, return true if the body of the
+        // replicated term would talk to the other term, false otherwise
+        else if(t1 instanceof Replicate) {
+            return Term.talksTo(((Replicate) t1).subterm(), t2, t1Restricted,
+                    t2Restricted);
+        }
+        else if(t2 instanceof Replicate) {
+            return Term.talksTo(t1, ((Replicate) t2).subterm(), t1Restricted,
+                    t2Restricted);
+        }
+
+        // If one of the terms is a parallel composition, return true if either
+        // of its subprocesses would talk to the other term
+        else if(t1 instanceof Parallel) {
+            boolean foundMatch = false;
+            for(Term subterm : (Parallel) t1) {
+                if(Term.talksTo(subterm, t2, t1Restricted, t2Restricted)) {
+                    foundMatch = true;
+                    break;
+                }
+            }
+            return foundMatch;
+        }
+        else if(t2 instanceof Parallel) {
+            boolean foundMatch = false;
+            for(Term subterm : (Parallel) t2) {
+                if(Term.talksTo(t1, subterm, t1Restricted, t2Restricted)) {
+                    foundMatch = true;
+                    break;
+                }
+            }
+            return foundMatch;
+        }
+
+        // If one of the terms is a restriction, add the restricted name to the
+        // set of restricted names, and ask if the subterm would talk to the
+        // other term
+        else if(t1 instanceof Restrict) {
+            Restrict r1 = (Restrict) t1;
+            HashSet<T> t1RestrictedNew = (HashSet<T>) t1Restricted.clone();
+            t1RestrictedNew.add(r1.boundName());
+            return Term.talksTo(r1.subterm(), t2, t1RestrictedNew,
+                    t2Restricted);
+        }
+        else if(t2 instanceof Restrict) {
+            Restrict r2 = (Restrict) t2;
+            HashSet<T> t2RestrictedNew = (HashSet<T>) t2Restricted.clone();
+            t2RestrictedNew.add(r2.boundName());
+            return Term.talksTo(t1, r2.subterm(), t1Restricted,
+                    t2RestrictedNew);
+        }
+
+        // No other possibilities, so return false if no other conditions catch
+        else { return false; }
     }
 }

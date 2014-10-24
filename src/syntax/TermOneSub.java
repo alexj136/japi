@@ -25,4 +25,26 @@ public abstract class TermOneSub<T> extends Term<T> {
      * @return a string representation of this TermOneSub
      */
     public abstract String toString();
+
+    /**
+     * Rename the names in a Term as is necessary after the exchange of a
+     * message - this is not alpha-conversion.
+     * @param from some names of this value must be renamed
+     * @param to names being renamed are renamed to this value
+     */
+    public abstract void rename(T from, T to);
+
+    /**
+     * Rename every single occurence of the first given name with the second
+     * given name.
+     * @param from all names of this value must be renamed
+     * @param to names being renamed are renamed to this value
+     */
+    public abstract void alphaConvert(T from, T to);
+
+    /**
+     * Deep-copy a TermOneSub.
+     * @return a deep-copy of this TermOneSub
+     */
+    public abstract TermOneSub<T> copy();
 }

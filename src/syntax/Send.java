@@ -27,4 +27,30 @@ public final class Send<T> extends TermComm<T> {
         return this.chnl + " " + Term.stringifyList("<", ">", ",", this.msg) +
             " . " + this.subterm;
     }
+
+    /**
+     * Rename the names within this Send as though a message had been received
+     * by a containing process
+     * @param from names with this value are renamed
+     * @param to names being renamed are renamed to this name
+     */
+    public void rename(T from, T to) {
+        if(this.chnl.equals(from)) { this.chnl = to; }
+        for(int i = 0; i < this.arity(); i++) {
+            if(this.msg(i).equals(from)) {
+                this.msg.remove(i);
+                this.msg.add(i, to);
+            }
+        }
+        this.subterm.rename(from, to);
+    }
+
+    /**
+     * Deep copy this Send.
+     * @return a deep copy of this Send.
+     */
+    public Send<T> copy() {
+        return new Send<T>(this.chnl, (ArrayList<T>) this.msg.clone(),
+                this.subterm.copy());
+    }
 }

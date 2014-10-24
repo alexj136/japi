@@ -47,4 +47,26 @@ public abstract class TermComm<T> extends TermOneSub<T> {
      * @return a string representation of this TermComm
      */
     public abstract String toString();
+
+    /**
+     * Rename the names in a Term as is necessary after the exchange of a
+     * message - this is not alpha-conversion.
+     * @param from some names of this value must be renamed
+     * @param to names being renamed are renamed to this value
+     */
+    public abstract void rename(T from, T to);
+
+    /**
+     * Rename every single occurence of the first given name with the second
+     * given name.
+     * @param from all names of this value must be renamed
+     * @param to names being renamed are renamed to this value
+     */
+    public abstract void alphaConvert(T from, T to);
+
+    /**
+     * Deep-copy this TermComm.
+     * @return a deep-copy of this TermComm
+     */
+    public abstract TermComm<T> copy();
 }
