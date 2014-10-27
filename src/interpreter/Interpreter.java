@@ -346,7 +346,7 @@ public class Interpreter {
         for(Integer i : this.boundNames) {
             scope += "new " + this.nameMap.get(i) + " in ";
         }
-        return scope + "[ " + procs + " ]";
+        return scope + (procs.equals("") ? "[]" : "[ " + procs + " ]");
     }
 
     /**
