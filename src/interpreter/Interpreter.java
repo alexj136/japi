@@ -19,13 +19,13 @@ public class Interpreter {
     private HashSet<String> usedNames;
     private int nextAvailableName;
 
-    private ArrayList<Send> senders;
-    private ArrayList<Receive> receivers;
-    private ArrayList<Restrict> restricts;
+    private ArrayList<Send<Integer>> senders;
+    private ArrayList<Receive<Integer>> receivers;
+    private ArrayList<Restrict<Integer>> restricts;
 
-    private ArrayList<Send> replSenders;
-    private ArrayList<Receive> replReceivers;
-    private ArrayList<Restrict> replRestricts;
+    private ArrayList<Send<Integer>> replSenders;
+    private ArrayList<Receive<Integer>> replReceivers;
+    private ArrayList<Restrict<Integer>> replRestricts;
 
     private HashSet<Integer> boundNames;
 
@@ -37,7 +37,7 @@ public class Interpreter {
      * @param nextAvailableName the value to use next time a fresh name is
      * required
      */
-    public Interpreter(Term term, HashMap<String, Integer> nameMap,
+    public Interpreter(Term<Integer> term, HashMap<String, Integer> nameMap,
             int nextAvailableName) {
 
         // Use the SyntaxTranslationResult's String to Integer map, useful for
@@ -52,13 +52,13 @@ public class Interpreter {
 
         this.nextAvailableName = nextAvailableName;
 
-        this.senders = new ArrayList<Send>();
-        this.receivers = new ArrayList<Receive>();
-        this.restricts = new ArrayList<Restrict>();
+        this.senders = new ArrayList<Send<Integer>>();
+        this.receivers = new ArrayList<Receive<Integer>>();
+        this.restricts = new ArrayList<Restrict<Integer>>();
 
-        this.replSenders = new ArrayList<Send>();
-        this.replReceivers = new ArrayList<Receive>();
-        this.replRestricts = new ArrayList<Restrict>();
+        this.replSenders = new ArrayList<Send<Integer>>();
+        this.replReceivers = new ArrayList<Receive<Integer>>();
+        this.replRestricts = new ArrayList<Restrict<Integer>>();
 
         this.boundNames = new HashSet<Integer>();
 
@@ -143,7 +143,7 @@ public class Interpreter {
      * Reduce the given Send and Receive that are members of senders and
      * receivers respectively, by exchanging a message.
      */
-    private void reduce(Send send, Receive rece) {
+    private void reduce(Send<Integer> send, Receive<Integer> rece) {
 
         assert Term.talksTo(send, rece);
 
@@ -155,16 +155,29 @@ public class Interpreter {
 
         this.senders.remove(send);
         this.receivers.remove(rece);
-        this.integrateNewlyExposedTerm(send.getSubprocess());
-        Term receiverSub = rece.getSubprocess();
-        receiverSub.rename(rece.getBindTo(), send.getToSend());
+        this.integrateNewlyExposedTerm(send.subterm());
+        Term<Integer> receiverSub = rece.subterm();
+
+        // To avoid clashes, first rename all sent names to a fresh name, and
+        // then rename those fresh names with the sent ones.
+        int firstIntermediateName = this.nextAvailableName;
+        for(int i = 0; i < rece.arity(); i++) {
+            receiverSub.rename(rece.msg(i), firstIntermediateName);
+            firstIntermediateName++;
+        }
+        firstIntermediateName = this.nextAvailableName;
+        for(int i = 0; i < rece.arity(); i++) {
+            receiverSub.rename(firstIntermediateName, send.msg(i));
+            firstIntermediateName++;
+        }
+
         this.integrateNewlyExposedTerm(receiverSub);
     }
 
     /*
      * Replicate the given member of the replSenders ArrayList
      */
-    private void reduce(Send send) {
+    private void reduce(Send<Integer> send) {
 
         if(!this.replSenders.contains(send)) {
             throw new IllegalArgumentException("Send send parameter " +
@@ -177,7 +190,7 @@ public class Interpreter {
     /*
      * Replicate the given member of the replReceivers ArrayList
      */
-    private void reduce(Receive rece) {
+    private void reduce(Receive<Integer> rece) {
 
         if(!this.replReceivers.contains(rece)) {
             throw new IllegalArgumentException("Receive rece parameter " +
@@ -190,7 +203,7 @@ public class Interpreter {
     /*
      * Replicate the given member of the replRestricts ArrayList
      */
-    private void reduce(Restrict rest) {
+    private void reduce(Restrict<Integer> rest) {
 
         boolean isInRestricts = this.restricts.contains(rest);
         boolean isInReplRestricts = this.replRestricts.contains(rest);
@@ -217,7 +230,7 @@ public class Interpreter {
     /*
      * Perform scope extrusion to the given member of the restricts ArrayList
      */
-    private void doScopeExtrusion(Restrict rest) {
+    private void doScopeExtrusion(Restrict<Integer> rest) {
 
         if(!this.restricts.contains(rest)) {
             throw new IllegalArgumentException("Restrict rest parameter " +
@@ -227,15 +240,15 @@ public class Interpreter {
         this.restricts.remove(rest);
 
         // Update nameMap and usedNames
-        String baseName = this.nameMap.get(rest.getBoundName());
+        String baseName = this.nameMap.get(rest.boundName());
         String printableName = this.nextStringName(baseName);
         this.usedNames.add(printableName);
         this.nameMap.put(this.nextAvailableName, printableName);
 
         // Alpha convert and reintegrate
-        rest.alphaConvert(rest.getBoundName(), this.nextAvailableName);
-        this.integrateNewlyExposedTerm(rest.getRestrictIn());
-        this.boundNames.add(rest.getBoundName());
+        rest.alphaConvert(rest.boundName(), this.nextAvailableName);
+        this.integrateNewlyExposedTerm(rest.subterm());
+        this.boundNames.add(rest.boundName());
 
         // Update nextAvailableName
         this.nextAvailableName++;
@@ -250,7 +263,7 @@ public class Interpreter {
     }
 
     // Add a newly exposed term to the appropriate arraylist
-    private void integrateNewlyExposedTerm(Term term) {
+    private void integrateNewlyExposedTerm(Term<Integer> term) {
         if(term instanceof Send) {
             this.senders.add((Send) term);
         }
@@ -259,7 +272,7 @@ public class Interpreter {
         }
         else if(term instanceof Replicate) {
 
-            Term subterm = ((Replicate) term).getToReplicate();
+            Term<Integer> subterm = ((Replicate) term).subterm();
 
             if(subterm instanceof Send) {
                 this.replSenders.add((Send) subterm);
@@ -271,16 +284,14 @@ public class Interpreter {
                 this.replRestricts.add((Restrict) subterm);
             }
             else if(subterm instanceof Parallel) {
-                this.integrateNewlyExposedTerm(
-                        new Replicate(((Parallel) subterm).getSubprocess1()));
-                this.integrateNewlyExposedTerm(
-                        new Replicate(((Parallel) subterm).getSubprocess2()));
+                Parallel para = (Parallel) term;
+                for(int i = 0; i < para.arity(); i++) {
+                    this.integrateNewlyExposedTerm(
+                            new Replicate(para.subterm(i)));
+                }
             }
             else if(subterm instanceof Replicate) {
                 this.integrateNewlyExposedTerm(subterm);
-            }
-            else if(subterm instanceof End) {
-                // Do nothing
             }
             else {
                 throw new IllegalArgumentException("Non-standard Term found " +
@@ -289,15 +300,13 @@ public class Interpreter {
 
         }
         else if(term instanceof Parallel) {
-            for(Term subterm : term) {
-                this.integrateNewlyExposedTerm(subterm);
+            Parallel para = (Parallel) term;
+            for(int i = 0; i < para.arity(); i++) {
+                this.integrateNewlyExposedTerm(para.subterm(i));
             }
         }
         else if(term instanceof Restrict) {
             this.restricts.add((Restrict) term);
-        }
-        else if(term instanceof End) {
-            // Do nothing
         }
         else {
             throw new IllegalArgumentException("Non-standard Term found " +
@@ -312,22 +321,22 @@ public class Interpreter {
     public String toString() {
         ArrayList<String> termStrings = new ArrayList<String>();
         for(Send send : this.senders) {
-            termStrings.add(send.toNiceString(this.nameMap));
+            termStrings.add(send.toStringWithNameMap(this.nameMap));
         }
         for(Receive rece : this.receivers) {
-            termStrings.add(rece.toNiceString(this.nameMap));
+            termStrings.add(rece.toStringWithNameMap(this.nameMap));
         }
         for(Restrict rest : this.restricts) {
-            termStrings.add(rest.toNiceString(this.nameMap));
+            termStrings.add(rest.toStringWithNameMap(this.nameMap));
         }
         for(Send send : this.replSenders) {
-            termStrings.add("! " + send.toNiceString(this.nameMap));
+            termStrings.add("! " + send.toStringWithNameMap(this.nameMap));
         }
         for(Receive rece : this.replReceivers) {
-            termStrings.add("! " + rece.toNiceString(this.nameMap));
+            termStrings.add("! " + rece.toStringWithNameMap(this.nameMap));
         }
         for(Restrict rest : this.replRestricts) {
-            termStrings.add("! " + rest.toNiceString(this.nameMap));
+            termStrings.add("! " + rest.toStringWithNameMap(this.nameMap));
         }
         String procs = termStrings.isEmpty() ? "" : termStrings.remove(0);
         while(!termStrings.isEmpty()) {

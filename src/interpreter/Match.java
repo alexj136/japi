@@ -1,6 +1,6 @@
 package interpreter;
 
-import runsyntax.Term;
+import syntax.Term;
 import java.util.ArrayList;
 
 /**

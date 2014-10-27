@@ -61,7 +61,6 @@ public class Main {
             return;
         }
         SyntaxTranslationResult res = SyntaxTranslator.translate(term);
-        /*
         Interpreter interpreter = Interpreter.fromTranslation(res);
         System.out.println(interpreter);
         boolean reductionOccurred = true;
@@ -69,13 +68,5 @@ public class Main {
             reductionOccurred = interpreter.doReduction();
             if(reductionOccurred) { System.out.println(interpreter); }
         }
-        */
-        System.out.println(term);
-        System.out.println(res.getTerm());
-        HashMap<Integer, String> nameMap = new HashMap<Integer, String>();
-        for(String name : res.getNameMap().keySet()) {
-            nameMap.put(res.getNameMap().get(name), name);
-        }
-        System.out.println(res.getTerm().toStringWithNameMap(nameMap));
     }
 }
