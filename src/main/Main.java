@@ -4,10 +4,11 @@ import parser.*;
 import syntax.Term;
 import interpreter.SyntaxTranslator;
 import interpreter.SyntaxTranslationResult;
-//import interpreter.Interpreter;
+import interpreter.Interpreter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 
 public class Main {
 
@@ -71,5 +72,10 @@ public class Main {
         */
         System.out.println(term);
         System.out.println(res.getTerm());
+        HashMap<Integer, String> nameMap = new HashMap<Integer, String>();
+        for(String name : res.getNameMap().keySet()) {
+            nameMap.put(res.getNameMap().get(name), name);
+        }
+        System.out.println(res.getTerm().toStringWithNameMap(nameMap));
     }
 }

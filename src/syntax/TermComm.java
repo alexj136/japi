@@ -41,32 +41,21 @@ public abstract class TermComm<T> extends TermOneSub<T> {
      * @return the arity (the number of names to bind or send) of this TermComm
      */
     public int arity() { return this.msg.size(); }
-    
-    /**
-     * Must be defined in the concrete classes.
-     * @return a string representation of this TermComm
-     */
-    public abstract String toString();
 
     /**
-     * Rename the names in a Term as is necessary after the exchange of a
-     * message - this is not alpha-conversion.
-     * @param from some names of this value must be renamed
-     * @param to names being renamed are renamed to this value
+     * Alpha-convert this communicating term. Send and Receive have the same
+     * behaviour under alpha conversion.
+     * @param from names with this value are renamed
+     * @param to names being renamed are renamed to this name
      */
-    public abstract void rename(T from, T to);
-
-    /**
-     * Rename every single occurence of the first given name with the second
-     * given name.
-     * @param from all names of this value must be renamed
-     * @param to names being renamed are renamed to this value
-     */
-    public abstract void alphaConvert(T from, T to);
-
-    /**
-     * Deep-copy this TermComm.
-     * @return a deep-copy of this TermComm
-     */
-    public abstract TermComm<T> copy();
+    public void alphaConvert(T from, T to) {
+        if(this.chnl.equals(from)) { this.chnl = to; }
+        for(int i = 0; i < this.arity(); i++) {
+            if(this.msg(i).equals(from)) {
+                this.msg.remove(i);
+                this.msg.add(i, to);
+            }
+        }
+        this.subterm.alphaConvert(from, to);
+    }
 }

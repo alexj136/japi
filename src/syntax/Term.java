@@ -2,6 +2,7 @@ package syntax;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.HashMap;
 
 /**
  * A Term is a pi-calculus expression. This is a generic class since different
@@ -32,6 +33,15 @@ public abstract class Term<T> {
     public abstract String toString();
 
     /**
+     * Obtain a string representation of this Term, but instead of using the
+     * toString method of the contained names, use the toString method of
+     * objects mapped to by the contained names in the given map.
+     * @return a string representing the Term, printing names of a different
+     * type, the values of which are mapped to by the contained names.
+     */
+    public abstract <U> String toStringWithNameMap(HashMap<T, U> nameMap);
+
+    /**
      * Rename the names in a Term as is necessary after the exchange of a
      * message - this is not alpha-conversion.
      * @param from some names of this value must be renamed
@@ -48,8 +58,8 @@ public abstract class Term<T> {
     public abstract void alphaConvert(T from, T to);
 
     /**
-     * Deep-copy a Term.
-     * @return a deep-copy of this Term
+     * Copy a Term. Contained name objects need not be deeply copied.
+     * @return a copy of this Term.
      */
     public abstract Term<T> copy();
 

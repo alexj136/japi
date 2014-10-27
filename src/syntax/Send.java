@@ -1,6 +1,7 @@
 package syntax;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * A Send object sends a message (a name) on a particular channel when there is
@@ -25,7 +26,20 @@ public final class Send<T> extends TermComm<T> {
     @Override
     public String toString() {
         return this.chnl + " " + Term.stringifyList("<", ">", ",", this.msg) +
-            " . " + this.subterm;
+                " . " + this.subterm;
+    }
+
+    /**
+     * Obtain a string representation of this Send, using a different name type.
+     * @return a string representing the Send, printing names of a different
+     * type, the values of which are mapped to by the contained names.
+     */
+    public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
+        ArrayList<U> msgNames = new ArrayList<U>();
+        for(T name : this.msg) { msgNames.add(nameMap.get(name)); }
+        return nameMap.get(this.chnl) + " " +
+                Term.stringifyList("<", ">", ",", msgNames) + " . " +
+                this.subterm.toStringWithNameMap(nameMap);
     }
 
     /**
@@ -46,8 +60,8 @@ public final class Send<T> extends TermComm<T> {
     }
 
     /**
-     * Deep copy this Send.
-     * @return a deep copy of this Send.
+     * Copy this Send.
+     * @return a copy of this Send.
      */
     public Send<T> copy() {
         return new Send<T>(this.chnl, (ArrayList<T>) this.msg.clone(),

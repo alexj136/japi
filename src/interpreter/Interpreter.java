@@ -1,6 +1,6 @@
 package interpreter;
 
-import runsyntax.*;
+import syntax.*;
 import java.util.Collections;
 import java.util.ArrayList;
 import java.util.HashMap;
