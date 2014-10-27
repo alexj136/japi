@@ -130,22 +130,30 @@ public abstract class Term<T> {
         // If one of the terms is a parallel composition, return true if either
         // of its subprocesses would talk to the other term
         else if(t1 instanceof Parallel) {
+            Parallel para = (Parallel) t1;
             boolean foundMatch = false;
-            for(Term subterm : (Parallel) t1) {
-                if(Term.talksTo(subterm, t2, t1Restricted, t2Restricted)) {
+            int i = 0;
+            while(i < para.arity() && !foundMatch) {
+                if(Term.talksTo(para.subterm(i), t2, t1Restricted,
+                        t2Restricted)) {
+
                     foundMatch = true;
-                    break;
                 }
+                i++;
             }
             return foundMatch;
         }
         else if(t2 instanceof Parallel) {
+            Parallel para = (Parallel) t2;
             boolean foundMatch = false;
-            for(Term subterm : (Parallel) t2) {
-                if(Term.talksTo(t1, subterm, t1Restricted, t2Restricted)) {
+            int i = 0;
+            while(i < para.arity() && !foundMatch) {
+                if(Term.talksTo(t1, para.subterm(i), t1Restricted,
+                        t2Restricted)) {
+
                     foundMatch = true;
-                    break;
                 }
+                i++;
             }
             return foundMatch;
         }
@@ -155,14 +163,14 @@ public abstract class Term<T> {
         // other term
         else if(t1 instanceof Restrict) {
             Restrict r1 = (Restrict) t1;
-            HashSet<T> t1RestrictedNew = (HashSet<T>) t1Restricted.clone();
+            HashSet t1RestrictedNew = (HashSet) t1Restricted.clone();
             t1RestrictedNew.add(r1.boundName());
             return Term.talksTo(r1.subterm(), t2, t1RestrictedNew,
                     t2Restricted);
         }
         else if(t2 instanceof Restrict) {
             Restrict r2 = (Restrict) t2;
-            HashSet<T> t2RestrictedNew = (HashSet<T>) t2Restricted.clone();
+            HashSet t2RestrictedNew = (HashSet) t2Restricted.clone();
             t2RestrictedNew.add(r2.boundName());
             return Term.talksTo(t1, r2.subterm(), t1Restricted,
                     t2RestrictedNew);
