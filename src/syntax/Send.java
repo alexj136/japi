@@ -7,7 +7,7 @@ import java.util.HashMap;
  * A Send object sends a message (a name) on a particular channel when there is
  * a corresponding Receive term to receive it.
  */
-public final class Send<T> extends TermComm<T> {
+public final class Send<T> extends PiTermComm<T> {
 
     /**
      * Construct a new Send object.
@@ -15,7 +15,7 @@ public final class Send<T> extends TermComm<T> {
      * @param msg the message (a list of channel names) being sent
      * @param subterm the term to 'become' once the message is sent
      */
-    public Send(T chnl, ArrayList<T> msg, Term<T> subterm) {
+    public Send(T chnl, ArrayList<T> msg, PiTerm<T> subterm) {
         super(chnl, msg, subterm);
     }
 
@@ -25,7 +25,7 @@ public final class Send<T> extends TermComm<T> {
      */
     @Override
     public String toString() {
-        return this.chnl + " " + Term.stringifyList("<", ">", ",", this.msg) +
+        return this.chnl + " " + PiTerm.stringifyList("<", ">", ",", this.msg) +
                 " . " + this.subterm;
     }
 
@@ -38,7 +38,7 @@ public final class Send<T> extends TermComm<T> {
         ArrayList<U> msgNames = new ArrayList<U>();
         for(T name : this.msg) { msgNames.add(nameMap.get(name)); }
         return nameMap.get(this.chnl) + " " +
-                Term.stringifyList("<", ">", ",", msgNames) + " . " +
+                PiTerm.stringifyList("<", ">", ",", msgNames) + " . " +
                 this.subterm.toStringWithNameMap(nameMap);
     }
 

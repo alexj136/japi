@@ -31,13 +31,13 @@ public class Interpreter {
 
     /**
      * Construct a new Interpreter.
-     * @param term the Term to interpret
+     * @param term the PiTerm to interpret
      * @param nameMap a mapping from the user's String names to integer names
      * used for interpretation
      * @param nextAvailableName the value to use next time a fresh name is
      * required
      */
-    public Interpreter(Term<Integer> term, HashMap<String, Integer> nameMap,
+    public Interpreter(PiTerm<Integer> term, HashMap<String, Integer> nameMap,
             int nextAvailableName) {
 
         // Use the SyntaxTranslationResult's String to Integer map, useful for
@@ -128,7 +128,7 @@ public class Interpreter {
                     this.reduce((Restrict) reduction.t2);
                 }
                 else {
-                    throw new IllegalStateException("Term to reduce was " +
+                    throw new IllegalStateException("PiTerm to reduce was " +
                             "not Send, Receive or Restrict");
                 }
 
@@ -145,7 +145,7 @@ public class Interpreter {
      */
     private void reduce(Send<Integer> send, Receive<Integer> rece) {
 
-        assert Term.talksTo(send, rece);
+        assert PiTerm.talksTo(send, rece);
 
         if(!(this.senders.contains(send) && this.receivers.contains(rece))) {
             throw new IllegalArgumentException("Send send and Receive " +
@@ -156,7 +156,7 @@ public class Interpreter {
         this.senders.remove(send);
         this.receivers.remove(rece);
         this.integrateNewlyExposedTerm(send.subterm());
-        Term<Integer> receiverSub = rece.subterm();
+        PiTerm<Integer> receiverSub = rece.subterm();
 
         // To avoid clashes, first rename all sent names to a fresh name, and
         // then rename those fresh names with the sent ones.
@@ -263,7 +263,7 @@ public class Interpreter {
     }
 
     // Add a newly exposed term to the appropriate arraylist
-    private void integrateNewlyExposedTerm(Term<Integer> term) {
+    private void integrateNewlyExposedTerm(PiTerm<Integer> term) {
         if(term instanceof Send) {
             this.senders.add((Send) term);
         }
@@ -272,7 +272,7 @@ public class Interpreter {
         }
         else if(term instanceof Replicate) {
 
-            Term<Integer> subterm = ((Replicate) term).subterm();
+            PiTerm<Integer> subterm = ((Replicate) term).subterm();
 
             if(subterm instanceof Send) {
                 this.replSenders.add((Send) subterm);
@@ -294,8 +294,8 @@ public class Interpreter {
                 this.integrateNewlyExposedTerm(subterm);
             }
             else {
-                throw new IllegalArgumentException("Non-standard Term found " +
-                        "in program");
+                throw new IllegalArgumentException("Non-standard PiTerm " + 
+                        "found in program");
             }
 
         }
@@ -309,7 +309,7 @@ public class Interpreter {
             this.restricts.add((Restrict) term);
         }
         else {
-            throw new IllegalArgumentException("Non-standard Term found " +
+            throw new IllegalArgumentException("Non-standard PiTerm found " +
                     "in program");
         }
     }

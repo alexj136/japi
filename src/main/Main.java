@@ -1,7 +1,7 @@
 package main;
 
 import parser.*;
-import syntax.Term;
+import syntax.PiTerm;
 import interpreter.SyntaxTranslator;
 import interpreter.SyntaxTranslationResult;
 import interpreter.Interpreter;
@@ -52,7 +52,7 @@ public class Main {
 
         // Print either the prettyPrint of the AST or the error message supplied
         // with the ParseException if parsing fails.
-        Term<String> term;
+        PiTerm<String> term;
         try {
             term = Parser.parseStream(input);
         }

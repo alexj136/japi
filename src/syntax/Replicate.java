@@ -5,14 +5,14 @@ import java.util.HashMap;
 /**
  * Replicate elements repeatedly copy a process.
  */
-public final class Replicate<T> extends TermOneSub<T> {
+public final class Replicate<T> extends PiTermOneSub<T> {
 
     /**
      * Construct a new replicating process.
      * @param subterm the process that will be replicated
      * @return a new Replicate object
      */
-    public Replicate(Term<T> subterm) {
+    public Replicate(PiTerm<T> subterm) {
         super(subterm);
     }
 

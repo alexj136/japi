@@ -5,16 +5,16 @@ import java.util.HashSet;
 import java.util.HashMap;
 
 /**
- * A Term is a pi-calculus expression. This is a generic class since different
+ * A PiTerm is a pi-calculus expression. This is a generic class since different
  * data types can be (and are) used to represent names in the pi-calculus. For
- * example, the parser parses a Term<String>, whereas the interpreter operates
- * over Term<Integer>s. Thus a translation from String to Integer names must
+ * example, the parser parses a PiTerm<String>, whereas the interpreter operates
+ * over PiTerm<Integer>s. Thus a translation from String to Integer names must
  * occur before interpretation. The only constraint on the type of name that can
  * be used is that it must have a reasonable definition of equality (i.e. it
  * override java.lang.Object.equals(Object o) in a sensible way. Unfortunately,
  * java's type system does not allow one to actually enforce such a constraint.
  */
-public abstract class Term<T> {
+public abstract class PiTerm<T> {
 
     /**
      * Generate a string of the given number of tabs, for use when pretty-
@@ -27,22 +27,22 @@ public abstract class Term<T> {
     }
 
     /**
-     * Obtain a string representation of this Term.
-     * @return a string representing the Term
+     * Obtain a string representation of this PiTerm.
+     * @return a string representing the PiTerm
      */
     public abstract String toString();
 
     /**
-     * Obtain a string representation of this Term, but instead of using the
+     * Obtain a string representation of this PiTerm, but instead of using the
      * toString method of the contained names, use the toString method of
      * objects mapped to by the contained names in the given map.
-     * @return a string representing the Term, printing names of a different
+     * @return a string representing the PiTerm, printing names of a different
      * type, the values of which are mapped to by the contained names.
      */
     public abstract <U> String toStringWithNameMap(HashMap<T, U> nameMap);
 
     /**
-     * Rename the names in a Term as is necessary after the exchange of a
+     * Rename the names in a PiTerm as is necessary after the exchange of a
      * message - this is not alpha-conversion.
      * @param from some names of this value must be renamed
      * @param to names being renamed are renamed to this value
@@ -58,10 +58,10 @@ public abstract class Term<T> {
     public abstract void alphaConvert(T from, T to);
 
     /**
-     * Copy a Term. Contained name objects need not be deeply copied.
-     * @return a copy of this Term.
+     * Copy a PiTerm. Contained name objects need not be deeply copied.
+     * @return a copy of this PiTerm.
      */
-    public abstract Term<T> copy();
+    public abstract PiTerm<T> copy();
 
     /**
      * Generate strings from lists of different kinds, that are nicely delimited
@@ -102,11 +102,11 @@ public abstract class Term<T> {
      * @param t2 the second term
      * @return true if the terms will exchange a message, false otherwise
      */
-    public static <T> boolean talksTo(Term<T> t1, Term<T> t2) {
-        return Term.talksTo(t1, t2, new HashSet<T>(),
+    public static <T> boolean talksTo(PiTerm<T> t1, PiTerm<T> t2) {
+        return PiTerm.talksTo(t1, t2, new HashSet<T>(),
                 new HashSet<T>());
     }
-    private static <T> boolean talksTo(Term<T> t1, Term<T> t2,
+    private static <T> boolean talksTo(PiTerm<T> t1, PiTerm<T> t2,
             HashSet<T> t1Restricted, HashSet<T> t2Restricted) {
 
         // If we have a send and a receive, return true if they are on the same
@@ -129,11 +129,11 @@ public abstract class Term<T> {
         // If one of the terms is a replicate, return true if the body of the
         // replicated term would talk to the other term, false otherwise
         else if(t1 instanceof Replicate) {
-            return Term.talksTo(((Replicate) t1).subterm(), t2, t1Restricted,
+            return PiTerm.talksTo(((Replicate) t1).subterm(), t2, t1Restricted,
                     t2Restricted);
         }
         else if(t2 instanceof Replicate) {
-            return Term.talksTo(t1, ((Replicate) t2).subterm(), t1Restricted,
+            return PiTerm.talksTo(t1, ((Replicate) t2).subterm(), t1Restricted,
                     t2Restricted);
         }
 
@@ -144,7 +144,7 @@ public abstract class Term<T> {
             boolean foundMatch = false;
             int i = 0;
             while(i < para.arity() && !foundMatch) {
-                if(Term.talksTo(para.subterm(i), t2, t1Restricted,
+                if(PiTerm.talksTo(para.subterm(i), t2, t1Restricted,
                         t2Restricted)) {
 
                     foundMatch = true;
@@ -158,7 +158,7 @@ public abstract class Term<T> {
             boolean foundMatch = false;
             int i = 0;
             while(i < para.arity() && !foundMatch) {
-                if(Term.talksTo(t1, para.subterm(i), t1Restricted,
+                if(PiTerm.talksTo(t1, para.subterm(i), t1Restricted,
                         t2Restricted)) {
 
                     foundMatch = true;
@@ -175,14 +175,14 @@ public abstract class Term<T> {
             Restrict r1 = (Restrict) t1;
             HashSet t1RestrictedNew = (HashSet) t1Restricted.clone();
             t1RestrictedNew.add(r1.boundName());
-            return Term.talksTo(r1.subterm(), t2, t1RestrictedNew,
+            return PiTerm.talksTo(r1.subterm(), t2, t1RestrictedNew,
                     t2Restricted);
         }
         else if(t2 instanceof Restrict) {
             Restrict r2 = (Restrict) t2;
             HashSet t2RestrictedNew = (HashSet) t2Restricted.clone();
             t2RestrictedNew.add(r2.boundName());
-            return Term.talksTo(t1, r2.subterm(), t1Restricted,
+            return PiTerm.talksTo(t1, r2.subterm(), t1Restricted,
                     t2RestrictedNew);
         }
 

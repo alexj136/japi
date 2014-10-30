@@ -14,11 +14,11 @@ public class Parser {
      * Parse some input to obtain an AST.
      * @param input a java.io.InputStream containing text (ideally) representing
      * a japi program
-     * @return an AST (a Term object) representing the parsed program
+     * @return an AST (a PiTerm object) representing the parsed program
      * @throws ParseException if the input could not be parsed (i.e. if there
      * was a syntax error in the program)
      */
-    public static Term parseStream(InputStream input) throws ParseException {
+    public static PiTerm parseStream(InputStream input) throws ParseException {
         return new Parser(input).expression();
     }
 }
@@ -69,7 +69,7 @@ void input() : {} { expression() <EOF> }
  *
  * This is the grammar used in the implementation below.
  */
-Term<String> expression() : { Term<String> exp; ArrayList<String> names; Token n; }
+PiTerm<String> expression() : { PiTerm<String> exp; ArrayList<String> names; Token n; }
 {
     LOOKAHEAD(2)
     n=<ID> "(" names=receiveCont() "." exp=expression()
@@ -99,15 +99,15 @@ Term<String> expression() : { Term<String> exp; ArrayList<String> names; Token n
     |
     "0"
     {
-        return new Parallel<String>(new ArrayList<Term<String>>());
+        return new Parallel<String>(new ArrayList<PiTerm<String>>());
     }
 }
 
-Term<String> parallelCont() : { Term<String> e; ArrayList<Term<String>> rest; }
+PiTerm<String> parallelCont() : { PiTerm<String> e; ArrayList<PiTerm<String>> rest; }
 {
     "]"
     {
-        return new Parallel<String>(new ArrayList<Term<String>>());
+        return new Parallel<String>(new ArrayList<PiTerm<String>>());
     }
     |
     e=expression() rest=parallelContCont()
@@ -117,11 +117,11 @@ Term<String> parallelCont() : { Term<String> e; ArrayList<Term<String>> rest; }
     }
 }
 
-ArrayList<Term<String>> parallelContCont() : { Term<String> e; ArrayList<Term<String>> rest; }
+ArrayList<PiTerm<String>> parallelContCont() : { PiTerm<String> e; ArrayList<PiTerm<String>> rest; }
 {
     "]"
     {
-        return new ArrayList<Term<String>>();
+        return new ArrayList<PiTerm<String>>();
     }
     |
     "|" e=expression() rest=parallelContCont()

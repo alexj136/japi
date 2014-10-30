@@ -8,7 +8,7 @@ import java.util.HashMap;
  * receives its message, it binds the message to a variable and 'disappears',
  * leaving behind its subterm in its place.
  */
-public final class Receive<T> extends TermComm<T> {
+public final class Receive<T> extends PiTermComm<T> {
 
     /**
      * Construct a new recieving process
@@ -17,7 +17,7 @@ public final class Receive<T> extends TermComm<T> {
      * @param subterm the process to 'become' when the message is received
      * @return a new Receive object
      */
-    public Receive(T chnl, ArrayList<T> msg, Term<T> subterm) {
+    public Receive(T chnl, ArrayList<T> msg, PiTerm<T> subterm) {
         super(chnl, msg, subterm);
     }
 
@@ -27,7 +27,7 @@ public final class Receive<T> extends TermComm<T> {
      */
     @Override
     public String toString() {
-        return this.chnl + " " + Term.stringifyList("(", ")", ",", this.msg) +
+        return this.chnl + " " + PiTerm.stringifyList("(", ")", ",", this.msg) +
             " . " + this.subterm;
     }
 
@@ -41,7 +41,7 @@ public final class Receive<T> extends TermComm<T> {
         ArrayList<U> msgNames = new ArrayList<U>();
         for(T name : this.msg) { msgNames.add(nameMap.get(name)); }
         return nameMap.get(this.chnl) + " " +
-                Term.stringifyList("(", ")", ",", msgNames) + " . " +
+                PiTerm.stringifyList("(", ")", ",", msgNames) + " . " +
                 this.subterm.toStringWithNameMap(nameMap);
     }
 

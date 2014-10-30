@@ -2,10 +2,10 @@ package syntax;
 
 import java.util.ArrayList;
 /**
- * TermComm represents at a higher level those terms that are involved in
+ * PiTermComm represents at a higher level those terms that are involved in
  * message passing. This includes Send and Receive.
  */
-public abstract class TermComm<T> extends TermOneSub<T> {
+public abstract class PiTermComm<T> extends PiTermOneSub<T> {
 
     protected T chnl;
     protected ArrayList<T> msg;
@@ -16,7 +16,7 @@ public abstract class TermComm<T> extends TermOneSub<T> {
      * @param msg the names to send or to bind received names to
      * @param subterm the subterm of this
      */
-    public TermComm(T chnl, ArrayList<T> msg, Term<T> subterm) {
+    public PiTermComm(T chnl, ArrayList<T> msg, PiTerm<T> subterm) {
         super(subterm);
         this.chnl = chnl;
         this.msg = msg;
@@ -37,8 +37,9 @@ public abstract class TermComm<T> extends TermOneSub<T> {
 
     /**
      * Determine the arity (the number of names to bind or send) of this
-     * TermComm.
-     * @return the arity (the number of names to bind or send) of this TermComm
+     * PiTermComm.
+     * @return the arity (the number of names to bind or send) of this
+     * PiTermComm
      */
     public int arity() { return this.msg.size(); }
 

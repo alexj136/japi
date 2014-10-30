@@ -8,15 +8,16 @@ import java.util.HashMap;
  * The Parallel class represents parallel composition - it contains two
  * concurrently executing processes.
  */
-public final class Parallel<T> extends Term<T> implements Iterable<Term<T>> {
+public final class Parallel<T> extends PiTerm<T>
+        implements Iterable<PiTerm<T>> {
 
-    private ArrayList<Term<T>> subterms;
+    private ArrayList<PiTerm<T>> subterms;
 
     /**
      * Construct a new Parallel object using the two concurrent processes.
      * @param subterms a list of the subterms of this Parallel
      */
-    public Parallel(ArrayList<Term<T>> subterms) {
+    public Parallel(ArrayList<PiTerm<T>> subterms) {
         this.subterms = subterms;
     }
 
@@ -25,7 +26,7 @@ public final class Parallel<T> extends Term<T> implements Iterable<Term<T>> {
      * @param i the index of the subterm to retreive
      * @return the i^th subterm in this parallel composition
      */
-    public Term<T> subterm(int i) { return this.subterms.get(i); }
+    public PiTerm<T> subterm(int i) { return this.subterms.get(i); }
 
     /**
      * Determine the number of terms in this parallel composition.
@@ -37,7 +38,7 @@ public final class Parallel<T> extends Term<T> implements Iterable<Term<T>> {
      * Obtain an iterator over the elements in this parallel composition.
      * @return an iterator over the elements in this parallel composition.
      */
-    public Iterator<Term<T>> iterator() { return this.subterms.iterator(); }
+    public Iterator<PiTerm<T>> iterator() { return this.subterms.iterator(); }
 
     /**
      * Obtain a string representation of this Parallel, using a different name
@@ -47,10 +48,10 @@ public final class Parallel<T> extends Term<T> implements Iterable<Term<T>> {
      */
     public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
         ArrayList<String> strSubs = new ArrayList<String>();
-        for(Term<T> subterm : this.subterms) {
+        for(PiTerm<T> subterm : this.subterms) {
             strSubs.add(subterm.toStringWithNameMap(nameMap));
         }
-        return Term.stringifyList("[", "]", " |", strSubs);
+        return PiTerm.stringifyList("[", "]", " |", strSubs);
     }
 
     /**
@@ -60,7 +61,7 @@ public final class Parallel<T> extends Term<T> implements Iterable<Term<T>> {
      * @param to names being renamed are renamed to this name
      */
     public void rename(T from, T to) {
-        for(Term<T> subterm : subterms) { subterm.rename(from, to); }
+        for(PiTerm<T> subterm : subterms) { subterm.rename(from, to); }
     }
 
     /**
@@ -71,7 +72,9 @@ public final class Parallel<T> extends Term<T> implements Iterable<Term<T>> {
      * @param to names being renamed are renamed to this name
      */
     public void alphaConvert(T from, T to) {
-        for(Term<T> subterm : this.subterms) { subterm.alphaConvert(from, to); }
+        for(PiTerm<T> subterm : this.subterms) {
+            subterm.alphaConvert(from, to);
+        }
     }
 
     /**
@@ -80,7 +83,7 @@ public final class Parallel<T> extends Term<T> implements Iterable<Term<T>> {
      */
     @Override
     public String toString() {
-        return Term.stringifyList("[", "]", " |", this.subterms);
+        return PiTerm.stringifyList("[", "]", " |", this.subterms);
     }
 
     /**
@@ -88,8 +91,8 @@ public final class Parallel<T> extends Term<T> implements Iterable<Term<T>> {
      * @return a deep copy of this Parallel
      */
     public Parallel<T> copy() {
-        ArrayList<Term<T>> copySubs = new ArrayList<Term<T>>();
-        for(Term<T> subterm : this.subterms) { copySubs.add(subterm.copy()); }
+        ArrayList<PiTerm<T>> copySubs = new ArrayList<PiTerm<T>>();
+        for(PiTerm<T> subterm : this.subterms) { copySubs.add(subterm.copy()); }
         return new Parallel<T>(copySubs);
     }
 }

@@ -5,31 +5,31 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 /**
- * Contains static methods used to translate Term<String>s to
- * Term<Integer>s.
+ * Contains static methods used to translate PiTerm<String>s to
+ * PiTerm<Integer>s.
  */
 public abstract class SyntaxTranslator {
 
     /**
-     * Translate a Term<String> into a Term<Integer>.
-     * @param term the Term<String> to translate
-     * @return a SyntaxTranslationResult object containing a Term<Integer>
-     * representing the given Term<String>, and a HashMap that maps String names
-     * in the Term<String> to integer names in the Term<Integer>.
+     * Translate a PiTerm<String> into a PiTerm<Integer>.
+     * @param term the PiTerm<String> to translate
+     * @return a SyntaxTranslationResult object containing a PiTerm<Integer>
+     * representing the given PiTerm<String>, and a HashMap that maps String
+     * names in the PiTerm<String> to integer names in the PiTerm<Integer>.
      */
-    public static SyntaxTranslationResult translate(Term<String> term) {
+    public static SyntaxTranslationResult translate(PiTerm<String> term) {
         return SyntaxTranslator._translate(term,
                 new HashMap<String, Integer>(), 0);
     }
 
-    private static SyntaxTranslationResult _translate(Term<String> term,
+    private static SyntaxTranslationResult _translate(PiTerm<String> term,
             HashMap<String, Integer> nameMap, int nextAvailableName) {
 
         // For Send and Receive, determine the channel names by looking up the
         // string channel names in the map. Set them appropriately, and
         // translate the subterm.
-        if(term instanceof TermComm) {
-            TermComm<String> comm = (TermComm<String>) term;
+        if(term instanceof PiTermComm) {
+            PiTermComm<String> comm = (PiTermComm<String>) term;
 
             int chnl;
 
@@ -69,7 +69,7 @@ public abstract class SyntaxTranslator {
             }
             else {
                 throw new IllegalArgumentException(
-                        "Unrecognised TermComm type");
+                        "Unrecognised PiTermComm type");
             }
             return result;
         }
@@ -82,9 +82,9 @@ public abstract class SyntaxTranslator {
             SyntaxTranslationResult result = new SyntaxTranslationResult(null,
                     nameMap, nextAvailableName);
 
-            ArrayList<Term<Integer>> subterms = new ArrayList<Term<Integer>>();
+            ArrayList<PiTerm<Integer>> subterms = new ArrayList<PiTerm<Integer>>();
 
-            for(Term<String> subterm : para) {
+            for(PiTerm<String> subterm : para) {
                 result = _translate(subterm, result.getNameMap(),
                         result.getNextAvailableName());
                 subterms.add(result.getTerm());
@@ -129,10 +129,10 @@ public abstract class SyntaxTranslator {
             return result;
         }
 
-        // Throw an exception if we got a Term<String> of unrecognised
+        // Throw an exception if we got a PiTerm<String> of unrecognised
         // type.
         else {
-            throw new IllegalArgumentException("Unrecognised Term type");
+            throw new IllegalArgumentException("Unrecognised PiTerm type");
         }
     }
 }

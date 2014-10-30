@@ -1,25 +1,25 @@
 package interpreter;
 
-import syntax.Term;
+import syntax.PiTerm;
 import java.util.HashMap;
 
 /**
- * A pair containing a runsyntax.Term and a HashMap storing a map between the
- * user's String names and integer names used by the interpreter.
+ * A pair containing a PiTerm and a HashMap storing a map between the user's
+ * String names and integer names used by the interpreter.
  */
 public class SyntaxTranslationResult {
 
-    private Term<Integer> term;
+    private PiTerm<Integer> term;
     private HashMap<String, Integer> nameMap;
     private int nextAvailableName;
 
     /**
      * Construct a new SyntaxTranslationResult.
-     * @param term the runsyntax.Term to store
+     * @param term the PiTerm to store
      * @param nameMap a mapping between the user's String names and the
      * interpreter's integer names
      */
-    public SyntaxTranslationResult(Term<Integer> term,
+    public SyntaxTranslationResult(PiTerm<Integer> term,
             HashMap<String, Integer> nameMap,
             int nextAvailableName) {
 
@@ -29,10 +29,10 @@ public class SyntaxTranslationResult {
     }
 
     /**
-     * Access the stored Term.
-     * @return the stored Term
+     * Access the stored PiTerm.
+     * @return the stored PiTerm
      */
-    public Term<Integer> getTerm() { return this.term; }
+    public PiTerm<Integer> getTerm() { return this.term; }
 
     /**
      * Access the stored name mapping.
@@ -47,10 +47,10 @@ public class SyntaxTranslationResult {
     public int getNextAvailableName() { return this.nextAvailableName; }
 
     /**
-     * Set the stored Term.
-     * @param term the new Term to store
+     * Set the stored PiTerm.
+     * @param term the new PiTerm to store
      */
-    public void setTerm(Term<Integer> term) { this.term = term; }
+    public void setTerm(PiTerm<Integer> term) { this.term = term; }
 
     /**
      * Set the stored name mapping.

@@ -6,7 +6,7 @@ import java.util.HashMap;
  * Restrict objects behave somewhat like lambda abstractions - they bind
  * occurences of names in a process.
  */
-public final class Restrict<T> extends TermOneSub<T> {
+public final class Restrict<T> extends PiTermOneSub<T> {
 
     private T boundName;
 
@@ -16,7 +16,7 @@ public final class Restrict<T> extends TermOneSub<T> {
      * @param subterm the subprocess within which to restrict the name
      * @return a new Restrict object
      */
-    public Restrict(T boundName, Term<T> subterm) {
+    public Restrict(T boundName, PiTerm<T> subterm) {
         super(subterm);
         this.boundName = boundName;
     }
