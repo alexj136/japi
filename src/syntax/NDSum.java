@@ -27,7 +27,7 @@ public final class NDSum<T> extends PiTermManySub<T> {
      */
     @Override
     public String toString() {
-        return PiTerm.stringifyList("", "", " + ", this.subterms);
+        return PiTerm.stringifyList("{ ", " }", " + ", this.subterms);
     }
 
     /**
@@ -41,7 +41,7 @@ public final class NDSum<T> extends PiTermManySub<T> {
         for(PiTerm<T> subterm : this.subterms) {
             strSubs.add(subterm.toStringWithNameMap(nameMap));
         }
-        return PiTerm.stringifyList("", "", " + ", strSubs);
+        return PiTerm.stringifyList("{ ", " }", " + ", strSubs);
     }
 
     /**

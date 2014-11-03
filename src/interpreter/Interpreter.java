@@ -13,6 +13,17 @@ import java.util.Random;
  */
 public class Interpreter {
 
+    /* For a planned refactor...
+    private static final int SENDERS = 0;
+    private static final int RECEIVERS = 1;
+    private static final int RESTRICTS = 2;
+    private static final int SUMS = 3;
+    private static final int REPLSENDERS = 4;
+    private static final int REPLRECEIVERS = 5;
+    private static final int REPLRESTRICTS = 6;
+    private static final int REPLSUMS = 7;
+    */
+
     private static Random rand = new Random();
 
     private HashMap<Integer, String> nameMap;
@@ -22,10 +33,12 @@ public class Interpreter {
     private ArrayList<Send<Integer>> senders;
     private ArrayList<Receive<Integer>> receivers;
     private ArrayList<Restrict<Integer>> restricts;
+    private ArrayList<NDSum<Integer>> sums;
 
     private ArrayList<Send<Integer>> replSenders;
     private ArrayList<Receive<Integer>> replReceivers;
     private ArrayList<Restrict<Integer>> replRestricts;
+    private ArrayList<NDSum<Integer>> replSums;
 
     private HashSet<Integer> boundNames;
 
@@ -55,10 +68,12 @@ public class Interpreter {
         this.senders = new ArrayList<Send<Integer>>();
         this.receivers = new ArrayList<Receive<Integer>>();
         this.restricts = new ArrayList<Restrict<Integer>>();
+        this.sums = new ArrayList<NDSum<Integer>>();
 
         this.replSenders = new ArrayList<Send<Integer>>();
         this.replReceivers = new ArrayList<Receive<Integer>>();
         this.replRestricts = new ArrayList<Restrict<Integer>>();
+        this.replSums = new ArrayList<NDSum<Integer>>();
 
         this.boundNames = new HashSet<Integer>();
 
@@ -92,6 +107,8 @@ public class Interpreter {
             return true;
         }
 
+        // The lists of terms that can interact. The order of the pair does
+        // matter.
         ArrayList[][] pairings = {
             { this.senders          , this.replReceivers    },
             { this.receivers        , this.replSenders      },
@@ -102,9 +119,25 @@ public class Interpreter {
             { this.senders          , this.replRestricts    },
             { this.receivers        , this.replRestricts    },
             { this.restricts        , this.restricts        },
-            { this.restricts        , this.replRestricts    }
+            { this.restricts        , this.replRestricts    },
+
+            { this.sums             , this.sums             },
+
+            { this.sums             , this.senders          },
+            { this.sums             , this.receivers        },
+            { this.sums             , this.restricts        },
+
+            { this.sums             , this.replSenders      },
+            { this.sums             , this.replReceivers    },
+            { this.sums             , this.replRestricts    },
+
+            { this.sums             , this.replSums         },
+            { this.senders          , this.replSums         },
+            { this.receivers        , this.replSums         },
+            { this.restricts        , this.replSums         }
         };
 
+        // Convert the pairings array into an ArrayList for easier processing
         ArrayList<ArrayList[]> todo = new ArrayList<ArrayList[]>();
         for(ArrayList[] pair : pairings) { todo.add(pair); }
 
@@ -118,7 +151,23 @@ public class Interpreter {
 
                 Match reduction = Interpreter.arbitraryElement(matches);
 
-                if(reduction.t2 instanceof Send) {
+                if(reduction.t1 instanceof NDSum
+                        && reduction.t2 instanceof NDSum) {
+
+                    this.reduce((NDSum) reduction.t1, (NDSum) reduction.t2);
+                }
+                else if(reduction.t1 instanceof NDSum &&
+                        reduction.t2 instanceof Send) {
+
+                    this.reduce((NDSum) reduction.t1, (Send) reduction.t2);
+                }
+                else if(reduction.t1 instanceof NDSum &&
+                        reduction.t2 instanceof Receive) {
+
+                    this.reduce((NDSum) reduction.t1, (Receive) reduction.t2);
+                }
+
+                else if(reduction.t2 instanceof Send) {
                     this.reduce((Send) reduction.t2);
                 }
                 else if(reduction.t2 instanceof Receive) {
@@ -126,6 +175,9 @@ public class Interpreter {
                 }
                 else if(reduction.t2 instanceof Restrict) {
                     this.reduce((Restrict) reduction.t2);
+                }
+                else if(reduction.t2 instanceof NDSum) {
+                    this.reduce((NDSum) reduction.t2);
                 }
                 else {
                     throw new IllegalStateException("PiTerm to reduce was " +
@@ -137,6 +189,27 @@ public class Interpreter {
         }
 
         return doneReduction;
+    }
+
+    /*
+     * Reduce the given pair of nondeterministic sums that can communicate.
+     */
+    private void reduce(NDSum<Integer> sum1, NDSum<Integer> sum2) {
+
+    }
+
+    /*
+     * Reduce the given pairing of a nondeterministic sum and a sender.
+     */
+    private void reduce(NDSum<Integer> sum, Send<Integer> send) {
+
+    }
+
+    /*
+     * Reduce the given pairing of a nondeterministic sum and a receiver.
+     */
+    private void reduce(NDSum<Integer> sum, Receive<Integer> rece) {
+
     }
 
     /*
@@ -262,6 +335,19 @@ public class Interpreter {
         return baseName;
     }
 
+    /*
+     * Replicate the given member of the replSums ArrayList
+     */
+    private void reduce(NDSum<Integer> sum) {
+
+        if(!this.replSums.contains(sum)) {
+            throw new IllegalArgumentException("Receive rece parameter " +
+                    "must be a member of the replReceivers ArrayList");
+        }
+
+        this.integrateNewlyExposedTerm(sum);
+    }
+
     // Add a newly exposed term to the appropriate arraylist
     private void integrateNewlyExposedTerm(PiTerm<Integer> term) {
         if(term instanceof Send) {
@@ -293,6 +379,9 @@ public class Interpreter {
             else if(subterm instanceof Replicate) {
                 this.integrateNewlyExposedTerm(subterm);
             }
+            else if(subterm instanceof NDSum) {
+                this.replSums.add((NDSum) subterm);
+            }
             else {
                 throw new IllegalArgumentException("Non-standard PiTerm " + 
                         "found in program");
@@ -307,6 +396,9 @@ public class Interpreter {
         }
         else if(term instanceof Restrict) {
             this.restricts.add((Restrict) term);
+        }
+        else if(term instanceof NDSum) {
+            this.sums.add((NDSum) term);
         }
         else {
             throw new IllegalArgumentException("Non-standard PiTerm found " +
@@ -329,6 +421,9 @@ public class Interpreter {
         for(Restrict rest : this.restricts) {
             termStrings.add(rest.toStringWithNameMap(this.nameMap));
         }
+        for(NDSum sum : this.sums) {
+            termStrings.add(sum.toStringWithNameMap(this.nameMap));
+        }
         for(Send send : this.replSenders) {
             termStrings.add("! " + send.toStringWithNameMap(this.nameMap));
         }
@@ -337,6 +432,9 @@ public class Interpreter {
         }
         for(Restrict rest : this.replRestricts) {
             termStrings.add("! " + rest.toStringWithNameMap(this.nameMap));
+        }
+        for(NDSum sum : this.replSums) {
+            termStrings.add("! " + sum.toStringWithNameMap(this.nameMap));
         }
         String procs = termStrings.isEmpty() ? "" : termStrings.remove(0);
         while(!termStrings.isEmpty()) {

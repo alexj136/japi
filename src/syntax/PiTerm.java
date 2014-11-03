@@ -134,12 +134,17 @@ public abstract class PiTerm<T> {
 
         // If one of the terms is a parallel composition, return true if either
         // of its subprocesses would talk to the other term
-        else if(t1 instanceof Parallel) {
-            Parallel para = (Parallel) t1;
+        else if(t1 instanceof PiTermManySub) {
+            PiTermManySub ptms;
+            if(t1 instanceof Parallel) { ptms = (Parallel) t1; }
+            else if(t1 instanceof NDSum) { ptms = (NDSum) t1; }
+            else { throw new IllegalArgumentException("Unrecognised " +
+                    "PiTermManySub PiTerm in PiTerm.talksTo()"); }
+
             boolean foundMatch = false;
             int i = 0;
-            while(i < para.arity() && !foundMatch) {
-                if(PiTerm.talksTo(para.subterm(i), t2, t1Restricted,
+            while(i < ptms.arity() && !foundMatch) {
+                if(PiTerm.talksTo(ptms.subterm(i), t2, t1Restricted,
                         t2Restricted)) {
 
                     foundMatch = true;
@@ -148,7 +153,7 @@ public abstract class PiTerm<T> {
             }
             return foundMatch;
         }
-        else if(t2 instanceof Parallel) {
+        else if(t2 instanceof PiTermManySub) {
             return PiTerm.talksTo(t2, t1, t2Restricted, t1Restricted);
         }
 
