@@ -119,11 +119,7 @@ public abstract class PiTerm<T> {
                     (!(t2Restricted.contains(s1.chnl())));
         }
         else if(t1 instanceof Receive && t2 instanceof Send) {
-            Receive r1 = (Receive) t1;
-            Send s2 = (Send) t2;
-            return r1.chnl().equals(s2.chnl()) && (r1.arity() == s2.arity()) &&
-                    (!(t1Restricted.contains(r1.chnl()))) &&
-                    (!(t2Restricted.contains(r1.chnl())));
+            return PiTerm.talksTo(t2, t1, t2Restricted, t1Restricted);
         }
 
         // If one of the terms is a replicate, return true if the body of the
@@ -133,8 +129,7 @@ public abstract class PiTerm<T> {
                     t2Restricted);
         }
         else if(t2 instanceof Replicate) {
-            return PiTerm.talksTo(t1, ((Replicate) t2).subterm(), t1Restricted,
-                    t2Restricted);
+            return PiTerm.talksTo(t2, t1, t2Restricted, t1Restricted);
         }
 
         // If one of the terms is a parallel composition, return true if either
@@ -154,18 +149,7 @@ public abstract class PiTerm<T> {
             return foundMatch;
         }
         else if(t2 instanceof Parallel) {
-            Parallel para = (Parallel) t2;
-            boolean foundMatch = false;
-            int i = 0;
-            while(i < para.arity() && !foundMatch) {
-                if(PiTerm.talksTo(t1, para.subterm(i), t1Restricted,
-                        t2Restricted)) {
-
-                    foundMatch = true;
-                }
-                i++;
-            }
-            return foundMatch;
+            return PiTerm.talksTo(t2, t1, t2Restricted, t1Restricted);
         }
 
         // If one of the terms is a restriction, add the restricted name to the
@@ -179,11 +163,7 @@ public abstract class PiTerm<T> {
                     t2Restricted);
         }
         else if(t2 instanceof Restrict) {
-            Restrict r2 = (Restrict) t2;
-            HashSet t2RestrictedNew = (HashSet) t2Restricted.clone();
-            t2RestrictedNew.add(r2.boundName());
-            return PiTerm.talksTo(t1, r2.subterm(), t1Restricted,
-                    t2RestrictedNew);
+            return PiTerm.talksTo(t2, t1, t2Restricted, t1Restricted);
         }
 
         // No other possibilities, so return false if no other conditions catch
