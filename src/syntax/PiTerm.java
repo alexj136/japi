@@ -81,11 +81,11 @@ public abstract class PiTerm<T> {
 
         if(elems.isEmpty()) { return open + close; }
         else {
-            String out = open + " " + elems.get(0).toString();
+            String out = open + elems.get(0).toString();
             for(int i = 1; i < elems.size(); i++) {
-                out += delimiter + " " + elems.get(i).toString();
+                out += delimiter + elems.get(i).toString();
             }
-            return out + " " + close;
+            return out + close;
 
         }
     }

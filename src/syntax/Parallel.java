@@ -1,44 +1,19 @@
 package syntax;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.HashMap;
 
 /**
  * The Parallel class represents parallel composition - it contains two
  * concurrently executing processes.
  */
-public final class Parallel<T> extends PiTerm<T>
-        implements Iterable<PiTerm<T>> {
-
-    private ArrayList<PiTerm<T>> subterms;
+public final class Parallel<T> extends PiTermManySub<T> {
 
     /**
-     * Construct a new Parallel object using the two concurrent processes.
+     * Construct a new Parallel object using a list of concurrent processes.
      * @param subterms a list of the subterms of this Parallel
      */
-    public Parallel(ArrayList<PiTerm<T>> subterms) {
-        this.subterms = subterms;
-    }
-
-    /**
-     * Access a subprocess in this parallel composition.
-     * @param i the index of the subterm to retreive
-     * @return the i^th subterm in this parallel composition
-     */
-    public PiTerm<T> subterm(int i) { return this.subterms.get(i); }
-
-    /**
-     * Determine the number of terms in this parallel composition.
-     * @return  the number of terms in this parallel composition
-     */
-    public int arity() { return this.subterms.size(); }
-
-    /**
-     * Obtain an iterator over the elements in this parallel composition.
-     * @return an iterator over the elements in this parallel composition.
-     */
-    public Iterator<PiTerm<T>> iterator() { return this.subterms.iterator(); }
+    public Parallel(ArrayList<PiTerm<T>> subterms) { super(subterms); }
 
     /**
      * Obtain a string representation of this Parallel, using a different name
@@ -55,35 +30,12 @@ public final class Parallel<T> extends PiTerm<T>
     }
 
     /**
-     * Rename the names within this Parallel as though a message had been
-     * received by a containing process
-     * @param from names with this value are renamed
-     * @param to names being renamed are renamed to this name
-     */
-    public void rename(T from, T to) {
-        for(PiTerm<T> subterm : subterms) { subterm.rename(from, to); }
-    }
-
-    /**
-     * Alpha-convert this Parallel Term. Has the same behaviour in terms of the
-     * names within this node as rename(), hence the existance of the
-     * changeNames private method.
-     * @param from names with this value are renamed
-     * @param to names being renamed are renamed to this name
-     */
-    public void alphaConvert(T from, T to) {
-        for(PiTerm<T> subterm : this.subterms) {
-            subterm.alphaConvert(from, to);
-        }
-    }
-
-    /**
      * Obtain a string representation of this Parallel.
      * @return a string representation of this Parallel
      */
     @Override
     public String toString() {
-        return PiTerm.stringifyList("[", "]", " |", this.subterms);
+        return PiTerm.stringifyList("[ ", " ]", " | ", this.subterms);
     }
 
     /**
@@ -91,8 +43,6 @@ public final class Parallel<T> extends PiTerm<T>
      * @return a deep copy of this Parallel
      */
     public Parallel<T> copy() {
-        ArrayList<PiTerm<T>> copySubs = new ArrayList<PiTerm<T>>();
-        for(PiTerm<T> subterm : this.subterms) { copySubs.add(subterm.copy()); }
-        return new Parallel<T>(copySubs);
+        return new Parallel(this.copySubs());
     }
 }

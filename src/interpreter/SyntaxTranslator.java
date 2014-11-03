@@ -76,21 +76,40 @@ public abstract class SyntaxTranslator {
 
         // Translate the LHS of the composition, and use the generated nameMap
         // to translate the RHS
-        else if(term instanceof Parallel) {
-            Parallel<String> para = (Parallel<String>) term;
+        else if(term instanceof PiTermManySub) {
+            PiTermManySub ptms;
+            if(term instanceof Parallel) {
+                ptms = (Parallel<String>) term;
+            }
+            else if(term instanceof NDSum) {
+                ptms = (NDSum<String>) term;
+            }
+            else {
+                throw new IllegalArgumentException(
+                        "Unrecognised PiTermManySub type");
+            }
 
             SyntaxTranslationResult result = new SyntaxTranslationResult(null,
                     nameMap, nextAvailableName);
 
             ArrayList<PiTerm<Integer>> subterms = new ArrayList<PiTerm<Integer>>();
 
-            for(PiTerm<String> subterm : para) {
-                result = _translate(subterm, result.getNameMap(),
+            for(int i = 0; i < ptms.arity(); i++) {
+                result = _translate(ptms.subterm(i), result.getNameMap(),
                         result.getNextAvailableName());
                 subterms.add(result.getTerm());
             }
 
-            result.setTerm(new Parallel<Integer>(subterms));
+            if(term instanceof Parallel) {
+                result.setTerm(new Parallel<Integer>(subterms));
+            }
+            else if(term instanceof NDSum) {
+                result.setTerm(new NDSum<Integer>(subterms));
+            }
+            else {
+                throw new IllegalArgumentException(
+                        "Unrecognised PiTermManySub type");
+            }
             return result;
         }
 

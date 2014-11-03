@@ -41,7 +41,7 @@ public final class Receive<T> extends PiTermComm<T> {
         ArrayList<U> msgNames = new ArrayList<U>();
         for(T name : this.msg) { msgNames.add(nameMap.get(name)); }
         return nameMap.get(this.chnl) + " " +
-                PiTerm.stringifyList("(", ")", ",", msgNames) + " . " +
+                PiTerm.stringifyList("( ", " )", ", ", msgNames) + " . " +
                 this.subterm.toStringWithNameMap(nameMap);
     }
 
