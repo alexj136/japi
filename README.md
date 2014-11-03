@@ -19,12 +19,13 @@ To invoke the interpreter, first build, and then run:
 
 The syntax of source files is as shown:
 
-    P, Q ::= X<Y>.P         # Send prefix
-           | X(Y).p         # Receive prefix
-           | [P|P|...P]     # N-ary parallel composition
-           | new X in P     # Name restriction
-           | !P             # Replication
-           | 0              # Completed process
+    P, Q ::= X < Y_1, Y_2, ... Y_n > . P    # Send prefix, n <= 0
+           | X ( Y_1, Y_2, ... Y_n ) . P    # Receive prefix, n <= 0
+           | [ P_1 | P_2 | ... P_n ]        # N-ary parallel composition, n <= 0
+           | new X in P                     # Name restriction
+           | ! P                            # Replication
+           | { P_1 + P_2 + ... P_n }        # N-ary nondeterministic choice, n <= 2
+           | 0                              # Completed process
 
     X, Y ::= [a-z]+
 
