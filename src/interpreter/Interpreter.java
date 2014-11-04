@@ -13,17 +13,6 @@ import java.util.Random;
  */
 public class Interpreter {
 
-    /* For a planned refactor...
-    private static final int SENDERS = 0;
-    private static final int RECEIVERS = 1;
-    private static final int RESTRICTS = 2;
-    private static final int SUMS = 3;
-    private static final int REPLSENDERS = 4;
-    private static final int REPLRECEIVERS = 5;
-    private static final int REPLRESTRICTS = 6;
-    private static final int REPLSUMS = 7;
-    */
-
     private static Random rand = new Random();
 
     private HashMap<Integer, String> nameMap;
@@ -98,16 +87,10 @@ public class Interpreter {
 
         // Always send messages if possible. If not, do another kind of
         // reduction in arbitrary order
+        boolean doneReduction = tryReduction(this.senders, this.receivers);
+        if(doneReduction) { return true; }
 
-        ArrayList<Match> matches =
-                Match.findMatches(this.senders, this.receivers);
-        if(!matches.isEmpty()) {
-            Match reduction = Interpreter.arbitraryElement(matches);
-            this.reduce((Send) reduction.t1, (Receive) reduction.t2);
-            return true;
-        }
-
-        // The lists of terms that can interact. The order of the pair does
+        // The lists of terms that can interact. The order of the pair does not
         // matter.
         ArrayList[][] pairings = {
             { this.senders          , this.replReceivers    },
@@ -120,17 +103,13 @@ public class Interpreter {
             { this.receivers        , this.replRestricts    },
             { this.restricts        , this.restricts        },
             { this.restricts        , this.replRestricts    },
-
             { this.sums             , this.sums             },
-
             { this.sums             , this.senders          },
             { this.sums             , this.receivers        },
             { this.sums             , this.restricts        },
-
             { this.sums             , this.replSenders      },
             { this.sums             , this.replReceivers    },
             { this.sums             , this.replRestricts    },
-
             { this.sums             , this.replSums         },
             { this.senders          , this.replSums         },
             { this.receivers        , this.replSums         },
@@ -141,82 +120,116 @@ public class Interpreter {
         ArrayList<ArrayList[]> todo = new ArrayList<ArrayList[]>();
         for(ArrayList[] pair : pairings) { todo.add(pair); }
 
-        boolean doneReduction = false;
+        // Keep trying the possible reductions in random order until one works
         while(!(todo.isEmpty() || doneReduction)) {
             ArrayList[] pair = Interpreter.arbitraryElement(todo);
             todo.remove(pair);
-
-            matches = Match.findMatches(pair[0], pair[1]);
-            if(!matches.isEmpty()) {
-
-                Match reduction = Interpreter.arbitraryElement(matches);
-
-                if(reduction.t1 instanceof NDSum
-                        && reduction.t2 instanceof NDSum) {
-
-                    this.reduce((NDSum) reduction.t1, (NDSum) reduction.t2);
-                }
-                else if(reduction.t1 instanceof NDSum &&
-                        reduction.t2 instanceof Send) {
-
-                    this.reduce((NDSum) reduction.t1, (Send) reduction.t2);
-                }
-                else if(reduction.t1 instanceof NDSum &&
-                        reduction.t2 instanceof Receive) {
-
-                    this.reduce((NDSum) reduction.t1, (Receive) reduction.t2);
-                }
-
-                else if(reduction.t2 instanceof Send) {
-                    this.reduce((Send) reduction.t2);
-                }
-                else if(reduction.t2 instanceof Receive) {
-                    this.reduce((Receive) reduction.t2);
-                }
-                else if(reduction.t2 instanceof Restrict) {
-                    this.reduce((Restrict) reduction.t2);
-                }
-                else if(reduction.t2 instanceof NDSum) {
-                    this.reduce((NDSum) reduction.t2);
-                }
-                else {
-                    throw new IllegalStateException("PiTerm to reduce was " +
-                            "not Send, Receive or Restrict");
-                }
-
-                doneReduction = true;
-            }
+            doneReduction = tryReduction(pair[0], pair[1]);
         }
-
         return doneReduction;
     }
 
     /*
-     * Reduce the given pair of nondeterministic sums that can communicate.
+     * Attempt to find a reduction possibility accross members of the two given
+     * lists. If one is found, perform it and return true. Otherwise, return
+     * false.
      */
-    private void reduce(NDSum<Integer> sum1, NDSum<Integer> sum2) {
+    private boolean tryReduction(ArrayList<? extends PiTerm> list1,
+            ArrayList<? extends PiTerm> list2) {
 
+        ArrayList<Match> matches =
+                Match.findMatches(list1, list2);
+        if(matches.isEmpty()) { return false; }
+        Match reduction = Interpreter.arbitraryElement(matches);
+
+        if (pairMatch(this.senders, this.receivers, list1, list2)) {
+            this.doCommunicate((Send) reduction.t1, (Receive) reduction.t2);
+        }
+        else if(pairMatch(this.senders, this.replReceivers, list1, list2)) {
+            this.integrateNewlyExposedTerm(reduction.t2.copy());
+        }
+        else if(pairMatch(this.receivers, this.replSenders, list1, list2)) {
+            this.integrateNewlyExposedTerm(reduction.t2.copy());
+        }
+        else if(pairMatch(this.senders, this.restricts, list1, list2)) {
+            this.doScopeExtrusion((Restrict) reduction.t2);
+        }
+        else if(pairMatch(this.receivers, this.restricts, list1, list2)) {
+            this.doScopeExtrusion((Restrict) reduction.t2);
+        }
+        else if(pairMatch(this.restricts, this.replSenders, list1, list2)) {
+            this.integrateNewlyExposedTerm(reduction.t2.copy());
+        }
+        else if(pairMatch(this.restricts, this.replReceivers, list1, list2)) {
+            this.integrateNewlyExposedTerm(reduction.t2.copy());
+        }
+        else if(pairMatch(this.senders, this.replRestricts, list1, list2)) {
+            this.integrateNewlyExposedTerm(reduction.t2.copy());
+        }
+        else if(pairMatch(this.receivers, this.replRestricts, list1, list2)) {
+            this.integrateNewlyExposedTerm(reduction.t2.copy());
+        }
+        else if(pairMatch(this.restricts, this.restricts, list1, list2)) {
+            this.doScopeExtrusion((Restrict) reduction.t2);
+        }
+        else if(pairMatch(this.restricts, this.replRestricts, list1, list2)) {
+            this.integrateNewlyExposedTerm(reduction.t2.copy());
+        }
+        else if(pairMatch(this.sums, this.sums, list1, list2)) {
+            this.doSumSelection((NDSum) reduction.t1, reduction.t2);
+        }
+        else if(pairMatch(this.sums, this.senders, list1, list2)) {
+            this.doSumSelection((NDSum) reduction.t1, reduction.t2);
+        }
+        else if(pairMatch(this.sums, this.receivers, list1, list2)) {
+            this.doSumSelection((NDSum) reduction.t1, reduction.t2);
+        }
+        else if(pairMatch(this.sums, this.restricts, list1, list2)) {
+            this.doScopeExtrusion((Restrict) reduction.t2);
+        }
+        else if(pairMatch(this.sums, this.replSenders, list1, list2)) {
+            this.integrateNewlyExposedTerm(reduction.t2.copy());
+        }
+        else if(pairMatch(this.sums, this.replReceivers, list1, list2)) {
+            this.integrateNewlyExposedTerm(reduction.t2.copy());
+        }
+        else if(pairMatch(this.sums, this.replRestricts, list1, list2)) {
+            this.integrateNewlyExposedTerm(reduction.t2.copy());
+        }
+        else if(pairMatch(this.sums, this.replSums, list1, list2)) {
+            this.integrateNewlyExposedTerm(reduction.t2.copy());
+        }
+        else if(pairMatch(this.senders, this.replSums, list1, list2)) {
+            this.integrateNewlyExposedTerm(reduction.t2.copy());
+        }
+        else if(pairMatch(this.receivers, this.replSums, list1, list2)) {
+            this.integrateNewlyExposedTerm(reduction.t2.copy());
+        }
+        else if(pairMatch(this.restricts, this.replSums, list1, list2)) {
+            this.integrateNewlyExposedTerm(reduction.t2.copy());
+        }
+        else {
+            throw new IllegalArgumentException("Given lists not allowed to " +
+                    "communicate");
+        }
+
+        return true;
     }
+    // Determine if two lists are the same lists as the two other lists.
+    private static boolean pairMatch(
+            ArrayList<? extends PiTerm> e1,
+            ArrayList<? extends PiTerm> e2,
+            ArrayList<? extends PiTerm> t1,
+            ArrayList<? extends PiTerm> t2) {
 
-    /*
-     * Reduce the given pairing of a nondeterministic sum and a sender.
-     */
-    private void reduce(NDSum<Integer> sum, Send<Integer> send) {
-
-    }
-
-    /*
-     * Reduce the given pairing of a nondeterministic sum and a receiver.
-     */
-    private void reduce(NDSum<Integer> sum, Receive<Integer> rece) {
-
+        return (e1 == t1 && e2 == t2) || (e1 == t2 && e2 == t1);
     }
 
     /*
      * Reduce the given Send and Receive that are members of senders and
      * receivers respectively, by exchanging a message.
      */
-    private void reduce(Send<Integer> send, Receive<Integer> rece) {
+    private void doCommunicate(Send<Integer> send, Receive<Integer> rece) {
 
         assert PiTerm.talksTo(send, rece);
 
@@ -248,59 +261,6 @@ public class Interpreter {
     }
 
     /*
-     * Replicate the given member of the replSenders ArrayList
-     */
-    private void reduce(Send<Integer> send) {
-
-        if(!this.replSenders.contains(send)) {
-            throw new IllegalArgumentException("Send send parameter " +
-                    "must be a member of the replSenders ArrayList");
-        }
-
-        this.integrateNewlyExposedTerm(send);
-    }
-
-    /*
-     * Replicate the given member of the replReceivers ArrayList
-     */
-    private void reduce(Receive<Integer> rece) {
-
-        if(!this.replReceivers.contains(rece)) {
-            throw new IllegalArgumentException("Receive rece parameter " +
-                    "must be a member of the replReceivers ArrayList");
-        }
-
-        this.integrateNewlyExposedTerm(rece);
-    }
-
-    /*
-     * Replicate the given member of the replRestricts ArrayList
-     */
-    private void reduce(Restrict<Integer> rest) {
-
-        boolean isInRestricts = this.restricts.contains(rest);
-        boolean isInReplRestricts = this.replRestricts.contains(rest);
-
-        if(isInRestricts == isInReplRestricts) {
-            throw new IllegalArgumentException("Restrict rest parameter " +
-                    "must be a member of the replRestricts ArrayList or the " +
-                    "restricts ArrayList, but not both");
-        }
-
-        if(isInRestricts) {
-            this.doScopeExtrusion(rest);
-            return;
-        }
-
-        if(isInReplRestricts) {
-            this.integrateNewlyExposedTerm(rest);
-            return;
-        }
-
-        throw new IllegalStateException("Logic is dead!!!");
-    }
-
-    /*
      * Perform scope extrusion to the given member of the restricts ArrayList
      */
     private void doScopeExtrusion(Restrict<Integer> rest) {
@@ -326,7 +286,6 @@ public class Interpreter {
         // Update nextAvailableName
         this.nextAvailableName++;
     }
-
     // Add ' to a name until it is one that does not appear in the usedNames set
     private String nextStringName(String baseName) {
         while(this.usedNames.contains(baseName)) {
@@ -336,16 +295,36 @@ public class Interpreter {
     }
 
     /*
-     * Replicate the given member of the replSums ArrayList
+     * Reduce an NDSum PiTerm found in the sums ArrayList. This is done by
+     * identifing all the possibilities of the sum that communicate with the
+     * other given PiTerm, removing the whole sum from its list, and
+     * reintegrating one of the identified possiblities (randomly chosen).
      */
-    private void reduce(NDSum<Integer> sum) {
+    private void doSumSelection(NDSum<Integer> sum, PiTerm<Integer> other) {
 
-        if(!this.replSums.contains(sum)) {
-            throw new IllegalArgumentException("Receive rece parameter " +
-                    "must be a member of the replReceivers ArrayList");
+        if(!this.sums.contains(sum)) {
+            throw new IllegalArgumentException("NDSum sum parameter must be " +
+                    "a member of the sums ArrayList");
         }
 
-        this.integrateNewlyExposedTerm(sum);
+        // Obtain a list of all the subterms of sum that talk to other.
+        ArrayList<PiTerm<Integer>> commSubs = new ArrayList<PiTerm<Integer>>();
+        for(int i = 0; i < sum.arity(); i++) {
+            if(PiTerm.talksTo(sum.subterm(i), other)) {
+                commSubs.add(sum.subterm(i));
+            }
+        }
+
+        // Just to be safe...
+        if(commSubs.isEmpty()) {
+            throw new IllegalStateException("Tried to do sum selection with " +
+                    "terms that cannot communicate");
+        }
+
+        // Remove sum from the sums ArrayList and reintegrate one of its
+        // children
+        this.sums.remove(sum);
+        this.integrateNewlyExposedTerm(Interpreter.arbitraryElement(commSubs));
     }
 
     // Add a newly exposed term to the appropriate arraylist
