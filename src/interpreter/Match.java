@@ -36,7 +36,10 @@ public class Match {
         ArrayList<Match> matches = new ArrayList<Match>();
         for(PiTerm t1 : list1) {
             for(PiTerm t2 : list2) {
-                if(PiTerm.talksTo(t1, t2)) {
+                // If they talk to each other, and ARE NOT THE SAME TERM, we
+                // consider this a match. Otherwise, sums can cause themselves
+                // to reduce to one of their children.
+                if(PiTerm.talksTo(t1, t2) && (t1 != t2)) {
                     matches.add(new Match(t1, t2));
                 }
             }
