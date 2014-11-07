@@ -22,11 +22,14 @@ public final class Parallel<T> extends PiTermManySub<T> {
      * type, the values of which are mapped to by the contained names.
      */
     public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
-        ArrayList<String> strSubs = new ArrayList<String>();
-        for(PiTerm<T> subterm : this.subterms) {
-            strSubs.add(subterm.toStringWithNameMap(nameMap));
+        if(this.arity() < 1) { return "0"; }
+        else {
+            ArrayList<String> strSubs = new ArrayList<String>();
+            for(PiTerm<T> subterm : this.subterms) {
+                strSubs.add(subterm.toStringWithNameMap(nameMap));
+            }
+            return PiTerm.stringifyList("[ ", " ]", " | ", strSubs);
         }
-        return PiTerm.stringifyList("[", "]", " |", strSubs);
     }
 
     /**
@@ -35,7 +38,8 @@ public final class Parallel<T> extends PiTermManySub<T> {
      */
     @Override
     public String toString() {
-        return PiTerm.stringifyList("[ ", " ]", " | ", this.subterms);
+        if(this.arity() < 1) { return "0"; }
+        else { return PiTerm.stringifyList("[ ", " ]", " | ", this.subterms); }
     }
 
     /**

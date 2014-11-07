@@ -231,7 +231,15 @@ public class Interpreter {
      */
     private void doCommunicate(Send<Integer> send, Receive<Integer> rece) {
 
-        assert PiTerm.talksTo(send, rece);
+        if(!send.chnl().equals(rece.chnl())) {
+            throw new IllegalArgumentException("Tried to pass a message " +
+                    "between terms on different channels");
+        }
+
+        if(!(send.arity() == rece.arity())) {
+            throw new IllegalArgumentException("Tried to pass a message " +
+                    "between terms of unequal arity");
+        }
 
         if(!(this.senders.contains(send) && this.receivers.contains(rece))) {
             throw new IllegalArgumentException("Send send and Receive " +
@@ -324,7 +332,62 @@ public class Interpreter {
         // Remove sum from the sums ArrayList and reintegrate one of its
         // children
         this.sums.remove(sum);
-        this.integrateNewlyExposedTerm(Interpreter.arbitraryElement(commSubs));
+        PiTerm<Integer> chosen = Interpreter.arbitraryElement(commSubs);
+        this.integrateNewlyExposedTerm(chosen);
+
+        // Since sum selection is not supposed to be an atomic action in terms
+        // of the pi calculus semantics, we must reduce the chosen sum
+        // possibilty and the reacting term until they communicate.
+        this.forceCommunication(chosen, other);
+    }
+
+    /*
+     * Force two terms to talk. Throws an exception if they don't.
+     */
+    private void forceCommunication(PiTerm<Integer> t1, PiTerm<Integer> t2) {
+        if(t1 instanceof Send) {
+            if(t2 instanceof Receive) {
+                this.doCommunicate((Send) t1, (Receive) t2);
+            }
+            else {
+                this.forceCommunication(t2, t1);
+            }
+        }
+        if(t1 instanceof Receive) {
+            if(t2 instanceof Send) {
+                this.doCommunicate((Send) t2, (Receive) t1);
+            }
+            else {
+                this.forceCommunication(t2, t1);
+            }
+        }
+        if(t1 instanceof PiTermManySub) {
+            PiTermManySub<Integer> ptms = (PiTermManySub) t1;
+            ArrayList<PiTerm<Integer>> commSubs =
+                    new ArrayList<PiTerm<Integer>>();
+            for(int i = 0; i < ptms.arity(); i++) {
+                if(PiTerm.talksTo(ptms.subterm(i), t2)) {
+                    commSubs.add(ptms.subterm(i));
+                }
+            }
+            PiTerm<Integer> chosen = Interpreter.arbitraryElement(commSubs);
+            if(t1 instanceof NDSum) {
+                if(this.sums.contains(t1)) { this.sums.remove(t1); }
+            }
+            this.integrateNewlyExposedTerm(chosen);
+            this.forceCommunication(chosen, t2);
+        }
+        if(t1 instanceof Replicate) {
+            PiTerm<Integer> t1SubCopy = ((Replicate) t1).subterm().copy();
+            this.integrateNewlyExposedTerm(t1);
+            this.integrateNewlyExposedTerm(t1SubCopy);
+            this.forceCommunication(t1SubCopy, t2);
+        }
+        if(t1 instanceof Restrict) {
+            PiTerm<Integer> t1Sub = ((Restrict) t1).subterm();
+            this.doScopeExtrusion((Restrict) t1);
+            this.forceCommunication(t1, t2);
+        }
     }
 
     // Add a newly exposed term to the appropriate arraylist
@@ -340,16 +403,22 @@ public class Interpreter {
             PiTerm<Integer> subterm = ((Replicate) term).subterm();
 
             if(subterm instanceof Send) {
-                this.replSenders.add((Send) subterm);
+                if(!(this.replSenders.contains(subterm))) {
+                    this.replSenders.add((Send) subterm);
+                }
             }
             else if(subterm instanceof Receive) {
-                this.replReceivers.add((Receive) subterm);
+                if(!(this.replReceivers.contains(subterm))) {
+                    this.replReceivers.add((Receive) subterm);
+                }
             }
             else if(subterm instanceof Restrict) {
-                this.replRestricts.add((Restrict) subterm);
+                if(!(this.replRestricts.contains(subterm))) {
+                    this.replRestricts.add((Restrict) subterm);
+                }
             }
             else if(subterm instanceof Parallel) {
-                Parallel para = (Parallel) term;
+                Parallel para = (Parallel) subterm;
                 for(int i = 0; i < para.arity(); i++) {
                     this.integrateNewlyExposedTerm(
                             new Replicate(para.subterm(i)));
@@ -359,7 +428,9 @@ public class Interpreter {
                 this.integrateNewlyExposedTerm(subterm);
             }
             else if(subterm instanceof NDSum) {
-                this.replSums.add((NDSum) subterm);
+                if(!(this.replSums.contains(subterm))) {
+                    this.replSums.add((NDSum) subterm);
+                }
             }
             else {
                 throw new IllegalArgumentException("Non-standard PiTerm " + 
@@ -423,7 +494,7 @@ public class Interpreter {
         for(Integer i : this.boundNames) {
             scope += "new " + this.nameMap.get(i) + " in ";
         }
-        return scope + (procs.equals("") ? "[]" : "[ " + procs + " ]");
+        return scope + (procs.equals("") ? "0" : "[ " + procs + " ]");
     }
 
     /**
