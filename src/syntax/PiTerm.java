@@ -2,7 +2,6 @@ package syntax;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.HashMap;
 
 /**
  * A PiTerm is a pi-calculus expression. This is a generic class since different
@@ -14,7 +13,13 @@ import java.util.HashMap;
  * override java.lang.Object.equals(Object o) in a sensible way. Unfortunately,
  * java's type system does not allow one to actually enforce such a constraint.
  */
-public abstract class PiTerm<T> {
+public abstract class PiTerm<T> extends Term<T> {
+
+    /**
+     * Copy a PiTerm. Contained name objects need not be deeply copied.
+     * @return a copy of this PiTerm.
+     */
+    public abstract PiTerm<T> copy();
 
     /**
      * Generate a string of the given number of tabs, for use when pretty-
@@ -26,42 +31,6 @@ public abstract class PiTerm<T> {
         return new String(new char[4 * numTabs]).replace('\0', ' ');
     }
 
-    /**
-     * Obtain a string representation of this PiTerm.
-     * @return a string representing the PiTerm
-     */
-    public abstract String toString();
-
-    /**
-     * Obtain a string representation of this PiTerm, but instead of using the
-     * toString method of the contained names, use the toString method of
-     * objects mapped to by the contained names in the given map.
-     * @return a string representing the PiTerm, printing names of a different
-     * type, the values of which are mapped to by the contained names.
-     */
-    public abstract <U> String toStringWithNameMap(HashMap<T, U> nameMap);
-
-    /**
-     * Rename the names in a PiTerm as is necessary after the exchange of a
-     * message - this is not alpha-conversion.
-     * @param from some names of this value must be renamed
-     * @param to names being renamed are renamed to this value
-     */
-    public abstract void rename(T from, T to);
-
-    /**
-     * Rename every single occurence of the first given name with the second
-     * given name.
-     * @param from all names of this value must be renamed
-     * @param to names being renamed are renamed to this value
-     */
-    public abstract void alphaConvert(T from, T to);
-
-    /**
-     * Copy a PiTerm. Contained name objects need not be deeply copied.
-     * @return a copy of this PiTerm.
-     */
-    public abstract PiTerm<T> copy();
 
     /**
      * Generate strings from lists of different kinds, that are nicely delimited
