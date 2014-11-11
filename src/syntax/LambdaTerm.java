@@ -1,30 +1,90 @@
 package syntax;
 
+import java.util.HashSet;
+
+/**
+ * LambdaTerms are terms in the lambda calculus. This class contains static
+ * methods for evaluating them.
+ */
 public abstract class LambdaTerm<T> extends Term<T> {
 
-    public static LambdaTerm<T> reduce(LambdaTerm<T> term) {
-        if(term instanceof Abstraction) {
-            // Nothing to do
-            return term;
+    /**
+     * Enumerate the free variables in this LambdaTerm.
+     * @return a HashSet of all the free variable names in this LambdaTerm
+     */
+    public abstract HashSet<T> freeVars();
+
+    /**
+     * Enumerate the variable names that have their binders within the given
+     * LambdaTerm.
+     * @return a HashSet of all the variable names that have their binders
+     * within the given LambdaTerm
+     */
+    public abstract HashSet<T> binders();
+
+    /**
+     * Reduce a LambdaTerm until it is in weak-head normal form.
+     * @param term the term to reduce
+     * @return the reduced term
+     */
+    public static <T> LambdaTerm<T> reduce(LambdaTerm<T> term) {
+        if(!(term instanceof Abstraction
+                || term instanceof Application
+                || term instanceof Variable)) {
+
+            throw new IllegalArgumentException("Unrecognised LambdaTerm type " +
+                    "in LambdaTerm.reduce()");
         }
-        else if(term instanceof Application) {
+        while(term instanceof Application
+                && ((Application) term).func() instanceof Abstraction) {
+
+            /*
+             *           app
+             *          /   \
+             *         /     \
+             *       abs     arg
+             *      /   \
+             *     /     \
+             *   name    body
+             */
             Application<T> app = (Application) term;
-            if(app.func() instanceof Abstraction) {
-                Abstraction<T> abs = (Abstraction) app.func();
-                return LambdaTerm.substitute(abs.body(), abs.name(), app.arg());
+            Abstraction<T> abs = (Abstraction) app.func();
+            term = LambdaTerm.substitute(abs.body(), abs.name(), app.arg());
+        }
+        return term;
+    }
+
+    public static <T> LambdaTerm<T> substitute(LambdaTerm<T> subWithin,
+            T subOut, LambdaTerm<T> subIn) {
+
+        if(subWithin instanceof Abstraction) {
+            Abstraction abs = (Abstraction) subWithin;
+            if(abs.name().equals(subOut)) {
+                return subWithin;
             }
             else {
-                // Nothing to do
-                return term;
+                abs.setBody(LambdaTerm.substitute(abs.body(), subOut, subIn));
+                return abs;
             }
         }
-        else if(term instanceof Var) {
-            // Nothing to do
-            return term;
+        else if(subWithin instanceof Application) {
+            Application app = (Application) subWithin;
+            app.setFunc(LambdaTerm.substitute(app.func(), subOut, subIn));
+            app.setArg(LambdaTerm.substitute(app.arg(), subOut, subIn));
+            return app;
+        }
+        else if(subWithin instanceof Variable) {
+            Variable var = (Variable) subWithin;
+            if(var.name().equals(subOut)) {
+                return subIn.copy();
+            }
+            else {
+                return var;
+            }
         }
         else {
             throw new IllegalArgumentException("Unrecognised LambdaTerm type " +
-                    "in LambdaTerm.reduce()");
+                    "in LambdaTerm.substitute()");
         }
     }
 }
