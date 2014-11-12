@@ -1,11 +1,13 @@
 package interpreter;
 
 import syntax.*;
+import utils.Pair;
 import java.util.Collections;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.Optional;
 
 /**
  * Represents n-ary parallel composition, and contains methods to handle
@@ -30,6 +32,8 @@ public class Interpreter {
     private ArrayList<NDSum<Integer>> replSums;
 
     private HashSet<Integer> boundNames;
+
+    private Optional<Pair<PiTerm<Integer>>> actingTerm;
 
     /**
      * Construct a new Interpreter.
@@ -65,6 +69,8 @@ public class Interpreter {
         this.replSums = new ArrayList<NDSum<Integer>>();
 
         this.boundNames = new HashSet<Integer>();
+
+        this.actingTerm = Optional.empty();
 
         this.integrateNewlyExposedTerm(term);
     }
