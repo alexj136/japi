@@ -1,5 +1,6 @@
 package syntax;
 
+import utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -27,7 +28,7 @@ public final class Receive<T> extends PiTermComm<T> {
      */
     @Override
     public String toString() {
-        return this.chnl + " " + PiTerm.stringifyList("(", ")", ",", this.msg) +
+        return this.chnl + " " + Utils.stringifyList("(", ")", ",", this.msg) +
             " . " + this.subterm;
     }
 
@@ -41,7 +42,7 @@ public final class Receive<T> extends PiTermComm<T> {
         ArrayList<U> msgNames = new ArrayList<U>();
         for(T name : this.msg) { msgNames.add(nameMap.get(name)); }
         return nameMap.get(this.chnl) + " " +
-                PiTerm.stringifyList("( ", " )", ", ", msgNames) + " . " +
+                Utils.stringifyList("( ", " )", ", ", msgNames) + " . " +
                 this.subterm.toStringWithNameMap(nameMap);
     }
 

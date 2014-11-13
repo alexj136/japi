@@ -27,6 +27,17 @@ public final class Application<T> extends LambdaTerm<T> {
         return fvArg;
     }
 
+    public HashSet<T> binders() {
+        HashSet<T> bindersFunc = this.func.binders();
+        HashSet<T> bindersArg = this.arg.binders();
+        for(T name : bindersFunc) { bindersArg.add(name); }
+        return bindersArg;
+    }
+
+    public String toString() {
+        return this.func + " " + this.arg;
+    }
+
     public Application<T> copy() {
         return new Application(this.func.copy(), this.arg.copy());
     }

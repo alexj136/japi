@@ -1,5 +1,6 @@
 package syntax;
 
+import utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -28,7 +29,7 @@ public final class Parallel<T> extends PiTermManySub<T> {
             for(PiTerm<T> subterm : this.subterms) {
                 strSubs.add(subterm.toStringWithNameMap(nameMap));
             }
-            return PiTerm.stringifyList("[ ", " ]", " | ", strSubs);
+            return Utils.stringifyList("[ ", " ]", " | ", strSubs);
         }
     }
 
@@ -39,7 +40,7 @@ public final class Parallel<T> extends PiTermManySub<T> {
     @Override
     public String toString() {
         if(this.arity() < 1) { return "0"; }
-        else { return PiTerm.stringifyList("[ ", " ]", " | ", this.subterms); }
+        else { return Utils.stringifyList("[ ", " ]", " | ", this.subterms); }
     }
 
     /**

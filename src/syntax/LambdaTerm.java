@@ -29,7 +29,8 @@ public abstract class LambdaTerm<T> extends Term<T> {
     public abstract HashSet<T> binders();
 
     /**
-     * Reduce a LambdaTerm until it is in weak-head normal form.
+     * Reduce a LambdaTerm until it is in weak-head normal form. Mutates the
+     * given term - do not keep any pointers to it after calling.
      * @param term the term to reduce
      * @return the reduced term
      */
@@ -48,7 +49,7 @@ public abstract class LambdaTerm<T> extends Term<T> {
              *           app
              *          /   \
              *         /     \
-             *       abs     arg
+             *       abs     arg    ->    body{arg/name}
              *      /   \
              *     /     \
              *   name    body

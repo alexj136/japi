@@ -18,5 +18,9 @@ public final class Variable<T> extends LambdaTerm<T> {
         return fv;
     }
 
+    public HashSet<T> binders() { return new HashSet<T>(); }
+
+    public String toString() { return this.name.toString(); }
+
     public Variable<T> copy() { return new Variable(this.name); }
 }
