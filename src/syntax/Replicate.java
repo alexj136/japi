@@ -43,12 +43,12 @@ public final class Replicate<T> extends PiTermOneSub<T> {
     }
 
     /**
-     * Alpha-convert this Replicate as is necessary when doing scope extrusion.
-     * @param from Names of this value are renamed
-     * @param to names being renamed are renamed to this value
+     * Carelessly rename this Replicate.
+     * @param from all names of this value are renamed
+     * @param to all names being renamed are renamed to this value
      */
-    public void alphaConvert(T from, T to) {
-        this.subterm.alphaConvert(from, to);
+    public void blindRename(T from, T to) {
+        this.subterm.blindRename(from, to);
     }
 
     /**

@@ -44,12 +44,12 @@ public abstract class PiTermComm<T> extends PiTermOneSub<T> {
     public int arity() { return this.msg.size(); }
 
     /**
-     * Alpha-convert this communicating term. Send and Receive have the same
-     * behaviour under alpha conversion.
-     * @param from names with this value are renamed
-     * @param to names being renamed are renamed to this name
+     * Carelessly rename this communicating term. Send and Receive have the same
+     * behaviour here.
+     * @param from all names with this value are renamed
+     * @param to all names being renamed are renamed to this name
      */
-    public void alphaConvert(T from, T to) {
+    public void blindRename(T from, T to) {
         if(this.chnl.equals(from)) { this.chnl = to; }
         for(int i = 0; i < this.arity(); i++) {
             if(this.msg(i).equals(from)) {
@@ -57,6 +57,6 @@ public abstract class PiTermComm<T> extends PiTermOneSub<T> {
                 this.msg.add(i, to);
             }
         }
-        this.subterm.alphaConvert(from, to);
+        this.subterm.blindRename(from, to);
     }
 }

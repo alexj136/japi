@@ -33,7 +33,7 @@ public abstract class Term<T> {
      * @param from all names of this value must be renamed
      * @param to names being renamed are renamed to this value
      */
-    public abstract void alphaConvert(T from, T to);
+    public abstract void blindRename(T from, T to);
 
     /**
      * Copy a Term. Contained name objects need not be deeply copied.

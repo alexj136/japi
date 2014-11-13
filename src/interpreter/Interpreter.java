@@ -324,7 +324,7 @@ public class Interpreter {
         this.nameMap.put(this.nextAvailableName, printableName);
 
         // Alpha convert
-        rest.alphaConvert(rest.boundName(), this.nextAvailableName);
+        rest.blindRename(rest.boundName(), this.nextAvailableName);
 
         // Extrude the scope
         this.boundNames.add(rest.boundName());

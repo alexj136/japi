@@ -51,7 +51,7 @@ public final class Restrict<T> extends PiTermOneSub<T> {
 
     /**
      * Renamw this Restrict as is required when a message is passed.
-     * @param from Names of this value are renamed
+     * @param from names of this value are renamed
      * @param to names being renamed are renamed to this value
      */
     public void rename(T from, T to) {
@@ -59,16 +59,15 @@ public final class Restrict<T> extends PiTermOneSub<T> {
     }
 
     /**
-     * Alpha-convert this Restrict as is required when performing scope
-     * extrusion.
-     * @param from Names of this value are renamed
-     * @param to names being renamed are renamed to this value
+     * Carelessly rename this Restrict.
+     * @param from all names of this value are renamed
+     * @param to all names being renamed are renamed to this value
      */
-    public void alphaConvert(T from, T to) {
+    public void blindRename(T from, T to) {
         if(this.boundName.equals(from)) {
             this.boundName = to;
         }
-        this.subterm.alphaConvert(from, to);
+        this.subterm.blindRename(from, to);
     }
 
     /**

@@ -56,13 +56,13 @@ public abstract class PiTermManySub<T> extends PiTerm<T>
     }
 
     /**
-     * Alpha-convert this PiTermManySub Term.
+     * Carelessly rename every occurence of 'from' with 'to'.
      * @param from names with this value are renamed
      * @param to names being renamed are renamed to this name
      */
-    public void alphaConvert(T from, T to) {
+    public void blindRename(T from, T to) {
         for(PiTerm<T> subterm : this.subterms) {
-            subterm.alphaConvert(from, to);
+            subterm.blindRename(from, to);
         }
     }
 }
