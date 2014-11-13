@@ -9,6 +9,12 @@ import java.util.HashSet;
 public abstract class LambdaTerm<T> extends Term<T> {
 
     /**
+     * Copy a LambdaTerm. Contained name objects need not be deeply copied.
+     * @return a copy of this LambdaTerm.
+     */
+    public abstract LambdaTerm<T> copy();
+
+    /**
      * Enumerate the free variables in this LambdaTerm.
      * @return a HashSet of all the free variable names in this LambdaTerm
      */

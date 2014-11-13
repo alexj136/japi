@@ -33,7 +33,9 @@ public class Interpreter {
 
     private HashSet<Integer> boundNames;
 
-    private Optional<Pair<PiTerm<Integer>>> actingTerm;
+    // This pair should not belong to a PiTerm list. Replicated terms should
+    // have the Replicate wrapper, Parallels can be present, etc.
+    private Optional<Pair<PiTerm<Integer>, PiTerm<Integer>>> actingTerms;
 
     /**
      * Construct a new Interpreter.
@@ -70,7 +72,7 @@ public class Interpreter {
 
         this.boundNames = new HashSet<Integer>();
 
-        this.actingTerm = Optional.empty();
+        this.actingTerms = Optional.empty();
 
         this.integrateNewlyExposedTerm(term);
     }
@@ -91,9 +93,17 @@ public class Interpreter {
      */
     public boolean doReduction() {
 
+        // If we're in the middle of an indivisible action, we must default to
+        // continuing this, to prevent illegal interference
+        if(this.actingTerms.isPresent()) {
+            this.continueInProgressReduction();
+            return true;
+        }
+
         // Always send messages if possible. If not, do another kind of
         // reduction in arbitrary order
-        boolean doneReduction = tryReduction(this.senders, this.receivers);
+        boolean doneReduction =
+                tryRandomReductionBetweenLists(this.senders, this.receivers);
         if(doneReduction) { return true; }
 
         // The lists of terms that can interact. The order of the pair does not
@@ -130,7 +140,7 @@ public class Interpreter {
         while(!(todo.isEmpty() || doneReduction)) {
             ArrayList[] pair = Interpreter.arbitraryElement(todo);
             todo.remove(pair);
-            doneReduction = tryReduction(pair[0], pair[1]);
+            doneReduction = tryRandomReductionBetweenLists(pair[0], pair[1]);
         }
         return doneReduction;
     }
@@ -140,13 +150,29 @@ public class Interpreter {
      * lists. If one is found, perform it and return true. Otherwise, return
      * false.
      */
-    private boolean tryReduction(ArrayList<? extends PiTerm> list1,
+    private boolean tryRandomReductionBetweenLists(
+            ArrayList<? extends PiTerm> list1,
             ArrayList<? extends PiTerm> list2) {
 
+        // Enumerate all matches between the given lists
         ArrayList<Match> matches =
                 Match.findMatches(list1, list2);
+
+        // If there are no matches, we were unsuccessful, so return false
         if(matches.isEmpty()) { return false; }
-        Match reduction = Interpreter.arbitraryElement(matches);
+
+        // Handle the chosen reduction and forward the returned status
+        return this.handleChosenReduction(list1, list2,
+                Interpreter.arbitraryElement(matches));
+    }
+
+    /*
+     * Given two lists and a Match between them, perform a reduction on that
+     * matching pair. It is not checked that the match contains terms from the
+     * given lists.
+     */
+    private boolean handleChosenReduction(ArrayList<? extends PiTerm> list1,
+            ArrayList<? extends PiTerm> list2, Match reduction) {
 
         if (pairMatch(this.senders, this.receivers, list1, list2)) {
             this.doCommunicate((Send) reduction.t1, (Receive) reduction.t2);
@@ -158,10 +184,12 @@ public class Interpreter {
             this.integrateNewlyExposedTerm(reduction.t2.copy());
         }
         else if(pairMatch(this.senders, this.restricts, list1, list2)) {
-            this.doScopeExtrusion((Restrict) reduction.t2);
+            this.integrateNewlyExposedTerm(
+                    this.doScopeExtrusion((Restrict) reduction.t2));
         }
         else if(pairMatch(this.receivers, this.restricts, list1, list2)) {
-            this.doScopeExtrusion((Restrict) reduction.t2);
+            this.integrateNewlyExposedTerm(
+                    this.doScopeExtrusion((Restrict) reduction.t2));
         }
         else if(pairMatch(this.restricts, this.replSenders, list1, list2)) {
             this.integrateNewlyExposedTerm(reduction.t2.copy());
@@ -176,7 +204,8 @@ public class Interpreter {
             this.integrateNewlyExposedTerm(reduction.t2.copy());
         }
         else if(pairMatch(this.restricts, this.restricts, list1, list2)) {
-            this.doScopeExtrusion((Restrict) reduction.t2);
+            this.integrateNewlyExposedTerm(
+                    this.doScopeExtrusion((Restrict) reduction.t2));
         }
         else if(pairMatch(this.restricts, this.replRestricts, list1, list2)) {
             this.integrateNewlyExposedTerm(reduction.t2.copy());
@@ -191,7 +220,8 @@ public class Interpreter {
             this.doSumSelection((NDSum) reduction.t1, reduction.t2);
         }
         else if(pairMatch(this.sums, this.restricts, list1, list2)) {
-            this.doScopeExtrusion((Restrict) reduction.t2);
+            this.integrateNewlyExposedTerm(
+                    this.doScopeExtrusion((Restrict) reduction.t2));
         }
         else if(pairMatch(this.sums, this.replSenders, list1, list2)) {
             this.integrateNewlyExposedTerm(reduction.t2.copy());
@@ -275,9 +305,10 @@ public class Interpreter {
     }
 
     /*
-     * Perform scope extrusion to the given member of the restricts ArrayList
+     * Perform scope extrusion to the given member of the restricts ArrayList.
+     * Return a pointer to the newly exposed term, but do not reintegrate it.
      */
-    private void doScopeExtrusion(Restrict<Integer> rest) {
+    private PiTerm<Integer> doScopeExtrusion(Restrict<Integer> rest) {
 
         if(!this.restricts.contains(rest)) {
             throw new IllegalArgumentException("Restrict rest parameter " +
@@ -292,13 +323,17 @@ public class Interpreter {
         this.usedNames.add(printableName);
         this.nameMap.put(this.nextAvailableName, printableName);
 
-        // Alpha convert and reintegrate
+        // Alpha convert
         rest.alphaConvert(rest.boundName(), this.nextAvailableName);
-        this.integrateNewlyExposedTerm(rest.subterm());
+
+        // Extrude the scope
         this.boundNames.add(rest.boundName());
 
         // Update nextAvailableName
         this.nextAvailableName++;
+
+        // Return the newly exposed term
+        return rest.subterm();
     }
     // Add ' to a name until it is one that does not appear in the usedNames set
     private String nextStringName(String baseName) {
@@ -314,7 +349,8 @@ public class Interpreter {
      * other given PiTerm, removing the whole sum from its list, and
      * reintegrating one of the identified possiblities (randomly chosen).
      */
-    private void doSumSelection(NDSum<Integer> sum, PiTerm<Integer> other) {
+    private void doSumSelection(NDSum<Integer> sum,
+            PiTerm<Integer> other) {
 
         if(!this.sums.contains(sum)) {
             throw new IllegalArgumentException("NDSum sum parameter must be " +
@@ -335,64 +371,117 @@ public class Interpreter {
                     "terms that cannot communicate");
         }
 
-        // Remove sum from the sums ArrayList and reintegrate one of its
-        // children
+        // Remove the sum and choose the possibility
         this.sums.remove(sum);
         PiTerm<Integer> chosen = Interpreter.arbitraryElement(commSubs);
-        this.integrateNewlyExposedTerm(chosen);
 
-        // Since sum selection is not supposed to be an atomic action in terms
-        // of the pi calculus semantics, we must reduce the chosen sum
-        // possibilty and the reacting term until they communicate.
-        this.forceCommunication(chosen, other);
+        if(other instanceof Send) {
+            this.senders.remove(other);
+        }
+        else if(other instanceof Receive) {
+            this.receivers.remove(other);
+        }
+        else if(other instanceof NDSum) {
+            this.sums.remove(other);
+        }
+        else {
+            throw new IllegalArgumentException("Sum selection can only be " +
+                    "invoked with a match between a sum and a member of the " +
+                    "sums, senders or receivers lists.");
+        }
+
+        this.actingTerms = Optional.of(
+                new Pair<PiTerm<Integer>, PiTerm<Integer>>(chosen, other));
     }
 
     /*
      * Force two terms to talk. Throws an exception if they don't.
      */
-    private void forceCommunication(PiTerm<Integer> t1, PiTerm<Integer> t2) {
+    private void continueInProgressReduction() {
+
+        if(!this.actingTerms.isPresent()) {
+            throw new IllegalStateException("continueInProgressReduction was " +
+                    "called when no reduction was in progress");
+        }
+
+        PiTerm<Integer> t1 = this.actingTerms.get().first();
+        PiTerm<Integer> t2 = this.actingTerms.get().second();
+
         if(t1 instanceof Send) {
             if(t2 instanceof Receive) {
+                this.integrateNewlyExposedTerm(t1);
+                this.integrateNewlyExposedTerm(t2);
                 this.doCommunicate((Send) t1, (Receive) t2);
+                this.actingTerms = Optional.empty();
             }
             else {
-                this.forceCommunication(t2, t1);
+                this.actingTerms = Optional.of(
+                        new Pair<PiTerm<Integer>, PiTerm<Integer>>(t2, t1));
+                this.continueInProgressReduction();
             }
         }
-        if(t1 instanceof Receive) {
+        else if(t1 instanceof Receive) {
             if(t2 instanceof Send) {
+                this.integrateNewlyExposedTerm(t1);
+                this.integrateNewlyExposedTerm(t2);
                 this.doCommunicate((Send) t2, (Receive) t1);
+                this.actingTerms = Optional.empty();
             }
             else {
-                this.forceCommunication(t2, t1);
+                this.actingTerms = Optional.of(
+                        new Pair<PiTerm<Integer>, PiTerm<Integer>>(t2, t1));
+                this.continueInProgressReduction();
             }
         }
-        if(t1 instanceof PiTermManySub) {
+        else if(t1 instanceof PiTermManySub) {
             PiTermManySub<Integer> ptms = (PiTermManySub) t1;
             ArrayList<PiTerm<Integer>> commSubs =
                     new ArrayList<PiTerm<Integer>>();
+
+            // Enumerate the subterms which will communicate
             for(int i = 0; i < ptms.arity(); i++) {
                 if(PiTerm.talksTo(ptms.subterm(i), t2)) {
                     commSubs.add(ptms.subterm(i));
                 }
             }
+
+            // Pick one to use
             PiTerm<Integer> chosen = Interpreter.arbitraryElement(commSubs);
+
+            // Either discard the others (for a sum) or integrate them (for a
+            // parallel composition)
             if(t1 instanceof NDSum) {
-                if(this.sums.contains(t1)) { this.sums.remove(t1); }
+                // Do nothing - unselected options will be discarded
             }
-            this.integrateNewlyExposedTerm(chosen);
-            this.forceCommunication(chosen, t2);
+            else if(t1 instanceof Parallel) {
+                // Integrate unselected terms
+                for(int i = 0; i < ptms.arity(); i++) {
+                    if(ptms.subterm(i) != chosen) {
+                        this.integrateNewlyExposedTerm(ptms.subterm(i));
+                    }
+                }
+            }
+            else {
+                throw new IllegalStateException("Unrecognised PiTermManySub " +
+                        "type in actingterms");
+            }
+            this.actingTerms = Optional.of(
+                    new Pair<PiTerm<Integer>, PiTerm<Integer>>(chosen, t2));
         }
-        if(t1 instanceof Replicate) {
+        else if(t1 instanceof Replicate) {
             PiTerm<Integer> t1SubCopy = ((Replicate) t1).subterm().copy();
             this.integrateNewlyExposedTerm(t1);
-            this.integrateNewlyExposedTerm(t1SubCopy);
-            this.forceCommunication(t1SubCopy, t2);
+            this.actingTerms = Optional.of(
+                    new Pair<PiTerm<Integer>, PiTerm<Integer>>(t1SubCopy, t2));
         }
-        if(t1 instanceof Restrict) {
-            PiTerm<Integer> t1Sub = ((Restrict) t1).subterm();
-            this.doScopeExtrusion((Restrict) t1);
-            this.forceCommunication(t1, t2);
+        else if(t1 instanceof Restrict) {
+            PiTerm<Integer> t1Sub = this.doScopeExtrusion((Restrict) t1);
+            this.actingTerms = Optional.of(
+                    new Pair<PiTerm<Integer>, PiTerm<Integer>>(t1Sub, t2));
+        }
+        else {
+            throw new IllegalStateException("Unrecognised PiTerm type in " +
+                    "actingTerms");
         }
     }
 
@@ -468,6 +557,12 @@ public class Interpreter {
      */
     public String toString() {
         ArrayList<String> termStrings = new ArrayList<String>();
+        if(this.actingTerms.isPresent()) {
+            termStrings.add(this.actingTerms.get().first()
+                    .toStringWithNameMap(this.nameMap));
+            termStrings.add(this.actingTerms.get().second()
+                    .toStringWithNameMap(this.nameMap));
+        }
         for(Send send : this.senders) {
             termStrings.add(send.toStringWithNameMap(this.nameMap));
         }

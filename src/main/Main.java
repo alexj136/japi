@@ -10,10 +10,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 
-import syntax.LambdaTerm;
-import syntax.Variable;
-import syntax.Application;
-import syntax.Abstraction;
+//import syntax.LambdaTerm;
+//import syntax.Variable;
+//import syntax.Application;
+//import syntax.Abstraction;
 public class Main {
 
     /**
