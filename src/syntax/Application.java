@@ -1,6 +1,7 @@
 package syntax;
 
 import java.util.HashSet;
+import java.util.HashMap;
 
 public final class Application<T> extends LambdaTerm<T> {
 
@@ -38,7 +39,22 @@ public final class Application<T> extends LambdaTerm<T> {
         return this.func + " " + this.arg;
     }
 
+    public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
+        return this.func.toStringWithNameMap(nameMap) + " " +
+                this.arg.toStringWithNameMap(nameMap);
+    }
+
     public Application<T> copy() {
         return new Application(this.func.copy(), this.arg.copy());
+    }
+
+    public void blindRename(T from, T to) {
+        this.func.blindRename(from, to);
+        this.arg.blindRename(from, to);
+    }
+
+    public void renameNonFree(T from, T to) {
+        this.func.renameNonFree(from, to);
+        this.arg.renameNonFree(from, to);
     }
 }

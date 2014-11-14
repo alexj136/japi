@@ -29,6 +29,14 @@ public abstract class LambdaTerm<T> extends Term<T> {
     public abstract HashSet<T> binders();
 
     /**
+     * Rename all occurences of the name 'from' to the name 'to', in and after
+     * the first abstraction that binds this name.
+     * @param from names of this value are renamed
+     * @param to renamed names are renamed to this value
+     */
+    public abstract void renameNonFree(T from, T to);
+
+    /**
      * Given that a LambdaTerm T1 whose body binds 'binders', will have a
      * LambdaTerm T2, with free variables 'freeVars', substituted into it,
      * compute the bound names in T1 that have to be alpha converted to avoid
@@ -53,6 +61,7 @@ public abstract class LambdaTerm<T> extends Term<T> {
 
         return atRisk;
     }
+
     /**
      * Reduce a LambdaTerm until it is in weak-head normal form. Mutates the
      * given term - do not keep any pointers to it after calling.
@@ -86,6 +95,12 @@ public abstract class LambdaTerm<T> extends Term<T> {
         return term;
     }
 
+    /**
+     * @param subWithin
+     * @param subOut
+     * @param subIn
+     * @return
+     */
     public static <T> LambdaTerm<T> substitute(LambdaTerm<T> subWithin,
             T subOut, LambdaTerm<T> subIn) {
 

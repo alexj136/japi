@@ -20,14 +20,6 @@ public abstract class Term<T> {
     public abstract <U> String toStringWithNameMap(HashMap<T, U> nameMap);
 
     /**
-     * Rename the names in a Term as is necessary after the exchange of a
-     * message - this is not alpha-conversion.
-     * @param from some names of this value must be renamed
-     * @param to names being renamed are renamed to this value
-     */
-    public abstract void rename(T from, T to);
-
-    /**
      * Rename every single occurence of the first given name with the second
      * given name.
      * @param from all names of this value must be renamed

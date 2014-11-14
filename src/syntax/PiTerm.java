@@ -22,6 +22,15 @@ public abstract class PiTerm<T> extends Term<T> {
     public abstract PiTerm<T> copy();
 
     /**
+     * Rename the names in a PiTerm as is necessary after the exchange of a
+     * message - this is not alpha-conversion.
+     * @param from some names of this value must be renamed
+     * @param to names being renamed are renamed to this value
+     */
+    public abstract void rename(T from, T to);
+
+
+    /**
      * Determine if two terms will exchange a message. Two terms are defined as
      * able to do so when any top-level (i.e. not to the right of a '.') send or
      * receive nodes have matching channels. These may be within parallel
