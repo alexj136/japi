@@ -29,6 +29,31 @@ public abstract class LambdaTerm<T> extends Term<T> {
     public abstract HashSet<T> binders();
 
     /**
+     * Given that a LambdaTerm T1 whose body binds 'binders', will have a
+     * LambdaTerm T2, with free variables 'freeVars', substituted into it,
+     * compute the bound names in T1 that have to be alpha converted to avoid
+     * erroneous capture of free variables in T2.
+     * @param freeVars the free variables of T2
+     * @param binders the names bound in T1
+     * @return the binder names that should be renamed in T1 for T2 to be safely
+     * substituted in
+     */
+    public static <T> HashSet<T> toRename(HashSet<T> freeVars,
+            HashSet<T> binders) {
+
+        HashSet<T> atRisk = new HashSet<T>();
+
+        for(T freeVarI : freeVars) {
+            for(T binderI : binders) {
+                if(freeVarI.equals(binderI)) {
+                    atRisk.add(freeVarI);
+                }
+            }
+        }
+
+        return atRisk;
+    }
+    /**
      * Reduce a LambdaTerm until it is in weak-head normal form. Mutates the
      * given term - do not keep any pointers to it after calling.
      * @param term the term to reduce
