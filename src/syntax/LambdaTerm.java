@@ -96,10 +96,12 @@ public abstract class LambdaTerm<T> extends Term<T> {
     }
 
     /**
-     * @param subWithin
-     * @param subOut
-     * @param subIn
-     * @return
+     * Substitute all occurences of the variable subOut with the term subIn,
+     * within the term subWithin.
+     * @param subWithin the expression to substitute inside
+     * @param subOut the variable to substitue out
+     * @param subIn the term to substitute in
+     * @return a pointer to the generated term
      */
     public static <T> LambdaTerm<T> substitute(LambdaTerm<T> subWithin,
             T subOut, LambdaTerm<T> subIn) {
