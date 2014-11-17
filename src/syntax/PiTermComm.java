@@ -8,15 +8,16 @@ import java.util.ArrayList;
 public abstract class PiTermComm<T> extends PiTermOneSub<T> {
 
     protected T chnl;
-    protected ArrayList<T> msg;
+    protected ArrayList<LambdaTerm<T>> msg;
 
     /**
      * Construct a new communicating term
      * @param chnl the channel to communicate over
-     * @param msg the names to send or to bind received names to
+     * @param msg the expressions to send or names to bind received expressions
+     * to
      * @param subterm the subterm of this
      */
-    public PiTermComm(T chnl, ArrayList<T> msg, PiTerm<T> subterm) {
+    public PiTermComm(T chnl, ArrayList<LambdaTerm<T>> msg, PiTerm<T> subterm) {
         super(subterm);
         this.chnl = chnl;
         this.msg = msg;
@@ -33,7 +34,7 @@ public abstract class PiTermComm<T> extends PiTermOneSub<T> {
      * @param i the index of the value to be retreived
      * @return the i^th message/binding name
      */
-    public T msg(int i) { return this.msg.get(i); }
+    public LambdaTerm<T> msg(int i) { return this.msg.get(i); }
 
     /**
      * Determine the arity (the number of names to bind or send) of this
@@ -52,10 +53,7 @@ public abstract class PiTermComm<T> extends PiTermOneSub<T> {
     public void blindRename(T from, T to) {
         if(this.chnl.equals(from)) { this.chnl = to; }
         for(int i = 0; i < this.arity(); i++) {
-            if(this.msg(i).equals(from)) {
-                this.msg.remove(i);
-                this.msg.add(i, to);
-            }
+            this.msg(i).blindRename(from, to);
         }
         this.subterm.blindRename(from, to);
     }

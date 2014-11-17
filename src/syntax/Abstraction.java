@@ -118,6 +118,17 @@ public final class Abstraction<T> extends LambdaTerm<T> {
     }
 
     /**
+     * Rename all free occurrences of 'from' with 'to' in this Abstraction.
+     * @param from all occurrences of this name are changed
+     * @param to names being changed are replaced with this value
+     */
+    public void renameFree(T from, T to) {
+        if(!this.name.equals(from)) {
+            this.body.renameFree(from, to);
+        }
+    }
+
+    /**
      * Rename all bound names in this term, including the binders.
      * @param from the name to change from
      * @param to the name to change to

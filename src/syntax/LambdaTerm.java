@@ -1,7 +1,6 @@
 package syntax;
 
 import java.util.HashSet;
-import java.util.function.UnaryOperator;
 
 /**
  * LambdaTerms are terms in the lambda calculus.
@@ -27,6 +26,13 @@ public abstract class LambdaTerm<T> extends Term<T> {
      * within the given LambdaTerm
      */
     public abstract HashSet<T> binders();
+
+    /**
+     * Rename all free occurences of the name 'from' to the name 'to'.
+     * @param from names of this value are renamed
+     * @param to renamed names are renamed to this value
+     */
+    public abstract void renameFree(T from, T to);
 
     /**
      * Rename all occurences of the name 'from' to the name 'to', in and after

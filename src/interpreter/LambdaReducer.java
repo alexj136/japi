@@ -5,7 +5,9 @@ import syntax.Abstraction;
 import syntax.Application;
 import syntax.Variable;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.function.UnaryOperator;
+import java.util.function.Supplier;
 
 /**
  * Contains static functions for reducing LambdaTerms.
@@ -46,7 +48,8 @@ public final class LambdaReducer {
      * @return the reduced term
      */
     public static LambdaTerm<Integer> reduce(LambdaTerm<Integer> term,
-            UnaryOperator<Integer> nameGenerator) {
+            UnaryOperator<Integer> nameGenerator,
+            Supplier<Integer> nextAvailableName) {
 
         if(!(term instanceof Abstraction
                 || term instanceof Application
@@ -73,8 +76,24 @@ public final class LambdaReducer {
             /*
              * Prevent any chance of a name clash occuring.
              */
-            abs.body().renameManyNonFree(LambdaReducer.toRename(
-                    app.arg().freeVars(), abs.body().binders()));
+            HashSet<Integer> atRisk = LambdaReducer.toRename(
+                    app.arg().freeVars(), abs.body().binders());
+            HashMap<Integer, Integer> oldToNew =
+                new HashMap<Integer, Integer>();
+            for(Integer name : atRisk) {
+                oldToNew.put(name, nameGenerator.apply(name));
+            }
+            int firstIntermediate = nextAvailableName.get();
+            int curIntermediate = firstIntermediate;
+            for(Integer name : atRisk) {
+                abs.body().renameNonFree(name, curIntermediate);
+                curIntermediate++;
+            }
+            curIntermediate = firstIntermediate;
+            for(Integer name : atRisk) {
+                abs.body().renameNonFree(curIntermediate, oldToNew.get(name));
+                curIntermediate++;
+            }
 
             /*
              * Do the substitution.

@@ -74,17 +74,17 @@ void input() : {} { term() <EOF> }
  *
  * This is the grammar used in the implementation below.
  */
-PiTerm<String> term() : { PiTerm<String> tm0, tm1; ArrayList<String> names; ArrayList<PiTerm<String>> tmList; Token n; }
+PiTerm<String> term() : { PiTerm<String> tm0, tm1; ArrayList<LambdaTerm<String>> exps; ArrayList<PiTerm<String>> tmList; Token n; }
 {
     LOOKAHEAD(2)
-    n=<ID> "(" names=receCont() "." tm0=term()
+    n=<ID> "(" exps=receCont() "." tm0=term()
     {
-        return new Receive<String>(n.toString(), names, tm0);
+        return new Receive<String>(n.toString(), exps, tm0);
     }
     |
-    n=<ID> "<" names=sendCont() "." tm0=term()
+    n=<ID> "<" exps=sendCont() "." tm0=term()
     {
-        return new Send<String>(n.toString(), names, tm0);
+        return new Send<String>(n.toString(), exps, tm0);
     }
     |
     "[" tm0=paraCont()
@@ -157,58 +157,58 @@ ArrayList<PiTerm<String>> paraContCont() : { PiTerm<String> e; ArrayList<PiTerm<
     }
 }
 
-ArrayList<String> sendCont() : { Token n; ArrayList<String> rest; }
+ArrayList<LambdaTerm<String>> sendCont() : { Token n; ArrayList<LambdaTerm<String>> rest; }
 {
     ">"
     {
-        return new ArrayList<String>();
+        return new ArrayList<LambdaTerm<String>>();
     }
     |
     n=<ID> rest=sendContCont()
     {
-        rest.add(0, n.toString());
+        rest.add(0, new Variable<String>(n.toString()));
         return rest;
     }
 }
 
-ArrayList<String> sendContCont() : { Token n; ArrayList<String> rest; }
+ArrayList<LambdaTerm<String>> sendContCont() : { Token n; ArrayList<LambdaTerm<String>> rest; }
 {
     ">"
     {
-        return new ArrayList<String>();
+        return new ArrayList<LambdaTerm<String>>();
     }
     |
     "," n=<ID> rest=sendContCont()
     {
-        rest.add(0, n.toString());
+        rest.add(0, new Variable<String>(n.toString()));
         return rest;
     }
 }
 
-ArrayList<String> receCont() : { Token n; ArrayList<String> rest; }
+ArrayList<LambdaTerm<String>> receCont() : { Token n; ArrayList<LambdaTerm<String>> rest; }
 {
     ")"
     {
-        return new ArrayList<String>();
+        return new ArrayList<LambdaTerm<String>>();
     }
     |
     n=<ID> rest=receContCont()
     {
-        rest.add(0, n.toString());
+        rest.add(0, new Variable<String>(n.toString()));
         return rest;
     }
 }
 
-ArrayList<String> receContCont() : { Token n; ArrayList<String> rest; }
+ArrayList<LambdaTerm<String>> receContCont() : { Token n; ArrayList<LambdaTerm<String>> rest; }
 {
     ")"
     {
-        return new ArrayList<String>();
+        return new ArrayList<LambdaTerm<String>>();
     }
     |
     "," n=<ID> rest=receContCont()
     {
-        rest.add(0, n.toString());
+        rest.add(0, new Variable<String>(n.toString()));
         return rest;
     }
 }

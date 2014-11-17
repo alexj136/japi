@@ -30,9 +30,11 @@ public final class Variable<T> extends LambdaTerm<T> {
     public Variable<T> copy() { return new Variable(this.name); }
 
     public void blindRename(T from, T to) {
-        if(this.name.equals(from)) {
-            this.name = to;
-        }
+        if(this.name.equals(from)) { this.name = to; }
+    }
+
+    public void renameFree(T from, T to) {
+        if(this.name.equals(from)) { this.name = to; }
     }
 
     public void renameNonFree(T from, T to) {}

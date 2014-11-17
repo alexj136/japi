@@ -16,7 +16,7 @@ public final class Send<T> extends PiTermComm<T> {
      * @param msg the message (a list of channel names) being sent
      * @param subterm the term to 'become' once the message is sent
      */
-    public Send(T chnl, ArrayList<T> msg, PiTerm<T> subterm) {
+    public Send(T chnl, ArrayList<LambdaTerm<T>> msg, PiTerm<T> subterm) {
         super(chnl, msg, subterm);
     }
 
@@ -36,10 +36,12 @@ public final class Send<T> extends PiTermComm<T> {
      * type, the values of which are mapped to by the contained names.
      */
     public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
-        ArrayList<U> msgNames = new ArrayList<U>();
-        for(T name : this.msg) { msgNames.add(nameMap.get(name)); }
+        ArrayList<String> nameStrs = new ArrayList<String>();
+        for(LambdaTerm<T> name : this.msg) {
+            nameStrs.add(name.toStringWithNameMap(nameMap));
+        }
         return nameMap.get(this.chnl) + " " +
-                Utils.stringifyList("< ", " >", ", ", msgNames) + " . " +
+                Utils.stringifyList("< ", " >", ", ", nameStrs) + " . " +
                 this.subterm.toStringWithNameMap(nameMap);
     }
 
@@ -52,10 +54,7 @@ public final class Send<T> extends PiTermComm<T> {
     public void rename(T from, T to) {
         if(this.chnl.equals(from)) { this.chnl = to; }
         for(int i = 0; i < this.arity(); i++) {
-            if(this.msg(i).equals(from)) {
-                this.msg.remove(i);
-                this.msg.add(i, to);
-            }
+            this.msg(i).renameFree(from, to);
         }
         this.subterm.rename(from, to);
     }
@@ -65,7 +64,10 @@ public final class Send<T> extends PiTermComm<T> {
      * @return a copy of this Send.
      */
     public Send<T> copy() {
-        return new Send<T>(this.chnl, (ArrayList<T>) this.msg.clone(),
-                this.subterm.copy());
+        ArrayList<LambdaTerm<T>> copyExps = new ArrayList<LambdaTerm<T>>();
+        for(LambdaTerm<T> exp : this.msg) {
+            copyExps.add(exp.copy());
+        }
+        return new Send<T>(this.chnl, copyExps, this.subterm.copy());
     }
 }

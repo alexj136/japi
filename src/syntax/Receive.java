@@ -18,8 +18,14 @@ public final class Receive<T> extends PiTermComm<T> {
      * @param subterm the process to 'become' when the message is received
      * @return a new Receive object
      */
-    public Receive(T chnl, ArrayList<T> msg, PiTerm<T> subterm) {
+    public Receive(T chnl, ArrayList<LambdaTerm<T>> msg, PiTerm<T> subterm) {
         super(chnl, msg, subterm);
+        for(LambdaTerm<T> msgi : msg) {
+            if(!(msgi instanceof Variable)) {
+                throw new IllegalStateException("Non-Variable LambdaTerm in " +
+                        "Receive");
+            }
+        }
     }
 
     /**
@@ -39,10 +45,12 @@ public final class Receive<T> extends PiTermComm<T> {
      * type, the values of which are mapped to by the contained names.
      */
     public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
-        ArrayList<U> msgNames = new ArrayList<U>();
-        for(T name : this.msg) { msgNames.add(nameMap.get(name)); }
+        ArrayList<String> nameStrs = new ArrayList<String>();
+        for(LambdaTerm<T> name : this.msg) {
+            nameStrs.add(name.toStringWithNameMap(nameMap));
+        }
         return nameMap.get(this.chnl) + " " +
-                Utils.stringifyList("( ", " )", ", ", msgNames) + " . " +
+                Utils.stringifyList("( ", " )", ", ", nameStrs) + " . " +
                 this.subterm.toStringWithNameMap(nameMap);
     }
 
@@ -58,7 +66,7 @@ public final class Receive<T> extends PiTermComm<T> {
          // Do not rename the message content, in accordance with the semantics
          // of the pi calculus. Only rename in the subprocess if the message did
          // not contain 'from'.
-        if(!this.msg.contains(from)) {
+        if(!this.binds(from)) {
             this.subterm.rename(from, to);
         }
     }
@@ -68,7 +76,34 @@ public final class Receive<T> extends PiTermComm<T> {
      * @return a copy of this Receive.
      */
     public Receive<T> copy() {
-        return new Receive<T>(this.chnl, (ArrayList<T>) this.msg.clone(),
-                this.subterm.copy());
+        ArrayList<LambdaTerm<T>> copyExps = new ArrayList<LambdaTerm<T>>();
+        for(LambdaTerm<T> exp : this.msg) {
+            copyExps.add(exp.copy());
+        }
+        return new Receive<T>(this.chnl, copyExps, this.subterm.copy());
+    }
+
+    /**
+     * Determine if this Receive binds the given name.
+     * @param name the name to test
+     * @return true if name is bound by this Receive, false otherwise
+     */
+    public boolean binds(T name) {
+        boolean found;
+        int msgIdx = 0;
+        while((!found) && msgIdx < this.arity()) {
+            if(this.msg(msgIdx) instanceof Variable) {
+                Variable var = (Variable) this.msg(msgIdx);
+                if(var.name().equals(name)) {
+                    found = true;
+                }
+            }
+            else {
+                throw new IllegalStateException("Non-Variable LambdaTerm in " +
+                        "Receive");
+            }
+            msgIdx++;
+        }
+        return found;
     }
 }
