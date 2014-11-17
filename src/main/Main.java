@@ -14,6 +14,7 @@ import syntax.LambdaTerm;
 import syntax.Variable;
 import syntax.Application;
 import syntax.Abstraction;
+import interpreter.LambdaReducer;
 public class Main {
 
     /**

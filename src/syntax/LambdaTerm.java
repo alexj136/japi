@@ -1,10 +1,10 @@
 package syntax;
 
 import java.util.HashSet;
+import java.util.function.UnaryOperator;
 
 /**
- * LambdaTerms are terms in the lambda calculus. This class contains static
- * methods for evaluating them.
+ * LambdaTerms are terms in the lambda calculus.
  */
 public abstract class LambdaTerm<T> extends Term<T> {
 
@@ -35,105 +35,4 @@ public abstract class LambdaTerm<T> extends Term<T> {
      * @param to renamed names are renamed to this value
      */
     public abstract void renameNonFree(T from, T to);
-
-    /**
-     * Given that a LambdaTerm T1 whose body binds 'binders', will have a
-     * LambdaTerm T2, with free variables 'freeVars', substituted into it,
-     * compute the bound names in T1 that have to be alpha converted to avoid
-     * erroneous capture of free variables in T2.
-     * @param freeVars the free variables of T2
-     * @param binders the names bound in T1
-     * @return the binder names that should be renamed in T1 for T2 to be safely
-     * substituted in
-     */
-    public static <T> HashSet<T> toRename(HashSet<T> freeVars,
-            HashSet<T> binders) {
-
-        HashSet<T> atRisk = new HashSet<T>();
-
-        for(T freeVarI : freeVars) {
-            for(T binderI : binders) {
-                if(freeVarI.equals(binderI)) {
-                    atRisk.add(freeVarI);
-                }
-            }
-        }
-
-        return atRisk;
-    }
-
-    /**
-     * Reduce a LambdaTerm until it is in weak-head normal form. Mutates the
-     * given term - do not keep any pointers to it after calling.
-     * @param term the term to reduce
-     * @return the reduced term
-     */
-    public static <T> LambdaTerm<T> reduce(LambdaTerm<T> term) {
-        if(!(term instanceof Abstraction
-                || term instanceof Application
-                || term instanceof Variable)) {
-
-            throw new IllegalArgumentException("Unrecognised LambdaTerm type " +
-                    "in LambdaTerm.reduce()");
-        }
-        while(term instanceof Application
-                && ((Application) term).func() instanceof Abstraction) {
-
-            /*
-             *           app
-             *          /   \
-             *         /     \
-             *       abs     arg    ->    body{arg/name}
-             *      /   \
-             *     /     \
-             *   name    body
-             */
-            Application<T> app = (Application) term;
-            Abstraction<T> abs = (Abstraction) app.func();
-            term = LambdaTerm.substitute(abs.body(), abs.name(), app.arg());
-        }
-        return term;
-    }
-
-    /**
-     * Substitute all occurences of the variable subOut with the term subIn,
-     * within the term subWithin.
-     * @param subWithin the expression to substitute inside
-     * @param subOut the variable to substitue out
-     * @param subIn the term to substitute in
-     * @return a pointer to the generated term
-     */
-    public static <T> LambdaTerm<T> substitute(LambdaTerm<T> subWithin,
-            T subOut, LambdaTerm<T> subIn) {
-
-        if(subWithin instanceof Abstraction) {
-            Abstraction abs = (Abstraction) subWithin;
-            if(abs.name().equals(subOut)) {
-                return subWithin;
-            }
-            else {
-                abs.setBody(LambdaTerm.substitute(abs.body(), subOut, subIn));
-                return abs;
-            }
-        }
-        else if(subWithin instanceof Application) {
-            Application app = (Application) subWithin;
-            app.setFunc(LambdaTerm.substitute(app.func(), subOut, subIn));
-            app.setArg(LambdaTerm.substitute(app.arg(), subOut, subIn));
-            return app;
-        }
-        else if(subWithin instanceof Variable) {
-            Variable var = (Variable) subWithin;
-            if(var.name().equals(subOut)) {
-                return subIn.copy();
-            }
-            else {
-                return var;
-            }
-        }
-        else {
-            throw new IllegalArgumentException("Unrecognised LambdaTerm type " +
-                    "in LambdaTerm.substitute()");
-        }
-    }
 }

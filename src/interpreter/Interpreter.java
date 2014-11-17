@@ -317,30 +317,80 @@ public class Interpreter {
 
         this.restricts.remove(rest);
 
-        // Update nameMap and usedNames
-        String baseName = this.nameMap.get(rest.boundName());
-        String printableName = this.nextStringName(baseName);
-        this.usedNames.add(printableName);
-        this.nameMap.put(this.nextAvailableName, printableName);
-
         // Alpha convert
-        rest.blindRename(rest.boundName(), this.nextAvailableName);
+        int newName = this.leaseNewName(rest.boundName());
+        rest.blindRename(rest.boundName(), newName);
 
         // Extrude the scope
         this.boundNames.add(rest.boundName());
 
-        // Update nextAvailableName
-        this.nextAvailableName++;
-
         // Return the newly exposed term
         return rest.subterm();
     }
-    // Add ' to a name until it is one that does not appear in the usedNames set
+
+    /**
+     * Given an existing name non-printable (Integer) name, generate a new
+     * non-printable name for use as an alpha converted version of the given
+     * name, such that the printable version of the new name is based on the
+     * printable version of the given name. nameMap, usedNames and
+     * nextAvailableName are updated appropriately.
+     * @param existingName a name already in use
+     * @return a name to use for alpha-converted versions of existingName
+     */
+    Integer leaseNewName(Integer existingName) {
+        String printableVersion;
+        try {
+            printableVersion = this.getPrintableVersion(existingName);
+        }
+        catch(IllegalArgumentException iae) {
+            throw new IllegalArgumentException("Tried to lease a new integer " +
+                    "name from one that does not already exist in the " +
+                    "program.");
+        }
+        String newPrintable = this.nextStringName(printableVersion);
+        Integer newNonPrintable = this.nextAvailableName;
+        this.nameMap.put(newNonPrintable, newPrintable);
+        this.usedNames.add(newPrintable);
+        this.nextAvailableName++;
+        return newNonPrintable;
+    }
+
+    /**
+     * Access the next available name that can be used externally for
+     * intermediate substitutions.
+     * @return the next available name
+     */
+    Integer getNextAvailableName() {
+        return this.nextAvailableName;
+    }
+
+    /**
+     * Given a printable name present in the program, obtain a new string name
+     * to be used with alpha-converted versions of that name.
+     * @param baseName the original name
+     * @return the name that can be alpha-converted to
+     */
     private String nextStringName(String baseName) {
         while(this.usedNames.contains(baseName)) {
             baseName += "'";
         }
         return baseName;
+    }
+
+    /**
+     * Lookup the nameMap to determine what String should be printed to
+     * represent a particular Integer name.
+     * @param name the Integer name
+     * @return the String version of the given name, for printing
+     */
+    private String getPrintableVersion(Integer name) {
+        if(!this.nameMap.containsKey(name)) {
+            throw new IllegalArgumentException("Tried to lookup the " +
+                    "printable name for an Integer name that does not have a " +
+                    "corresponding printable name - perhaps a String version " +
+                    "was not leased.");
+        }
+        return this.nameMap.get(name);
     }
 
     /*

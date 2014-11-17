@@ -3,18 +3,35 @@ package syntax;
 import java.util.HashSet;
 import java.util.HashMap;
 
+/**
+ * Represents lambda calculus function application.
+ */
 public final class Application<T> extends LambdaTerm<T> {
 
     private LambdaTerm<T> func;
     private LambdaTerm<T> arg;
 
+    /**
+     * Construct a new Application.
+     * @param func the function (LHS term) of the Application
+     * @param arg the argument (RHS term) of the Application
+     * @return The application of func to arg as a LambdaTerm
+     */
     public Application(LambdaTerm<T> func, LambdaTerm<T> arg) {
         this.func = func;
         this.arg = arg;
     }
 
+    /**
+     * Access the function (LHS term) of the Application.
+     * @return the function (LHS term) of the Application
+     */
     public LambdaTerm<T> func() { return this.func; }
 
+    /**
+     * Access the argument (RHS term) of the Application.
+     * @return the argument (RHS term) of the Application
+     */
     public LambdaTerm<T> arg() { return this.arg; }
 
     public void setFunc(LambdaTerm<T> func) { this.func = func; }
