@@ -46,17 +46,24 @@ public final class Send<T> extends PiTermComm<T> {
     }
 
     /**
-     * Rename the names within this Send as though a message had been received
-     * by a containing process
-     * @param from names with this value are renamed
-     * @param to names being renamed are renamed to this name
+     * Substitute the names within this Send with expressions, as though a
+     * message had been received by a containing process.
+     * @param replacing names with this value are replaced
+     * @param with names being replaced are replaced with this expression
      */
-    public void rename(T from, T to) {
-        if(this.chnl.equals(from)) { this.chnl = to; }
-        for(int i = 0; i < this.arity(); i++) {
-            this.msg(i).renameFree(from, to);
+    public void msgPass(T replacing, LambdaTerm<T> with) {
+        if(replacing.equals(this.chnl) && !(with instanceof Variable)) {
+            throw new IllegalArgumentException("Tried to replace a " +
+                    "channel name with an expression");
         }
-        this.subterm.rename(from, to);
+        if(replacing.equals(this.chnl) && with instanceof Variable) {
+            Variable var = (Variable) with;
+            this.chnl = var.name();
+        }
+        for(int i = 0; i < this.arity(); i++) {
+            this.msg(i).renameFree(replacing, (T) new Object());
+        }
+        this.subterm.msgPass(replacing, with);
     }
 
     /**

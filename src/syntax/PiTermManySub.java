@@ -46,13 +46,13 @@ public abstract class PiTermManySub<T> extends PiTerm<T>
     }
 
     /**
-     * Rename the names within this PiTermManySub as though a message had been
-     * received by a containing process
-     * @param from names with this value are renamed
-     * @param to names being renamed are renamed to this name
+     * Substitute the names within this PiTermManySub with expressions as though
+     * a message had been received by a containing process
+     * @param replacing names with this value are replaced
+     * @param with names being replaced are replaced with this expression
      */
-    public void rename(T from, T to) {
-        for(PiTerm<T> subterm : subterms) { subterm.rename(from, to); }
+    public void msgPass(T replacing, LambdaTerm<T> with) {
+        for(PiTerm<T> subterm : subterms) { subterm.msgPass(replacing, with); }
     }
 
     /**

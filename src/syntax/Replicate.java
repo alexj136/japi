@@ -34,12 +34,13 @@ public final class Replicate<T> extends PiTermOneSub<T> {
     }
 
     /**
-     * Rename names in this Replicate as is necessary when a message is passed.
-     * @param from Names of this value are renamed
-     * @param to names being renamed are renamed to this value
+     * Substitute LambdaTerms for names in this Replicate as is necessary when a
+     * message is passed.
+     * @param replacing names of this value are replaced
+     * @param to names being replaced are replaced with this value
      */
-    public void rename(T from, T to) {
-        this.subterm.rename(from, to);
+    public void msgPass(T replacing, LambdaTerm<T> with) {
+        this.subterm.msgPass(replacing, with);
     }
 
     /**

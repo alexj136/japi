@@ -24,10 +24,10 @@ public abstract class PiTerm<T> extends Term<T> {
     /**
      * Rename the names in a PiTerm as is necessary after the exchange of a
      * message - this is not alpha-conversion.
-     * @param from some names of this value must be renamed
-     * @param to names being renamed are renamed to this value
+     * @param replacing some names of this value must be renamed
+     * @param with names being replaced are replaced with this LambdaTerm
      */
-    public abstract void rename(T from, T to);
+    public abstract void msgPass(T replacing, LambdaTerm<T> with);
 
 
     /**

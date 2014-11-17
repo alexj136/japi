@@ -61,13 +61,20 @@ public final class Receive<T> extends PiTermComm<T> {
      * binders
      * @param to if a name is renamed, it is renamed to this name
      */
-    public void rename(T from, T to) {
-        if(this.chnl.equals(from)) { this.chnl = to; }
+    public void msgPass(T replacing, LambdaTerm<T> with) {
+        if(replacing.equals(this.chnl) && !(with instanceof Variable)) {
+            throw new IllegalArgumentException("Tried to replace a " +
+                    "channel name with an expression");
+        }
+        else if(replacing.equals(this.chnl) && with instanceof Variable) {
+            Variable var = (Variable) with;
+            this.chnl = var.name();
+        }
          // Do not rename the message content, in accordance with the semantics
          // of the pi calculus. Only rename in the subprocess if the message did
          // not contain 'from'.
-        if(!this.binds(from)) {
-            this.subterm.rename(from, to);
+        if(!this.binds(replacing)) {
+            this.subterm.msgPass(replacing, with);
         }
     }
 
