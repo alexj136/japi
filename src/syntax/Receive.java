@@ -11,21 +11,40 @@ import java.util.HashMap;
  */
 public final class Receive<T> extends PiTermComm<T> {
 
+    private ArrayList<T> boundNames;
+
     /**
-     * Construct a new recieving process
+     * Construct a new recieving process.
      * @param chnl the channel to listen to for a message
      * @param msg the names to bind the received message components to
      * @param subterm the process to 'become' when the message is received
      * @return a new Receive object
      */
-    public Receive(T chnl, ArrayList<LambdaTerm<T>> msg, PiTerm<T> subterm) {
-        super(chnl, msg, subterm);
-        for(LambdaTerm<T> msgi : msg) {
-            if(!(msgi instanceof Variable)) {
-                throw new IllegalStateException("Non-Variable LambdaTerm in " +
-                        "Receive");
-            }
-        }
+    public Receive(T chnl, ArrayList<T> boundNames, PiTerm<T> subterm) {
+        super(chnl, subterm);
+        this.boundNames = boundNames;
+    }
+
+    /**
+     * Access the i^th bound name.
+     * @param i the index of the bound name to be retrieved
+     * @return the i^th bound name
+     */
+    public T name(int i) { return this.boundNames.get(i); }
+
+    /**
+     * Determine the arity (the number of bound names) of this Receive.
+     * @return the arity (the number of bound names) of this Receive
+     */
+    public int arity() { return this.boundNames.size(); }
+
+    /**
+     * Determine if this Receive binds the given name.
+     * @param name the name to test
+     * @return true if name is bound by this Receive, false otherwise
+     */
+    public boolean binds(T name) {
+        return this.boundNames.contains(name);
     }
 
     /**
@@ -34,8 +53,9 @@ public final class Receive<T> extends PiTermComm<T> {
      */
     @Override
     public String toString() {
-        return this.chnl + " " + Utils.stringifyList("(", ")", ",", this.msg) +
-            " . " + this.subterm;
+        return this.chnl + " " +
+                Utils.stringifyList("(", ")", ",", this.boundNames) +
+                " . " + this.subterm;
     }
 
     /**
@@ -46,9 +66,7 @@ public final class Receive<T> extends PiTermComm<T> {
      */
     public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
         ArrayList<String> nameStrs = new ArrayList<String>();
-        for(LambdaTerm<T> name : this.msg) {
-            nameStrs.add(name.toStringWithNameMap(nameMap));
-        }
+        for(T name : this.boundNames) { nameStrs.add(name.toString()); }
         return nameMap.get(this.chnl) + " " +
                 Utils.stringifyList("( ", " )", ", ", nameStrs) + " . " +
                 this.subterm.toStringWithNameMap(nameMap);
@@ -67,7 +85,7 @@ public final class Receive<T> extends PiTermComm<T> {
                     "channel name with an expression");
         }
         else if(replacing.equals(this.chnl) && with instanceof Variable) {
-            Variable var = (Variable) with;
+            Variable<T> var = (Variable) with;
             this.chnl = var.name();
         }
          // Do not rename the message content, in accordance with the semantics
@@ -83,34 +101,23 @@ public final class Receive<T> extends PiTermComm<T> {
      * @return a copy of this Receive.
      */
     public Receive<T> copy() {
-        ArrayList<LambdaTerm<T>> copyExps = new ArrayList<LambdaTerm<T>>();
-        for(LambdaTerm<T> exp : this.msg) {
-            copyExps.add(exp.copy());
-        }
-        return new Receive<T>(this.chnl, copyExps, this.subterm.copy());
+        return new Receive<T>(this.chnl, (ArrayList<T>) this.boundNames.clone(),
+                this.subterm.copy());
     }
 
     /**
-     * Determine if this Receive binds the given name.
-     * @param name the name to test
-     * @return true if name is bound by this Receive, false otherwise
+     * Carelessly rename within this Receive.
+     * @param from all names with this value are renamed
+     * @param to all names being renamed are renamed to this name
      */
-    public boolean binds(T name) {
-        boolean found;
-        int msgIdx = 0;
-        while((!found) && msgIdx < this.arity()) {
-            if(this.msg(msgIdx) instanceof Variable) {
-                Variable var = (Variable) this.msg(msgIdx);
-                if(var.name().equals(name)) {
-                    found = true;
-                }
+    public void blindRename(T from, T to) {
+        if(this.chnl.equals(from)) { this.chnl = to; }
+        for(int i = 0; i < this.arity(); i++) {
+            if(this.name(i).equals(from)) {
+                this.boundNames.remove(i);
+                this.boundNames.add(i, to);
             }
-            else {
-                throw new IllegalStateException("Non-Variable LambdaTerm in " +
-                        "Receive");
-            }
-            msgIdx++;
         }
-        return found;
+        this.subterm.blindRename(from, to);
     }
 }

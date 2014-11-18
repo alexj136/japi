@@ -17,13 +17,16 @@ public abstract class SyntaxTranslator {
      * representing the given PiTerm<String>, and a HashMap that maps String
      * names in the PiTerm<String> to integer names in the PiTerm<Integer>.
      */
-    public static SyntaxTranslationResult translate(PiTerm<String> term) {
+    public static SyntaxTranslationResult<PiTerm<Integer>> translate(
+            PiTerm<String> term) {
+
         return SyntaxTranslator._translate(term,
                 new HashMap<String, Integer>(), 0);
     }
 
-    private static SyntaxTranslationResult _translate(PiTerm<String> term,
-            HashMap<String, Integer> nameMap, int nextAvailableName) {
+    private static SyntaxTranslationResult<PiTerm<Integer>> _translate(
+            PiTerm<String> term, HashMap<String, Integer> nameMap,
+            int nextAvailableName) {
 
         // For Send and Receive, determine the channel names by looking up the
         // string channel names in the map. Set them appropriately, and
@@ -42,35 +45,53 @@ public abstract class SyntaxTranslator {
                 nextAvailableName++;
             }
 
-            ArrayList<Integer> msg = new ArrayList<Integer>();
-
-            for(int i = 0; i < comm.arity(); i++) {
-
-                if(nameMap.containsKey(comm.msg(i))) {
-                    msg.add(nameMap.get(comm.msg(i)));
-                }
-                else {
-                    msg.add(nextAvailableName);
-                    nameMap.put(comm.msg(i), nextAvailableName);
-                    nextAvailableName++;
-                }
-
-            }
-
-            SyntaxTranslationResult result = _translate(comm.subterm(),
-                    nameMap, nextAvailableName);
+            SyntaxTranslationResult<PiTerm<Integer>> result =
+                    _translate(comm.subterm(), nameMap, nextAvailableName);
 
             if(comm instanceof Send) {
-                result.setTerm(new Send<Integer>(chnl, msg, result.getTerm()));
+                Send<String> send = (Send) comm;
+
+                ArrayList<LambdaTerm<Integer>> exps =
+                        new ArrayList<LambdaTerm<Integer>>();
+
+                for(int i = 0; i < send.arity(); i++) {
+
+                    SyntaxTranslationResult<LambdaTerm<Integer>> expResult =
+                            _translate(send.exp(i), nameMap, nextAvailableName);
+
+                    exps.add(expResult.getTerm());
+                    nextAvailableName = expResult.getNextAvailableName();
+                }
+
+                result.setTerm(new Send<Integer>(chnl, exps, result.getTerm()));
             }
             else if(comm instanceof Receive) {
-                result.setTerm(new Receive<Integer>(chnl, msg,
+                Receive<String> rece = (Receive) comm;
+
+                ArrayList<Integer> boundNames = new ArrayList<Integer>();
+
+                for(int i = 0; i < rece.arity(); i++) {
+                    int newName;
+                    if(nameMap.containsKey(rece.name(i))) {
+                        newName = nameMap.get(rece.name(i));
+                    }
+                    else {
+                        nameMap.put(rece.name(i), nextAvailableName);
+                        newName = nextAvailableName;
+                        nextAvailableName++;
+                    }
+
+                    boundNames.add(newName);
+                }
+
+                result.setTerm(new Receive<Integer>(chnl, boundNames,
                         result.getTerm()));
             }
             else {
                 throw new IllegalArgumentException(
                         "Unrecognised PiTermComm type");
             }
+            result.setNextAvailableName(nextAvailableName);
             return result;
         }
 
@@ -89,10 +110,12 @@ public abstract class SyntaxTranslator {
                         "Unrecognised PiTermManySub type");
             }
 
-            SyntaxTranslationResult result = new SyntaxTranslationResult(null,
-                    nameMap, nextAvailableName);
+            SyntaxTranslationResult<PiTerm<Integer>> result =
+                    new SyntaxTranslationResult<PiTerm<Integer>>(null, nameMap,
+                            nextAvailableName);
 
-            ArrayList<PiTerm<Integer>> subterms = new ArrayList<PiTerm<Integer>>();
+            ArrayList<PiTerm<Integer>> subterms =
+                    new ArrayList<PiTerm<Integer>>();
 
             for(int i = 0; i < ptms.arity(); i++) {
                 result = _translate(ptms.subterm(i), result.getNameMap(),
@@ -119,8 +142,9 @@ public abstract class SyntaxTranslator {
         else if(term instanceof Replicate) {
             Replicate repl = (Replicate<String>) term;
 
-            SyntaxTranslationResult result = _translate(repl.subterm(), nameMap,
-                    nextAvailableName);
+            SyntaxTranslationResult<PiTerm<Integer>> result =
+                    _translate(repl.subterm(), nameMap, nextAvailableName);
+
             result.setTerm(new Replicate<Integer>(result.getTerm()));
             return result;
         }
@@ -142,8 +166,9 @@ public abstract class SyntaxTranslator {
                 nameMap.put(rest.boundName(), boundName);
             }
 
-            SyntaxTranslationResult result = _translate(rest.subterm(), nameMap,
-                    nextAvailableName);
+            SyntaxTranslationResult<PiTerm<Integer>> result =
+                    _translate(rest.subterm(), nameMap, nextAvailableName);
+
             result.setTerm(new Restrict<Integer>(boundName, result.getTerm()));
             return result;
         }
@@ -153,5 +178,31 @@ public abstract class SyntaxTranslator {
         else {
             throw new IllegalArgumentException("Unrecognised PiTerm type");
         }
+    }
+    
+    private static SyntaxTranslationResult<LambdaTerm<Integer>> _translate(
+            LambdaTerm<String> term, HashMap<String, Integer> nameMap,
+            int nextAvailableName) {
+
+        LambdaTerm<Integer> newTerm;
+
+        if(term instanceof Variable) {
+            Variable<String> var = (Variable) term;
+            if(nameMap.containsKey(var.name())) {
+                newTerm = new Variable<Integer>(nameMap.get(var.name()));
+            }
+            else {
+                nameMap.put(var.name(), nextAvailableName);
+                newTerm = new Variable<Integer>(nextAvailableName);
+                nextAvailableName++;
+            }
+        }
+
+        else {
+            throw new UnsupportedOperationException("Not yet implemented");
+        }
+
+        return new SyntaxTranslationResult<LambdaTerm<Integer>>(newTerm,
+                nameMap, nextAvailableName);
     }
 }

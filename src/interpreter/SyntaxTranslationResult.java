@@ -7,9 +7,9 @@ import java.util.HashMap;
  * A pair containing a PiTerm and a HashMap storing a map between the user's
  * String names and integer names used by the interpreter.
  */
-public class SyntaxTranslationResult {
+public class SyntaxTranslationResult<T> {
 
-    private PiTerm<Integer> term;
+    private T term;
     private HashMap<String, Integer> nameMap;
     private int nextAvailableName;
 
@@ -19,8 +19,7 @@ public class SyntaxTranslationResult {
      * @param nameMap a mapping between the user's String names and the
      * interpreter's integer names
      */
-    public SyntaxTranslationResult(PiTerm<Integer> term,
-            HashMap<String, Integer> nameMap,
+    public SyntaxTranslationResult(T term, HashMap<String, Integer> nameMap,
             int nextAvailableName) {
 
         this.term = term;
@@ -32,7 +31,7 @@ public class SyntaxTranslationResult {
      * Access the stored PiTerm.
      * @return the stored PiTerm
      */
-    public PiTerm<Integer> getTerm() { return this.term; }
+    public T getTerm() { return this.term; }
 
     /**
      * Access the stored name mapping.
@@ -50,7 +49,7 @@ public class SyntaxTranslationResult {
      * Set the stored PiTerm.
      * @param term the new PiTerm to store
      */
-    public void setTerm(PiTerm<Integer> term) { this.term = term; }
+    public void setTerm(T term) { this.term = term; }
 
     /**
      * Set the stored name mapping.

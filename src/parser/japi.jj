@@ -62,7 +62,8 @@ void input() : {} { term() <EOF> }
  *
  * which, in a more concrete, non-left-recursive form is:
  *
- *     TERM         ::= "x(RECECONT . TERM" | "x<SENDCONT . TERM" | "[ PARACONT" | "new x in TERM" | "!TERM"
+ *     TERM         ::= "x(RECECONT . TERM" | "x<SENDCONT . TERM"
+ *                    | "[ PARACONT" | "new x in TERM" | "!TERM"
  *                    | "{ TERM + TERM SUMCONT" | "0"
  *     SUMCONT      ::= "}" |  " + TERM SUMCONT"
  *     PARACONT     ::= "]" | "TERMSM PARACONTCONT"
@@ -74,12 +75,17 @@ void input() : {} { term() <EOF> }
  *
  * This is the grammar used in the implementation below.
  */
-PiTerm<String> term() : { PiTerm<String> tm0, tm1; ArrayList<LambdaTerm<String>> exps; ArrayList<PiTerm<String>> tmList; Token n; }
-{
+PiTerm<String> term() : {
+    PiTerm<String> tm0, tm1;
+    ArrayList<String> names;
+    ArrayList<LambdaTerm<String>> exps;
+    ArrayList<PiTerm<String>> tmList;
+    Token n;
+} {
     LOOKAHEAD(2)
-    n=<ID> "(" exps=receCont() "." tm0=term()
+    n=<ID> "(" names=receCont() "." tm0=term()
     {
-        return new Receive<String>(n.toString(), exps, tm0);
+        return new Receive<String>(n.toString(), names, tm0);
     }
     |
     n=<ID> "<" exps=sendCont() "." tm0=term()
@@ -115,8 +121,10 @@ PiTerm<String> term() : { PiTerm<String> tm0, tm1; ArrayList<LambdaTerm<String>>
     }
 }
 
-ArrayList<PiTerm<String>> sumCont() : { PiTerm<String> tm; ArrayList<PiTerm<String>> tmList; }
-{
+ArrayList<PiTerm<String>> sumCont() : {
+    PiTerm<String> tm;
+    ArrayList<PiTerm<String>> tmList;
+} {
     "}"
     {
         return new ArrayList<PiTerm<String>>();
@@ -129,8 +137,10 @@ ArrayList<PiTerm<String>> sumCont() : { PiTerm<String> tm; ArrayList<PiTerm<Stri
     }
 }
 
-PiTerm<String> paraCont() : { PiTerm<String> e; ArrayList<PiTerm<String>> rest; }
-{
+PiTerm<String> paraCont() : {
+    PiTerm<String> e;
+    ArrayList<PiTerm<String>> rest;
+} {
     "]"
     {
         return new Parallel<String>(new ArrayList<PiTerm<String>>());
@@ -143,8 +153,10 @@ PiTerm<String> paraCont() : { PiTerm<String> e; ArrayList<PiTerm<String>> rest; 
     }
 }
 
-ArrayList<PiTerm<String>> paraContCont() : { PiTerm<String> e; ArrayList<PiTerm<String>> rest; }
-{
+ArrayList<PiTerm<String>> paraContCont() : {
+    PiTerm<String> e;
+    ArrayList<PiTerm<String>> rest;
+} {
     "]"
     {
         return new ArrayList<PiTerm<String>>();
@@ -157,8 +169,10 @@ ArrayList<PiTerm<String>> paraContCont() : { PiTerm<String> e; ArrayList<PiTerm<
     }
 }
 
-ArrayList<LambdaTerm<String>> sendCont() : { Token n; ArrayList<LambdaTerm<String>> rest; }
-{
+ArrayList<LambdaTerm<String>> sendCont() : {
+    Token n;
+    ArrayList<LambdaTerm<String>> rest;
+} {
     ">"
     {
         return new ArrayList<LambdaTerm<String>>();
@@ -171,8 +185,10 @@ ArrayList<LambdaTerm<String>> sendCont() : { Token n; ArrayList<LambdaTerm<Strin
     }
 }
 
-ArrayList<LambdaTerm<String>> sendContCont() : { Token n; ArrayList<LambdaTerm<String>> rest; }
-{
+ArrayList<LambdaTerm<String>> sendContCont() : {
+    Token n;
+    ArrayList<LambdaTerm<String>> rest;
+} {
     ">"
     {
         return new ArrayList<LambdaTerm<String>>();
@@ -185,30 +201,34 @@ ArrayList<LambdaTerm<String>> sendContCont() : { Token n; ArrayList<LambdaTerm<S
     }
 }
 
-ArrayList<LambdaTerm<String>> receCont() : { Token n; ArrayList<LambdaTerm<String>> rest; }
-{
+ArrayList<String> receCont() : {
+    Token n;
+    ArrayList<String> rest;
+} {
     ")"
     {
-        return new ArrayList<LambdaTerm<String>>();
+        return new ArrayList<String>();
     }
     |
     n=<ID> rest=receContCont()
     {
-        rest.add(0, new Variable<String>(n.toString()));
+        rest.add(0, n.toString());
         return rest;
     }
 }
 
-ArrayList<LambdaTerm<String>> receContCont() : { Token n; ArrayList<LambdaTerm<String>> rest; }
-{
+ArrayList<String> receContCont() : {
+    Token n;
+    ArrayList<String> rest;
+} {
     ")"
     {
-        return new ArrayList<LambdaTerm<String>>();
+        return new ArrayList<String>();
     }
     |
     "," n=<ID> rest=receContCont()
     {
-        rest.add(0, new Variable<String>(n.toString()));
+        rest.add(0, n.toString());
         return rest;
     }
 }

@@ -82,7 +82,9 @@ public class Interpreter {
      * @param SyntaxTranslationResult the result of translating a source program
      * into an interpretable program.
      */
-    public static Interpreter fromTranslation(SyntaxTranslationResult result) {
+    public static Interpreter fromTranslation(
+            SyntaxTranslationResult<PiTerm<Integer>> result) {
+
         return new Interpreter(result.getTerm(), result.getNameMap(),
                 result.getNextAvailableName());
     }
@@ -290,15 +292,20 @@ public class Interpreter {
 
         // To avoid clashes, first rename all sent names to a fresh name, and
         // then rename those fresh names with the sent ones.
-        int firstIntermediateName = this.nextAvailableName;
-        for(int i = 0; i < rece.arity(); i++) {
-            receiverSub.rename(rece.msg(i), firstIntermediateName);
-            firstIntermediateName++;
+        for(int i = 0, firstIntermediateName = this.nextAvailableName;
+                i < rece.arity(); i++, firstIntermediateName++) {
+
+            if(!(rece.msg(i) instanceof Variable)) {
+                throw new IllegalStateException("Non-Variable LambdaTerm in " +
+                        "Receive");
+            }
+            receiverSub.msgPass(((Variable<Integer>) rece.msg(i)).name(),
+                    new Variable<Integer>(firstIntermediateName));
         }
-        firstIntermediateName = this.nextAvailableName;
-        for(int i = 0; i < rece.arity(); i++) {
-            receiverSub.rename(firstIntermediateName, send.msg(i));
-            firstIntermediateName++;
+        for(int i = 0, firstIntermediateName = this.nextAvailableName;
+                i < rece.arity(); i++, firstIntermediateName++) {
+
+            receiverSub.msgPass(firstIntermediateName, send.msg(i));
         }
 
         this.integrateNewlyExposedTerm(receiverSub);
