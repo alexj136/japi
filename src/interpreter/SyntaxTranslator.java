@@ -48,6 +48,8 @@ public abstract class SyntaxTranslator {
             SyntaxTranslationResult<PiTerm<Integer>> result =
                     _translate(comm.subterm(), nameMap, nextAvailableName);
 
+            nextAvailableName = result.getNextAvailableName();
+
             if(comm instanceof Send) {
                 Send<String> send = (Send) comm;
 

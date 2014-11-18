@@ -1,7 +1,6 @@
 package interpreter;
 
 import syntax.*;
-import interpreter.PiReducer;
 import interpreter.LambdaReducer;
 import utils.Pair;
 import java.util.Collections;
@@ -297,13 +296,13 @@ public class Interpreter {
         for(int i = 0, firstIntermediateName = this.nextAvailableName;
                 i < rece.arity(); i++, firstIntermediateName++) {
 
-            receiverSub.msgPass(rece.name(i),
-                    new Variable<Integer>(firstIntermediateName));
+            PiReducer.msgPass(rece.name(i),
+                    new Variable<Integer>(firstIntermediateName), receiverSub);
         }
         for(int i = 0, firstIntermediateName = this.nextAvailableName;
                 i < rece.arity(); i++, firstIntermediateName++) {
 
-            receiverSub.msgPass(firstIntermediateName, send.exp(i));
+            PiReducer.msgPass(firstIntermediateName, send.exp(i), receiverSub);
         }
 
         this.integrateNewlyExposedTerm(receiverSub);

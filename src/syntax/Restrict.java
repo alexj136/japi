@@ -62,17 +62,6 @@ public final class Restrict<T> extends PiTermOneSub<T> {
     }
 
     /**
-     * Substitute within this Restrict as is required when a message is passed.
-     * @param replacing names of this value are replaced
-     * @param with names being replaced are replaced with this value
-     */
-    public void msgPass(T replacing, LambdaTerm<T> with) {
-        if(!this.boundName.equals(replacing)) {
-            this.subterm.msgPass(replacing, with);
-        }
-    }
-
-    /**
      * Carelessly rename this Restrict.
      * @param from all names of this value are renamed
      * @param to all names being renamed are renamed to this value

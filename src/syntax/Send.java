@@ -62,32 +62,6 @@ public final class Send<T> extends PiTermComm<T> {
     }
 
     /**
-     * Substitute the names within this Send with expressions, as though a
-     * message had been received by a containing process.
-     * @param replacing names with this value are replaced
-     * @param with names being replaced are replaced with this expression
-     */
-    public void msgPass(T replacing, LambdaTerm<T> with) {
-        if(replacing.equals(this.chnl) && !(with instanceof Variable)) {
-            throw new IllegalArgumentException("Tried to replace a " +
-                    "channel name with an expression");
-        }
-        if(replacing.equals(this.chnl) && with instanceof Variable) {
-            Variable<T> var = (Variable) with;
-            this.chnl = var.name();
-        }
-        for(int i = 0; i < this.arity(); i++) {
-            if(with instanceof Variable) {
-                this.exp(i).renameFree(replacing, ((Variable<T>) with).name());
-            }
-            else {
-                throw new UnsupportedOperationException("Not yet implemented");
-            }
-        }
-        this.subterm.msgPass(replacing, with);
-    }
-
-    /**
      * Copy this Send.
      * @return a copy of this Send.
      */
