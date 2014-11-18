@@ -74,7 +74,7 @@ public final class LambdaReducer {
             Abstraction<Integer> abs = (Abstraction) app.func();
 
             /*
-             * Prevent any chance of a name clash occuring.
+             * Prevent name clashes occuring.
              */
             HashSet<Integer> atRisk = LambdaReducer.toRename(
                     app.arg().freeVars(), abs.body().binders());
@@ -98,42 +98,43 @@ public final class LambdaReducer {
             /*
              * Do the substitution.
              */
-            term = LambdaReducer.substitute(abs.body(), abs.name(), app.arg());
+            term = LambdaReducer.substitute(abs.name(), app.arg(), abs.body());
         }
         return term;
     }
 
     /**
-     * Substitute all occurences of the variable subOut with the term subIn,
-     * within the term subWithin.
-     * @param subWithin the expression to substitute inside
-     * @param subOut the variable to substitue out
-     * @param subIn the term to substitute in
+     * Substitute all occurences of the variable replacing with the term with,
+     * within the term in.
+     * @param in the expression to substitute inside
+     * @param replacing the variable to substitue out
+     * @param with the term to substitute in
      * @return a pointer to the generated term
      */
-    public static <T> LambdaTerm<T> substitute(LambdaTerm<T> subWithin,
-            T subOut, LambdaTerm<T> subIn) {
+    public static <T> LambdaTerm<T> substitute(T replacing, LambdaTerm<T> with,
+            LambdaTerm<T> in) {
 
-        if(subWithin instanceof Abstraction) {
-            Abstraction abs = (Abstraction) subWithin;
-            if(abs.name().equals(subOut)) {
-                return subWithin;
+        if(in instanceof Abstraction) {
+            Abstraction abs = (Abstraction) in;
+            if(abs.name().equals(replacing)) {
+                return in;
             }
             else {
-                abs.setBody(LambdaReducer.substitute(abs.body(), subOut, subIn));
+                abs.setBody(LambdaReducer.substitute(replacing, with,
+                        abs.body()));
                 return abs;
             }
         }
-        else if(subWithin instanceof Application) {
-            Application app = (Application) subWithin;
-            app.setFunc(LambdaReducer.substitute(app.func(), subOut, subIn));
-            app.setArg(LambdaReducer.substitute(app.arg(), subOut, subIn));
+        else if(in instanceof Application) {
+            Application app = (Application) in;
+            app.setFunc(LambdaReducer.substitute(replacing, with, app.func()));
+            app.setArg(LambdaReducer.substitute(replacing, with, app.arg()));
             return app;
         }
-        else if(subWithin instanceof Variable) {
-            Variable var = (Variable) subWithin;
-            if(var.name().equals(subOut)) {
-                return subIn.copy();
+        else if(in instanceof Variable) {
+            Variable var = (Variable) in;
+            if(var.name().equals(replacing)) {
+                return with.copy();
             }
             else {
                 return var;

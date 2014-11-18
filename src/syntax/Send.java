@@ -77,7 +77,12 @@ public final class Send<T> extends PiTermComm<T> {
             this.chnl = var.name();
         }
         for(int i = 0; i < this.arity(); i++) {
-            this.exp(i).renameFree(replacing, with);
+            if(with instanceof Variable) {
+                this.exp(i).renameFree(replacing, ((Variable<T>) with).name());
+            }
+            else {
+                throw new UnsupportedOperationException("Not yet implemented");
+            }
         }
         this.subterm.msgPass(replacing, with);
     }

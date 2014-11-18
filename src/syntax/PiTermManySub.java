@@ -2,6 +2,7 @@ package syntax;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.HashSet;
 
 public abstract class PiTermManySub<T> extends PiTerm<T>
         implements Iterable<PiTerm<T>> {
@@ -34,6 +35,18 @@ public abstract class PiTermManySub<T> extends PiTerm<T>
      * @return an iterator over the elements in this parallel composition.
      */
     public Iterator<PiTerm<T>> iterator() { return this.subterms.iterator(); }
+
+    /**
+     * Enumerate the binders in this PiTermManySub.
+     * @return a HashSet of the binders in this PiTermManySub
+     */
+    public HashSet<T> binders() {
+        HashSet<T> binders = new HashSet<T>();
+        for(PiTerm<T> subterm : subterms) {
+            for(T binder : subterm.binders()) { binders.add(binder); }
+        }
+        return binders;
+    }
 
     /**
      * Obtain an ArrayList with copies of the contained subterms.

@@ -3,6 +3,7 @@ package syntax;
 import utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * The Receive class represents a process waiting for a message. Once it
@@ -48,6 +49,17 @@ public final class Receive<T> extends PiTermComm<T> {
     }
 
     /**
+     * Enumerate the binders in this Receive.
+     * @return a HashSet of the binders in this Receive
+     */
+    @Override
+    public HashSet<T> binders() {
+        HashSet<T> subBinders = super.binders();
+        for(T name : this.boundNames) { subBinders.add(name); }
+        return subBinders;
+    }
+
+    /**
      * Obtain a string representation of this Receive.
      * @return a string representing this Receive
      */
@@ -66,7 +78,9 @@ public final class Receive<T> extends PiTermComm<T> {
      */
     public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
         ArrayList<String> nameStrs = new ArrayList<String>();
-        for(T name : this.boundNames) { nameStrs.add(name.toString()); }
+        for(T name : this.boundNames) {
+            nameStrs.add(nameMap.get(name).toString());
+        }
         return nameMap.get(this.chnl) + " " +
                 Utils.stringifyList("( ", " )", ", ", nameStrs) + " . " +
                 this.subterm.toStringWithNameMap(nameMap);

@@ -20,14 +20,6 @@ public abstract class LambdaTerm<T> extends Term<T> {
     public abstract HashSet<T> freeVars();
 
     /**
-     * Enumerate the variable names that have their binders within the given
-     * LambdaTerm.
-     * @return a HashSet of all the variable names that have their binders
-     * within the given LambdaTerm
-     */
-    public abstract HashSet<T> binders();
-
-    /**
      * Rename all free occurences of the name 'from' to the name 'to'.
      * @param from names of this value are renamed
      * @param to renamed names are renamed to this value

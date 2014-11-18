@@ -1,6 +1,8 @@
 package interpreter;
 
 import syntax.*;
+import interpreter.PiReducer;
+import interpreter.LambdaReducer;
 import utils.Pair;
 import java.util.Collections;
 import java.util.ArrayList;
@@ -295,17 +297,13 @@ public class Interpreter {
         for(int i = 0, firstIntermediateName = this.nextAvailableName;
                 i < rece.arity(); i++, firstIntermediateName++) {
 
-            if(!(rece.msg(i) instanceof Variable)) {
-                throw new IllegalStateException("Non-Variable LambdaTerm in " +
-                        "Receive");
-            }
-            receiverSub.msgPass(((Variable<Integer>) rece.msg(i)).name(),
+            receiverSub.msgPass(rece.name(i),
                     new Variable<Integer>(firstIntermediateName));
         }
         for(int i = 0, firstIntermediateName = this.nextAvailableName;
                 i < rece.arity(); i++, firstIntermediateName++) {
 
-            receiverSub.msgPass(firstIntermediateName, send.msg(i));
+            receiverSub.msgPass(firstIntermediateName, send.exp(i));
         }
 
         this.integrateNewlyExposedTerm(receiverSub);

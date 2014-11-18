@@ -24,4 +24,10 @@ public abstract class PiTermComm<T> extends PiTermOneSub<T> {
      * @return the channel name on which a message can be received or sent
      */
     public T chnl() { return this.chnl; }
+
+    /**
+     * Set the channel name.
+     * @param chnl the new channel name
+     */
+    public void setChnl(T chnl) { this.chnl = chnl; }
 }

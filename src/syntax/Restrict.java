@@ -1,6 +1,7 @@
 package syntax;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Restrict objects behave somewhat like lambda abstractions - they bind
@@ -26,6 +27,17 @@ public final class Restrict<T> extends PiTermOneSub<T> {
      * @return the name bound in this restriction
      */
     public T boundName() { return this.boundName; }
+
+    /**
+     * Enumerate the binders in this Restrict.
+     * @return a HashSey of the binders in this Restrict
+     */
+    @Override
+    public HashSet<T> binders() {
+        HashSet<T> subBinders = super.binders();
+        subBinders.add(this.boundName());
+        return subBinders;
+    }
 
     /**
      * Obtain a pretty-printout of this Restrict.

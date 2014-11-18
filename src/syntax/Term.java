@@ -1,9 +1,18 @@
 package syntax;
 
+import java.util.HashSet;
 import java.util.HashMap;
 
 public abstract class Term<T> {
     
+    /**
+     * Enumerate the variable names that have their binders within the given
+     * LambdaTerm.
+     * @return a HashSet of all the variable names that have their binders
+     * within the given LambdaTerm
+     */
+    public abstract HashSet<T> binders();
+
     /**
      * Obtain a string representation of this Term.
      * @return a string representing the Term
