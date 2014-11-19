@@ -50,6 +50,8 @@ TOKEN :
     | "in"
     | "!"
     | "0"
+    | "\\"
+    | "->"
     | <ID: (["a"-"z"])+>
     }
 
@@ -57,8 +59,9 @@ void input() : {} { term() <EOF> }
 
 /* The pi-calculus grammar used is as follows:
  *
- *     P ::= "x(a0, a1, ... aN).P" | "x<a0, a1, ... aN>.P" | "[P0|P1|...PN]"
+ *     P ::= "x(a0, a1, ... aN).P" | "x<E0, E1, ... EN>.P" | "[P0|P1|...PN]"
  *         | "new x in P" | "!P" | "{P0 + P1 + ... PN}" | "0"
+ *     E ::= "\x -> E" | "E E" | "x"
  *
  * which, in a more concrete, non-left-recursive form is:
  *
@@ -70,8 +73,10 @@ void input() : {} { term() <EOF> }
  *     PARACONTCONT ::= "]" | "| TERMSM PARACONTCONT"
  *     RECECONT     ::= ")" | "y RCONTC"
  *     RECECONTCONT ::= ")" | ", y RCONTC"
- *     SENDCONT     ::= ">" | "y SENDCONTCONT"
- *     SENDCONTCONT ::= ">" | ", y SENDCONTCONT"
+ *     SENDCONT     ::= ">" | "LTM SENDCONTCONT"
+ *     SENDCONTCONT ::= ">" | ", LTM SENDCONTCONT"
+ *     LAMTERM      ::= LAMTERMCONT | LAMTERMCONT LTM
+ *     LAMTERMCONT  ::= "\x -> LAMTERM" | "x"
  *
  * This is the grammar used in the implementation below.
  */
@@ -170,7 +175,7 @@ ArrayList<PiTerm<String>> paraContCont() : {
 }
 
 ArrayList<LambdaTerm<String>> sendCont() : {
-    Token n;
+    LambdaTerm<String> lam;
     ArrayList<LambdaTerm<String>> rest;
 } {
     ">"
@@ -178,15 +183,15 @@ ArrayList<LambdaTerm<String>> sendCont() : {
         return new ArrayList<LambdaTerm<String>>();
     }
     |
-    n=<ID> rest=sendContCont()
+    lam=lamTerm() rest=sendContCont()
     {
-        rest.add(0, new Variable<String>(n.toString()));
+        rest.add(0, lam);
         return rest;
     }
 }
 
 ArrayList<LambdaTerm<String>> sendContCont() : {
-    Token n;
+    LambdaTerm<String> lam;
     ArrayList<LambdaTerm<String>> rest;
 } {
     ">"
@@ -194,9 +199,9 @@ ArrayList<LambdaTerm<String>> sendContCont() : {
         return new ArrayList<LambdaTerm<String>>();
     }
     |
-    "," n=<ID> rest=sendContCont()
+    "," lam=lamTerm() rest=sendContCont()
     {
-        rest.add(0, new Variable<String>(n.toString()));
+        rest.add(0, lam);
         return rest;
     }
 }
@@ -230,5 +235,40 @@ ArrayList<String> receContCont() : {
     {
         rest.add(0, n.toString());
         return rest;
+    }
+}
+
+LambdaTerm<String> lamTerm() : {
+    LambdaTerm<String> lam0, lam1;
+} {
+    LOOKAHEAD(2)
+    lam0=lamTermCont() lam1=lamTerm()
+    {
+        return new Application<String>(lam0, lam1);
+    }
+    |
+    lam0=lamTermCont()
+    {
+        return lam0;
+    }
+    |
+    "(" lam0=lamTerm() ")"
+    {
+        return lam0;
+    }
+}
+
+LambdaTerm<String> lamTermCont() : {
+    Token n;
+    LambdaTerm<String> lam;
+} {
+    n=<ID>
+    {
+        return new Variable(n.toString());
+    }
+    |
+    "\\" n=<ID> "->" lam=lamTerm()
+    {
+        return new Abstraction(n.toString(), lam);
     }
 }
