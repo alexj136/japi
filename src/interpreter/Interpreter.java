@@ -2,8 +2,7 @@ package interpreter;
 
 import syntax.*;
 import interpreter.LambdaReducer;
-import utils.Pair;
-import utils.Utils;
+import utils.*;
 import java.util.Collections;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,10 +81,9 @@ public class Interpreter {
      * into an interpretable program.
      */
     public static Interpreter fromTranslation(
-            SyntaxTranslationResult<PiTerm<Integer>> result) {
+            Triple<PiTerm<Integer>, HashMap<String, Integer>, Integer> result) {
 
-        return new Interpreter(result.getTerm(), result.getNameMap(),
-                result.getNextAvailableName());
+        return new Interpreter(result.frst, result.scnd, result.thrd);
     }
 
     /**
@@ -177,74 +175,74 @@ public class Interpreter {
             Pair<PiTerm<Integer>, PiTerm<Integer>> reduction) {
 
         if (pairMatch(this.senders, this.receivers, list1, list2)) {
-            this.doCommunicate((Send) reduction.fst, (Receive) reduction.snd);
+            this.doCommunicate((Send) reduction.frst, (Receive) reduction.scnd);
         }
         else if(pairMatch(this.senders, this.replReceivers, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.snd.copy());
+            this.integrateNewlyExposedTerm(reduction.scnd.copy());
         }
         else if(pairMatch(this.receivers, this.replSenders, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.snd.copy());
+            this.integrateNewlyExposedTerm(reduction.scnd.copy());
         }
         else if(pairMatch(this.senders, this.restricts, list1, list2)) {
             this.integrateNewlyExposedTerm(
-                    this.doScopeExtrusion((Restrict) reduction.snd));
+                    this.doScopeExtrusion((Restrict) reduction.scnd));
         }
         else if(pairMatch(this.receivers, this.restricts, list1, list2)) {
             this.integrateNewlyExposedTerm(
-                    this.doScopeExtrusion((Restrict) reduction.snd));
+                    this.doScopeExtrusion((Restrict) reduction.scnd));
         }
         else if(pairMatch(this.restricts, this.replSenders, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.snd.copy());
+            this.integrateNewlyExposedTerm(reduction.scnd.copy());
         }
         else if(pairMatch(this.restricts, this.replReceivers, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.snd.copy());
+            this.integrateNewlyExposedTerm(reduction.scnd.copy());
         }
         else if(pairMatch(this.senders, this.replRestricts, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.snd.copy());
+            this.integrateNewlyExposedTerm(reduction.scnd.copy());
         }
         else if(pairMatch(this.receivers, this.replRestricts, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.snd.copy());
+            this.integrateNewlyExposedTerm(reduction.scnd.copy());
         }
         else if(pairMatch(this.restricts, this.restricts, list1, list2)) {
             this.integrateNewlyExposedTerm(
-                    this.doScopeExtrusion((Restrict) reduction.snd));
+                    this.doScopeExtrusion((Restrict) reduction.scnd));
         }
         else if(pairMatch(this.restricts, this.replRestricts, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.snd.copy());
+            this.integrateNewlyExposedTerm(reduction.scnd.copy());
         }
         else if(pairMatch(this.sums, this.sums, list1, list2)) {
-            this.doSumSelection((NDSum) reduction.fst, reduction.snd);
+            this.doSumSelection((NDSum) reduction.frst, reduction.scnd);
         }
         else if(pairMatch(this.sums, this.senders, list1, list2)) {
-            this.doSumSelection((NDSum) reduction.fst, reduction.snd);
+            this.doSumSelection((NDSum) reduction.frst, reduction.scnd);
         }
         else if(pairMatch(this.sums, this.receivers, list1, list2)) {
-            this.doSumSelection((NDSum) reduction.fst, reduction.snd);
+            this.doSumSelection((NDSum) reduction.frst, reduction.scnd);
         }
         else if(pairMatch(this.sums, this.restricts, list1, list2)) {
             this.integrateNewlyExposedTerm(
-                    this.doScopeExtrusion((Restrict) reduction.snd));
+                    this.doScopeExtrusion((Restrict) reduction.scnd));
         }
         else if(pairMatch(this.sums, this.replSenders, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.snd.copy());
+            this.integrateNewlyExposedTerm(reduction.scnd.copy());
         }
         else if(pairMatch(this.sums, this.replReceivers, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.snd.copy());
+            this.integrateNewlyExposedTerm(reduction.scnd.copy());
         }
         else if(pairMatch(this.sums, this.replRestricts, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.snd.copy());
+            this.integrateNewlyExposedTerm(reduction.scnd.copy());
         }
         else if(pairMatch(this.sums, this.replSums, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.snd.copy());
+            this.integrateNewlyExposedTerm(reduction.scnd.copy());
         }
         else if(pairMatch(this.senders, this.replSums, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.snd.copy());
+            this.integrateNewlyExposedTerm(reduction.scnd.copy());
         }
         else if(pairMatch(this.receivers, this.replSums, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.snd.copy());
+            this.integrateNewlyExposedTerm(reduction.scnd.copy());
         }
         else if(pairMatch(this.restricts, this.replSums, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.snd.copy());
+            this.integrateNewlyExposedTerm(reduction.scnd.copy());
         }
         else {
             throw new IllegalArgumentException("Given lists not allowed to " +
@@ -456,8 +454,8 @@ public class Interpreter {
                     "called when no reduction was in progress");
         }
 
-        PiTerm<Integer> t1 = this.actingTerms.get().fst;
-        PiTerm<Integer> t2 = this.actingTerms.get().snd;
+        PiTerm<Integer> t1 = this.actingTerms.get().frst;
+        PiTerm<Integer> t2 = this.actingTerms.get().scnd;
 
         if(t1 instanceof Send) {
             if(t2 instanceof Receive) {
@@ -605,9 +603,9 @@ public class Interpreter {
     public String toString() {
         ArrayList<String> termStrings = new ArrayList<String>();
         if(this.actingTerms.isPresent()) {
-            termStrings.add(this.actingTerms.get().fst
+            termStrings.add(this.actingTerms.get().frst
                     .toStringWithNameMap(this.nameMap));
-            termStrings.add(this.actingTerms.get().snd
+            termStrings.add(this.actingTerms.get().scnd
                     .toStringWithNameMap(this.nameMap));
         }
         for(Send send : this.senders) {

@@ -3,49 +3,51 @@ package utils;
 /**
  * Standard two-tuple class using generics.
  */
-public final class Pair<T, U> {
+public class Pair<T, U> {
     
-    public final T fst;
-    public final U snd;
+    public final T frst;
+    public final U scnd;
 
     /**
      * Construct a new Pair.
-     * @param fst the first element
-     * @param snd the second element
+     * @param frst the first element
+     * @param scnd the second element
      */
-    private Pair(T fst, U snd) {
-        this.fst = fst;
-        this.snd = snd;
+    protected Pair(T frst, U scnd) {
+        this.frst = frst;
+        this.scnd = scnd;
     }
 
     /**
      * Static constructor for Pairs. Removes the need for the lengthy type name
      * in the constructor call.
-     * @param fst the first element
-     * @param snd the second element
-     * @return a pair (fst, snd) that is compile-time type checked
+     * @param frst the first element
+     * @param scnd the second element
+     * @return a pair (frst, scnd) that is compile-time type checked
      */
-    public static <T, U> Pair<T, U> make(T fst, U snd) {
-        return new Pair<T, U>(fst, snd);
+    public static <T, U> Pair<T, U> make(T frst, U scnd) {
+        return new Pair<T, U>(frst, scnd);
     }
 
     /**
-     * Construct a Pair with the snd element of this Pair and a new fst element
-     * @param fst the new fst element
-     * @return a new pair with the same snd element as this one, and a new fst
+     * Construct a Pair with the scnd element of this Pair and a new frst
+     * element.
+     * @param frst the new frst element
+     * @return a new pair with the same scnd element as this one, and a new frst
      * element
      */
-    public Pair<T, U> withFst(T fst) {
-        return new Pair<T, U>(fst, this.snd);
+    public Pair<T, U> withFrst(T frst) {
+        return new Pair<T, U>(frst, this.scnd);
     }
 
     /**
-     * Construct a Pair with the fst element of this Pair and a new snd element
-     * @param snd the new snd element
-     * @return a new pair with the same fst element as this one, and a new snd
+     * Construct a Pair with the frst element of this Pair and a new scnd
+     * element.
+     * @param scnd the new scnd element
+     * @return a new pair with the same frst element as this one, and a new scnd
      * element
      */
-    public Pair<T, U> withSnd(U snd) {
-        return new Pair<T, U>(this.fst, snd);
+    public Pair<T, U> withScnd(U scnd) {
+        return new Pair<T, U>(this.frst, scnd);
     }
 }

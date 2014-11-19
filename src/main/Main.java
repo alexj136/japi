@@ -2,8 +2,8 @@ package main;
 
 import parser.*;
 import syntax.PiTerm;
+import utils.Triple;
 import interpreter.SyntaxTranslator;
-import interpreter.SyntaxTranslationResult;
 import interpreter.Interpreter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -60,7 +60,8 @@ public class Main {
             System.out.println("Could not parse the file:\n" + e.getMessage());
             return;
         }
-        SyntaxTranslationResult res = SyntaxTranslator.translate(term);
+        Triple<PiTerm<Integer>, HashMap<String, Integer>, Integer> res =
+                SyntaxTranslator.translate(term);
         Interpreter interpreter = Interpreter.fromTranslation(res);
         System.out.println(interpreter);
         boolean reductionOccurred = true;
