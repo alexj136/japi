@@ -5,28 +5,47 @@ package utils;
  */
 public final class Pair<T, U> {
     
-    private final T first;
-    private final U second;
+    public final T fst;
+    public final U snd;
 
     /**
      * Construct a new Pair.
-     * @param first the first element
-     * @param second the second element
+     * @param fst the first element
+     * @param snd the second element
      */
-    public Pair(T first, U second) {
-        this.first = first;
-        this.second = second;
+    private Pair(T fst, U snd) {
+        this.fst = fst;
+        this.snd = snd;
     }
 
     /**
-     * Access the first element.
-     * @return the first element
+     * Static constructor for Pairs. Removes the need for the lengthy type name
+     * in the constructor call.
+     * @param fst the first element
+     * @param snd the second element
+     * @return a pair (fst, snd) that is compile-time type checked
      */
-    public T first() { return this.first; }
+    public static <T, U> Pair<T, U> make(T fst, U snd) {
+        return new Pair<T, U>(fst, snd);
+    }
 
     /**
-     * Access the second element.
-     * @return the second element
+     * Construct a Pair with the snd element of this Pair and a new fst element
+     * @param fst the new fst element
+     * @return a new pair with the same snd element as this one, and a new fst
+     * element
      */
-    public U second() { return this.second; }
+    public Pair<T, U> withFst(T fst) {
+        return new Pair<T, U>(fst, this.snd);
+    }
+
+    /**
+     * Construct a Pair with the fst element of this Pair and a new snd element
+     * @param snd the new snd element
+     * @return a new pair with the same fst element as this one, and a new snd
+     * element
+     */
+    public Pair<T, U> withSnd(U snd) {
+        return new Pair<T, U>(this.fst, snd);
+    }
 }

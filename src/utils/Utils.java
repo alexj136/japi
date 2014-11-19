@@ -1,11 +1,24 @@
 package utils;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * General purpose functions ('static methods').
  */
 public final class Utils {
+
+    // Provides random numbers for Utils.arbitraryElement()
+    private static Random rand = new Random();
+
+    /**
+     * Retreive an arbitrary element from an ArrayList.
+     * @param matches the ArrayList to use
+     * @return an arbitrary element of the given list
+     */
+    public static <E> E arbitraryElement(ArrayList<E> list) {
+        return list.get(Utils.rand.nextInt(list.size()));
+    }
 
     /**
      * Generate a string of the given number of tabs, for use when pretty-

@@ -3,11 +3,11 @@ package interpreter;
 import syntax.*;
 import interpreter.LambdaReducer;
 import utils.Pair;
+import utils.Utils;
 import java.util.Collections;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Optional;
 
 /**
@@ -15,8 +15,6 @@ import java.util.Optional;
  * integration of newly exposed terms into that n-ary parallel composition.
  */
 public class Interpreter {
-
-    private static Random rand = new Random();
 
     private HashMap<Integer, String> nameMap;
     private HashSet<String> usedNames;
@@ -141,7 +139,7 @@ public class Interpreter {
 
         // Keep trying the possible reductions in random order until one works
         while(!(todo.isEmpty() || doneReduction)) {
-            ArrayList[] pair = Interpreter.arbitraryElement(todo);
+            ArrayList[] pair = Utils.arbitraryElement(todo);
             todo.remove(pair);
             doneReduction = tryRandomReductionBetweenLists(pair[0], pair[1]);
         }
@@ -158,94 +156,95 @@ public class Interpreter {
             ArrayList<? extends PiTerm> list2) {
 
         // Enumerate all matches between the given lists
-        ArrayList<Match> matches =
-                Match.findMatches(list1, list2);
+        ArrayList<Pair<PiTerm<Integer>, PiTerm<Integer>>> matches =
+                Interpreter.findMatches(list1, list2);
 
         // If there are no matches, we were unsuccessful, so return false
         if(matches.isEmpty()) { return false; }
 
         // Handle the chosen reduction and forward the returned status
         return this.handleChosenReduction(list1, list2,
-                Interpreter.arbitraryElement(matches));
+                Utils.arbitraryElement(matches));
     }
 
     /*
-     * Given two lists and a Match between them, perform a reduction on that
+     * Given two lists and a match between them, perform a reduction on that
      * matching pair. It is not checked that the match contains terms from the
      * given lists.
      */
     private boolean handleChosenReduction(ArrayList<? extends PiTerm> list1,
-            ArrayList<? extends PiTerm> list2, Match reduction) {
+            ArrayList<? extends PiTerm> list2,
+            Pair<PiTerm<Integer>, PiTerm<Integer>> reduction) {
 
         if (pairMatch(this.senders, this.receivers, list1, list2)) {
-            this.doCommunicate((Send) reduction.t1, (Receive) reduction.t2);
+            this.doCommunicate((Send) reduction.fst, (Receive) reduction.snd);
         }
         else if(pairMatch(this.senders, this.replReceivers, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.t2.copy());
+            this.integrateNewlyExposedTerm(reduction.snd.copy());
         }
         else if(pairMatch(this.receivers, this.replSenders, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.t2.copy());
+            this.integrateNewlyExposedTerm(reduction.snd.copy());
         }
         else if(pairMatch(this.senders, this.restricts, list1, list2)) {
             this.integrateNewlyExposedTerm(
-                    this.doScopeExtrusion((Restrict) reduction.t2));
+                    this.doScopeExtrusion((Restrict) reduction.snd));
         }
         else if(pairMatch(this.receivers, this.restricts, list1, list2)) {
             this.integrateNewlyExposedTerm(
-                    this.doScopeExtrusion((Restrict) reduction.t2));
+                    this.doScopeExtrusion((Restrict) reduction.snd));
         }
         else if(pairMatch(this.restricts, this.replSenders, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.t2.copy());
+            this.integrateNewlyExposedTerm(reduction.snd.copy());
         }
         else if(pairMatch(this.restricts, this.replReceivers, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.t2.copy());
+            this.integrateNewlyExposedTerm(reduction.snd.copy());
         }
         else if(pairMatch(this.senders, this.replRestricts, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.t2.copy());
+            this.integrateNewlyExposedTerm(reduction.snd.copy());
         }
         else if(pairMatch(this.receivers, this.replRestricts, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.t2.copy());
+            this.integrateNewlyExposedTerm(reduction.snd.copy());
         }
         else if(pairMatch(this.restricts, this.restricts, list1, list2)) {
             this.integrateNewlyExposedTerm(
-                    this.doScopeExtrusion((Restrict) reduction.t2));
+                    this.doScopeExtrusion((Restrict) reduction.snd));
         }
         else if(pairMatch(this.restricts, this.replRestricts, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.t2.copy());
+            this.integrateNewlyExposedTerm(reduction.snd.copy());
         }
         else if(pairMatch(this.sums, this.sums, list1, list2)) {
-            this.doSumSelection((NDSum) reduction.t1, reduction.t2);
+            this.doSumSelection((NDSum) reduction.fst, reduction.snd);
         }
         else if(pairMatch(this.sums, this.senders, list1, list2)) {
-            this.doSumSelection((NDSum) reduction.t1, reduction.t2);
+            this.doSumSelection((NDSum) reduction.fst, reduction.snd);
         }
         else if(pairMatch(this.sums, this.receivers, list1, list2)) {
-            this.doSumSelection((NDSum) reduction.t1, reduction.t2);
+            this.doSumSelection((NDSum) reduction.fst, reduction.snd);
         }
         else if(pairMatch(this.sums, this.restricts, list1, list2)) {
             this.integrateNewlyExposedTerm(
-                    this.doScopeExtrusion((Restrict) reduction.t2));
+                    this.doScopeExtrusion((Restrict) reduction.snd));
         }
         else if(pairMatch(this.sums, this.replSenders, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.t2.copy());
+            this.integrateNewlyExposedTerm(reduction.snd.copy());
         }
         else if(pairMatch(this.sums, this.replReceivers, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.t2.copy());
+            this.integrateNewlyExposedTerm(reduction.snd.copy());
         }
         else if(pairMatch(this.sums, this.replRestricts, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.t2.copy());
+            this.integrateNewlyExposedTerm(reduction.snd.copy());
         }
         else if(pairMatch(this.sums, this.replSums, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.t2.copy());
+            this.integrateNewlyExposedTerm(reduction.snd.copy());
         }
         else if(pairMatch(this.senders, this.replSums, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.t2.copy());
+            this.integrateNewlyExposedTerm(reduction.snd.copy());
         }
         else if(pairMatch(this.receivers, this.replSums, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.t2.copy());
+            this.integrateNewlyExposedTerm(reduction.snd.copy());
         }
         else if(pairMatch(this.restricts, this.replSums, list1, list2)) {
-            this.integrateNewlyExposedTerm(reduction.t2.copy());
+            this.integrateNewlyExposedTerm(reduction.snd.copy());
         }
         else {
             throw new IllegalArgumentException("Given lists not allowed to " +
@@ -427,7 +426,7 @@ public class Interpreter {
 
         // Remove the sum and choose the possibility
         this.sums.remove(sum);
-        PiTerm<Integer> chosen = Interpreter.arbitraryElement(commSubs);
+        PiTerm<Integer> chosen = Utils.arbitraryElement(commSubs);
 
         if(other instanceof Send) {
             this.senders.remove(other);
@@ -444,8 +443,7 @@ public class Interpreter {
                     "sums, senders or receivers lists.");
         }
 
-        this.actingTerms = Optional.of(
-                new Pair<PiTerm<Integer>, PiTerm<Integer>>(chosen, other));
+        this.actingTerms = Optional.of(Pair.make(chosen, other));
     }
 
     /*
@@ -458,8 +456,8 @@ public class Interpreter {
                     "called when no reduction was in progress");
         }
 
-        PiTerm<Integer> t1 = this.actingTerms.get().first();
-        PiTerm<Integer> t2 = this.actingTerms.get().second();
+        PiTerm<Integer> t1 = this.actingTerms.get().fst;
+        PiTerm<Integer> t2 = this.actingTerms.get().snd;
 
         if(t1 instanceof Send) {
             if(t2 instanceof Receive) {
@@ -469,8 +467,7 @@ public class Interpreter {
                 this.actingTerms = Optional.empty();
             }
             else {
-                this.actingTerms = Optional.of(
-                        new Pair<PiTerm<Integer>, PiTerm<Integer>>(t2, t1));
+                this.actingTerms = Optional.of(Pair.make(t2, t1));
                 this.continueInProgressReduction();
             }
         }
@@ -482,8 +479,7 @@ public class Interpreter {
                 this.actingTerms = Optional.empty();
             }
             else {
-                this.actingTerms = Optional.of(
-                        new Pair<PiTerm<Integer>, PiTerm<Integer>>(t2, t1));
+                this.actingTerms = Optional.of(Pair.make(t2, t1));
                 this.continueInProgressReduction();
             }
         }
@@ -500,7 +496,7 @@ public class Interpreter {
             }
 
             // Pick one to use
-            PiTerm<Integer> chosen = Interpreter.arbitraryElement(commSubs);
+            PiTerm<Integer> chosen = Utils.arbitraryElement(commSubs);
 
             // Either discard the others (for a sum) or integrate them (for a
             // parallel composition)
@@ -519,19 +515,16 @@ public class Interpreter {
                 throw new IllegalStateException("Unrecognised PiTermManySub " +
                         "type in actingterms");
             }
-            this.actingTerms = Optional.of(
-                    new Pair<PiTerm<Integer>, PiTerm<Integer>>(chosen, t2));
+            this.actingTerms = Optional.of(Pair.make(chosen, t2));
         }
         else if(t1 instanceof Replicate) {
             PiTerm<Integer> t1SubCopy = ((Replicate) t1).subterm().copy();
             this.integrateNewlyExposedTerm(t1);
-            this.actingTerms = Optional.of(
-                    new Pair<PiTerm<Integer>, PiTerm<Integer>>(t1SubCopy, t2));
+            this.actingTerms = Optional.of(Pair.make(t1SubCopy, t2));
         }
         else if(t1 instanceof Restrict) {
             PiTerm<Integer> t1Sub = this.doScopeExtrusion((Restrict) t1);
-            this.actingTerms = Optional.of(
-                    new Pair<PiTerm<Integer>, PiTerm<Integer>>(t1Sub, t2));
+            this.actingTerms = Optional.of(Pair.make(t1Sub, t2));
         }
         else {
             throw new IllegalStateException("Unrecognised PiTerm type in " +
@@ -612,9 +605,9 @@ public class Interpreter {
     public String toString() {
         ArrayList<String> termStrings = new ArrayList<String>();
         if(this.actingTerms.isPresent()) {
-            termStrings.add(this.actingTerms.get().first()
+            termStrings.add(this.actingTerms.get().fst
                     .toStringWithNameMap(this.nameMap));
-            termStrings.add(this.actingTerms.get().second()
+            termStrings.add(this.actingTerms.get().snd
                     .toStringWithNameMap(this.nameMap));
         }
         for(Send send : this.senders) {
@@ -653,11 +646,29 @@ public class Interpreter {
     }
 
     /**
-     * Retreive an arbitrary element from an ArrayList.
-     * @param matches the ArrayList to use
-     * @return an arbitrary element of the given list
+     * Enumerate all matches possible matches between two lists of PiTerms.
+     * @param list1 the first list of terms
+     * @param list2 the second list of terms
+     * @return an ArrayList of pairs of PiTerms, one for each possible matching
+     * between the given lists
      */
-    public static <E> E arbitraryElement(ArrayList<E> list) {
-        return list.get(Interpreter.rand.nextInt(list.size()));
+    public static ArrayList<Pair<PiTerm<Integer>, PiTerm<Integer>>> findMatches(
+            ArrayList<? extends PiTerm> list1,
+            ArrayList<? extends PiTerm> list2) {
+
+        ArrayList<Pair<PiTerm<Integer>, PiTerm<Integer>>> matches =
+                new ArrayList<Pair<PiTerm<Integer>, PiTerm<Integer>>>();
+
+        for(PiTerm t1 : list1) {
+            for(PiTerm t2 : list2) {
+                // If they talk to each other, and ARE NOT THE SAME TERM, we
+                // consider this a match. Otherwise, sums can cause themselves
+                // to reduce to one of their children.
+                if(PiTerm.talksTo(t1, t2) && (t1 != t2)) {
+                    matches.add(Pair.make(t1, t2));
+                }
+            }
+        }
+        return matches;
     }
 }
