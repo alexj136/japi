@@ -3,6 +3,7 @@ package parser;
 import java_cup.runtime.Symbol;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ComplexSymbolFactory.Location;
+import java.io.InputStreamReader;
 
 %%
 
@@ -11,10 +12,15 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 %cup
 %line
 %column
-%eofval{ return symbol(Symbols.EOF); %eofval}
+//%eofval{ return symbol(sym.EOF); %eofval}
 
 %{
-    StringBuffer string = new StringBuffer();
+    private ComplexSymbolFactory csf;
+
+    public Lexer(InputStreamReader input, ComplexSymbolFactory csf) {
+        this(input);
+        this.csf = csf;
+    }
 
     public Symbol symbol(int type) {
         return new Symbol(type, yyline, yycolumn);
@@ -28,32 +34,33 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 Ident   = [a-z_]+
 NewLine = \r|\n|\r\n;
 Space   = {NewLine} | [ \t\f]
-Comment =
+Comment = "//" [^]* {NewLine}?
 
 %%
 
 <YYINITIAL>{
 
-"<"     { return symbol(LANGLE);          }
-">"     { return symbol(RANGLE);          }
-"("     { return symbol(LPAREN);          }
-")"     { return symbol(RPAREN);          }
-"["     { return symbol(LSQUAR);          }
-"]"     { return symbol(RSQUAR);          }
-"{"     { return symbol(LCURLY);          }
-"}"     { return symbol(RCURLY);          }
-"."     { return symbol(DOT);             }
-","     { return symbol(COMMA);           }
-"+"     { return symbol(SUM);             }
-"|"     { return symbol(BAR);             }
-"new"   { return symbol(NEW);             }
-"in"    { return symbol(IN);              }
-"!"     { return symbol(BANG);            }
-"0"     { return symbol(ZERO);            }
-"\\"    { return symbol(BSLASH);          }
-"->"    { return symbol(ARROW);           }
-{Ident} { return symbol(IDENT, yytext()); }
+    "<"     { return symbol(sym.LANGLE);          }
+    ">"     { return symbol(sym.RANGLE);          }
+    "("     { return symbol(sym.LPAREN);          }
+    ")"     { return symbol(sym.RPAREN);          }
+    "["     { return symbol(sym.LSQUAR);          }
+    "]"     { return symbol(sym.RSQUAR);          }
+    "{"     { return symbol(sym.LCURLY);          }
+    "}"     { return symbol(sym.RCURLY);          }
+    "."     { return symbol(sym.DOT);             }
+    ","     { return symbol(sym.COMMA);           }
+    "+"     { return symbol(sym.SUM);             }
+    "|"     { return symbol(sym.BAR);             }
+    "new"   { return symbol(sym.NEW);             }
+    "in"    { return symbol(sym.IN);              }
+    "!"     { return symbol(sym.BANG);            }
+    "0"     { return symbol(sym.ZERO);            }
+    "\\"    { return symbol(sym.BSLASH);          }
+    "->"    { return symbol(sym.ARROW);           }
+    {Ident} { return symbol(sym.IDENT, yytext()); }
 
-{Space} { /* ignore */ }
+    {Space} { /* ignore */ }
 
-.|\n    { throw new Error("Illegal character <"+ yytext()+">"); }
+    [^]|\n    { throw new Error("Illegal character <"+ yytext()+">"); }
+}

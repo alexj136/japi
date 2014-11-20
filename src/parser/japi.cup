@@ -1,10 +1,22 @@
 package parser;
 
+import java_cup.runtime.ScannerBuffer;
+import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
-import syntax.*
+import syntax.*;
+import java.util.ArrayList;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 parser code {:
+    public Parser(Lexer lexer, ComplexSymbolFactory csf) { super(lexer, csf); }
 
+    public static PiTerm parseStream(InputStream input) throws Exception {
+        ComplexSymbolFactory csf = new ComplexSymbolFactory();
+        ScannerBuffer lexer =
+            new ScannerBuffer(new Lexer(new InputStreamReader(input), csf));
+        return (PiTerm<String>) (new Parser(lexer, csf).parse().value);
+    }
 :};
 
 terminal        LANGLE, // <
@@ -24,7 +36,8 @@ terminal        LANGLE, // <
                 BANG,   // !
                 ZERO,   // 0
                 BSLASH, // \
-                ARROW;  // ->
+                ARROW,  // ->
+                APP;    // PRECEDENCE DECLARATOR
 terminal String IDENT;  // [a-z_]+
 
 /* The pi-calculus grammar used is as follows:
@@ -45,10 +58,15 @@ non terminal ArrayList<LambdaTerm<String>>  moreLamTerms;
 non terminal ArrayList<String>              names;
 non terminal ArrayList<String>              moreNames;
 
-piTerm        ::= IDENT:c names:n DOT piterm:s     {: RESULT = new Receive<String>(c, n, p);        :}
-                | IDENT:c lamTerms:e DOT piterm:s  {: RESULT = new Send<String>(c, e, p);           :}
+precedence left LPAREN;
+precedence left BSLASH;
+precedence left IDENT;
+precedence left APP;
+
+piTerm        ::= IDENT:c names:n DOT piTerm:s     {: RESULT = new Receive<String>(c, n, s);        :}
+                | IDENT:c lamTerms:e DOT piTerm:s  {: RESULT = new Send<String>(c, e, s);           :}
                 | parTerms:s                       {: RESULT = new Parallel<String>(s);             :}
-                | NEW IDENT:c IN piterm:s          {: RESULT = new Restrict<String>(c, s)           :}
+                | NEW IDENT:c IN piTerm:s          {: RESULT = new Restrict<String>(c, s);          :}
                 | BANG piTerm:s                    {: RESULT = new Replicate<String>(s);            :}
                 | sumTerms:s                       {: RESULT = new NDSum<String>(s);                :}
                 | ZERO           {: RESULT = new Parallel<String>(new ArrayList<PiTerm<String>>()); :}
@@ -59,14 +77,14 @@ names         ::= LPAREN RPAREN                    {: RESULT = new ArrayList<Str
                 ;
 
 moreNames     ::= RPAREN                           {: RESULT = new ArrayList<String>();             :}
-                | COMMA IDENT:c morenames:n        {: n.add(0, c); RESULT = n;                      :}
+                | COMMA IDENT:c moreNames:n        {: n.add(0, c); RESULT = n;                      :}
                 ;
 
-lamTerms      ::= LPAREN RPAREN                    {: RESULT = new ArrayList<LambdaTerm<String>>(); :}
-                | LPAREN lamTerm:s moreLamTerms:ss {: ss.add(0, s); RESULT = ss;                    :}
+lamTerms      ::= LANGLE RANGLE                    {: RESULT = new ArrayList<LambdaTerm<String>>(); :}
+                | LANGLE lamTerm:s moreLamTerms:ss {: ss.add(0, s); RESULT = ss;                    :}
                 ;
 
-moreLamTerms  ::= RPAREN                           {: RESULT = new ArrayList<LambdaTerm<String>>(); :}
+moreLamTerms  ::= RANGLE                           {: RESULT = new ArrayList<LambdaTerm<String>>(); :}
                 | COMMA lamTerm:s moreLamTerms:ss  {: ss.add(0, s); RESULT = ss;                    :}
                 ;
 
@@ -75,7 +93,7 @@ parTerms      ::= LSQUAR RSQUAR                    {: RESULT = new ArrayList<PiT
                 ;
 
 moreParTerms  ::= RSQUAR                           {: RESULT = new ArrayList<PiTerm<String>>();     :}
-                | COMMA piTerm:s moreParTerms:ss   {: ss.add(0, s); RESULT = ss;                    :}
+                | BAR piTerm:s moreParTerms:ss     {: ss.add(0, s); RESULT = ss;                    :}
                 ;
 
 sumTerms      ::= LCURLY RCURLY                    {: RESULT = new ArrayList<PiTerm<String>>();     :}
@@ -83,11 +101,11 @@ sumTerms      ::= LCURLY RCURLY                    {: RESULT = new ArrayList<PiT
                 ;
 
 moreSumTerms  ::= RCURLY                           {: RESULT = new ArrayList<PiTerm<String>>();     :}
-                | COMMA piTerm:s moreSumTerms:ss   {: ss.add(0, s); RESULT = ss;                    :}
+                | SUM piTerm:s moreSumTerms:ss     {: ss.add(0, s); RESULT = ss;                    :}
                 ;
 
-lamTerm       ::= BSLASH IDENT:c ARROW lamTerm:s   {: RESULT = new Abstraction<String>(c, s);       :}
-                | lamTerm:s1 lamTerm:s2            {: RESULT = new Application<String>(s1, s2);     :}
+lamTerm       ::= LPAREN lamTerm:s RPAREN          {: RESULT = s;                                   :}
+                | BSLASH IDENT:c ARROW lamTerm:s   {: RESULT = new Abstraction<String>(c, s);       :}
                 | IDENT:c                          {: RESULT = new Variable<String>(c);             :}
-                | LPAREN lamTerm:s RPAREN          {: RESULT = s;                                   :}
+                | lamTerm:s1 lamTerm:s2            {: RESULT = new Application<String>(s1, s2);     :} %prec APP
                 ;

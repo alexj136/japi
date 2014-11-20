@@ -4,10 +4,14 @@
 function doBuild() {
     echo "Building..."
     mkdir -p ./bin/
-    pushd ./src/parser/ > /dev/null
-    java -cp ../../lib/javacc-6.0.jar javacc japi.jj
-    popd > /dev/null
-    javac $1 -g -sourcepath ./src/ ./src/main/*.java -d ./bin/
+    #pushd ./src/parser/ > /dev/null
+    #java -cp ../../lib/javacc-6.0.jar javacc japi.jj
+    #popd > /dev/null
+    java -jar ./lib/jflex-1.6.0.jar -d ./src/parser/ ./src/parser/japi.flex
+    java -cp ./lib/ -jar ./lib/java-cup-11b.jar -destdir ./src/parser/ \
+            -parser Parser ./src/parser/japi.cup
+    javac $1 -cp ./lib/java-cup-11b-runtime.jar -g -sourcepath ./src/ \
+            -d ./bin/ ./src/main/*.java
     echo "Done."
 }
 

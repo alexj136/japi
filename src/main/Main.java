@@ -56,7 +56,7 @@ public class Main {
         try {
             term = Parser.parseStream(input);
         }
-        catch(ParseException e) {
+        catch(/*Parse*/Exception e) {
             System.out.println("Could not parse the file:\n" + e.getMessage());
             return;
         }
