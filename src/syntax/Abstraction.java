@@ -8,8 +8,6 @@ import java.util.HashMap;
  */
 public final class Abstraction<T> extends LambdaTerm<T> {
 
-    private static String lambdaSymbol = "lambda";
-
     private T name;
     private LambdaTerm<T> body;
 
@@ -68,15 +66,8 @@ public final class Abstraction<T> extends LambdaTerm<T> {
      * @return a string representation of this Abstraction
      */
     public String toString() {
-        String bodyStr = this.body.toString();
-        if(bodyStr.startsWith(Abstraction.lambdaSymbol)) {
-            return Abstraction.lambdaSymbol + " " + this.name + "," +
-                    bodyStr.substring(Abstraction.lambdaSymbol.length());
-        }
-        else {
-            return Abstraction.lambdaSymbol + " " + this.name + ": " +
-                    this.body;
-        }
+        return "(" + LambdaTerm.LAM + this.name.toString() + " " +
+                LambdaTerm.DOT + " " + this.body.toString() + ")";
     }
 
     /**
@@ -86,15 +77,9 @@ public final class Abstraction<T> extends LambdaTerm<T> {
      * different type, the values of which are mapped to by the contained names
      */
     public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
-        String bodyStr = this.body.toStringWithNameMap(nameMap);
-        if(bodyStr.startsWith(Abstraction.lambdaSymbol)) {
-            return Abstraction.lambdaSymbol + " " + nameMap.get(this.name) +
-                    "," + bodyStr.substring(Abstraction.lambdaSymbol.length());
-        }
-        else {
-            return Abstraction.lambdaSymbol + " " + nameMap.get(this.name) +
-                    ": " + this.body.toStringWithNameMap(nameMap);
-        }
+        return "(" + LambdaTerm.LAM + nameMap.get(this.name).toString() + " " +
+                LambdaTerm.DOT + " " + this.body.toStringWithNameMap(nameMap) +
+                ")";
     }
 
     /**

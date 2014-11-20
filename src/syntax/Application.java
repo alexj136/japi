@@ -53,12 +53,12 @@ public final class Application<T> extends LambdaTerm<T> {
     }
 
     public String toString() {
-        return this.func + " " + this.arg;
+        return "(" + this.func + " " + this.arg + ")";
     }
 
     public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
-        return this.func.toStringWithNameMap(nameMap) + " " +
-                this.arg.toStringWithNameMap(nameMap);
+        return "(" + this.func.toStringWithNameMap(nameMap) + " " +
+                this.arg.toStringWithNameMap(nameMap) + ")";
     }
 
     public Application<T> copy() {

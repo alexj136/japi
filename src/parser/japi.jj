@@ -75,8 +75,9 @@ void input() : {} { term() <EOF> }
  *     RECECONTCONT ::= ")" | ", y RCONTC"
  *     SENDCONT     ::= ">" | "LTM SENDCONTCONT"
  *     SENDCONTCONT ::= ">" | ", LTM SENDCONTCONT"
- *     LAMTERM      ::= LAMTERMCONT | LAMTERMCONT LTM
- *     LAMTERMCONT  ::= "\x -> LAMTERM" | "x"
+ *     LAMTERM      ::= "x LAMTERMOPT" | "\x -> LAMTERMOPT"
+ *                    | "(LAMTERM) LAMTERMOPT"
+ *     LAMTERMOPT   ::= "LAMTERM" | epsilon
  *
  * This is the grammar used in the implementation below.
  */
@@ -239,36 +240,41 @@ ArrayList<String> receContCont() : {
 }
 
 LambdaTerm<String> lamTerm() : {
+    Token n;
     LambdaTerm<String> lam0, lam1;
 } {
     LOOKAHEAD(2)
-    lam0=lamTermCont() lam1=lamTerm()
+    "\\" n=<ID> "->" lam0=lamTerm()
     {
-        return new Application<String>(lam0, lam1);
+        return new Abstraction<String>(n.toString(), lam0);
     }
     |
-    lam0=lamTermCont()
+    n=<ID> lam0=lamTermOpt()
     {
-        return lam0;
+        if(lam0 != null) {
+            return new Application<String>(
+                    new Variable<String>(n.toString()), lam0);
+        }
+        else { return new Variable<String>(n.toString()); }
     }
     |
-    "(" lam0=lamTerm() ")"
+    "(" lam0=lamTerm() ")" lam1=lamTermOpt()
     {
-        return lam0;
+        if(lam1 != null) { return new Application<String>(lam0, lam1); }
+        else { return lam0; }
     }
 }
 
-LambdaTerm<String> lamTermCont() : {
-    Token n;
+LambdaTerm<String> lamTermOpt() : {
     LambdaTerm<String> lam;
 } {
-    n=<ID>
+    lam=lamTerm()
     {
-        return new Variable(n.toString());
+        return lam;
     }
     |
-    "\\" n=<ID> "->" lam=lamTerm()
+    {}
     {
-        return new Abstraction(n.toString(), lam);
+        return null;
     }
 }

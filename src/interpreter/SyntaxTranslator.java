@@ -132,7 +132,8 @@ public abstract class SyntaxTranslator {
             }
             else {
                 throw new IllegalArgumentException(
-                        "Unrecognised PiTermManySub type");
+                        "Unrecognised PiTermManySub type in " +
+                        "SyntaxTranslator.translate()");
             }
             return result;
         }
@@ -174,7 +175,8 @@ public abstract class SyntaxTranslator {
         // Throw an exception if we got a PiTerm<String> of unrecognised
         // type.
         else {
-            throw new IllegalArgumentException("Unrecognised PiTerm type");
+            throw new IllegalArgumentException("Unrecognised PiTerm type " +
+                    "in SyntaxTranslator.translate()");
         }
     }
     
@@ -196,8 +198,40 @@ public abstract class SyntaxTranslator {
             }
         }
 
+        else if(term instanceof Abstraction) {
+            Abstraction<String> abs = (Abstraction) term;
+            int name;
+            if(nameMap.containsKey(abs.name())) {
+                name = nameMap.get(abs.name());
+            }
+            else {
+                nameMap.put(abs.name(), nextAvailableName);
+                name = nextAvailableName;
+                nextAvailableName++;
+            }
+            Triple<LambdaTerm<Integer>, HashMap<String, Integer>, Integer>
+                    bodyRes = _translate(abs.body(), nameMap,
+                    nextAvailableName);
+            nextAvailableName = bodyRes.thrd;
+            newTerm = new Abstraction<Integer>(name, bodyRes.frst);
+        }
+
+        else if(term instanceof Application) {
+            Application<String> app = (Application) term;
+
+            Triple<LambdaTerm<Integer>, HashMap<String, Integer>, Integer>
+                    funcRes = _translate(app.func(), nameMap,
+                    nextAvailableName);
+            Triple<LambdaTerm<Integer>, HashMap<String, Integer>, Integer>
+                    argRes = _translate(app.arg(), nameMap,
+                    funcRes.thrd);
+            return argRes.withFrst(
+                    new Application<Integer>(funcRes.frst, argRes.frst));
+        }
+
         else {
-            throw new UnsupportedOperationException("Not yet implemented");
+            throw new IllegalArgumentException("Unrecognised LambdaTerm type " +
+                    "in SyntaxTranslator.translate()");
         }
 
         return Triple.make(newTerm, nameMap, nextAvailableName);
