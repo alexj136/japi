@@ -1,0 +1,93 @@
+package parser;
+
+import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
+import syntax.*
+
+parser code {:
+
+:};
+
+terminal        LANGLE, // <
+                RANGLE, // >
+                LPAREN, // (
+                RPAREN, // )
+                LSQUAR, // [
+                RSQUAR, // ]
+                LCURLY, // {
+                RCURLY, // }
+                DOT,    // .
+                COMMA,  // ,
+                BAR,    // |
+                SUM,    // +
+                NEW,    // new
+                IN,     // in
+                BANG,   // !
+                ZERO,   // 0
+                BSLASH, // \
+                ARROW;  // ->
+terminal String IDENT;  // [a-z_]+
+
+/* The pi-calculus grammar used is as follows:
+ *
+ * P ::= "x(a0, a1, ... aN).P" | "x<E0, E1, ... EN>.P" | "[P0|P1|...PN]"
+ * | "new x in P" | "!P" | "{P0 + P1 + ... PN}" | "0"
+ * E ::= "\x -> E" | "E E" | "x" | "( E )"
+ */
+
+non terminal PiTerm<String>                 piTerm;
+non terminal ArrayList<PiTerm<String>>      parTerms;
+non terminal ArrayList<PiTerm<String>>      moreParTerms;
+non terminal ArrayList<PiTerm<String>>      sumTerms;
+non terminal ArrayList<PiTerm<String>>      moreSumTerms;
+non terminal LambdaTerm<String>             lamTerm;
+non terminal ArrayList<LambdaTerm<String>>  lamTerms;
+non terminal ArrayList<LambdaTerm<String>>  moreLamTerms;
+non terminal ArrayList<String>              names;
+non terminal ArrayList<String>              moreNames;
+
+piTerm        ::= IDENT:c names:n DOT piterm:s     {: RESULT = new Receive<String>(c, n, p);        :}
+                | IDENT:c lamTerms:e DOT piterm:s  {: RESULT = new Send<String>(c, e, p);           :}
+                | parTerms:s                       {: RESULT = new Parallel<String>(s);             :}
+                | NEW IDENT:c IN piterm:s          {: RESULT = new Restrict<String>(c, s)           :}
+                | BANG piTerm:s                    {: RESULT = new Replicate<String>(s);            :}
+                | sumTerms:s                       {: RESULT = new NDSum<String>(s);                :}
+                | ZERO           {: RESULT = new Parallel<String>(new ArrayList<PiTerm<String>>()); :}
+                ;
+
+names         ::= LPAREN RPAREN                    {: RESULT = new ArrayList<String>();             :}
+                | LPAREN IDENT:c moreNames:n       {: n.add(0, c); RESULT = n;                      :}
+                ;
+
+moreNames     ::= RPAREN                           {: RESULT = new ArrayList<String>();             :}
+                | COMMA IDENT:c morenames:n        {: n.add(0, c); RESULT = n;                      :}
+                ;
+
+lamTerms      ::= LPAREN RPAREN                    {: RESULT = new ArrayList<LambdaTerm<String>>(); :}
+                | LPAREN lamTerm:s moreLamTerms:ss {: ss.add(0, s); RESULT = ss;                    :}
+                ;
+
+moreLamTerms  ::= RPAREN                           {: RESULT = new ArrayList<LambdaTerm<String>>(); :}
+                | COMMA lamTerm:s moreLamTerms:ss  {: ss.add(0, s); RESULT = ss;                    :}
+                ;
+
+parTerms      ::= LSQUAR RSQUAR                    {: RESULT = new ArrayList<PiTerm<String>>();     :}
+                | LSQUAR piTerm:s moreParTerms:ss  {: ss.add(0, s); RESULT = ss;                    :}
+                ;
+
+moreParTerms  ::= RSQUAR                           {: RESULT = new ArrayList<PiTerm<String>>();     :}
+                | COMMA piTerm:s moreParTerms:ss   {: ss.add(0, s); RESULT = ss;                    :}
+                ;
+
+sumTerms      ::= LCURLY RCURLY                    {: RESULT = new ArrayList<PiTerm<String>>();     :}
+                | LCURLY piTerm:s moreSumTerms:ss  {: ss.add(0, s); RESULT = ss;                    :}
+                ;
+
+moreSumTerms  ::= RCURLY                           {: RESULT = new ArrayList<PiTerm<String>>();     :}
+                | COMMA piTerm:s moreSumTerms:ss   {: ss.add(0, s); RESULT = ss;                    :}
+                ;
+
+lamTerm       ::= BSLASH IDENT:c ARROW lamTerm:s   {: RESULT = new Abstraction<String>(c, s);       :}
+                | lamTerm:s1 lamTerm:s2            {: RESULT = new Application<String>(s1, s2);     :}
+                | IDENT:c                          {: RESULT = new Variable<String>(c);             :}
+                | LPAREN lamTerm:s RPAREN          {: RESULT = s;                                   :}
+                ;
