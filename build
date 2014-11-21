@@ -7,10 +7,11 @@ function doBuild() {
     #pushd ./src/parser/ > /dev/null
     #java -cp ../../lib/javacc-6.0.jar javacc japi.jj
     #popd > /dev/null
-    java -jar ./lib/jflex-1.6.0.jar -d ./src/parser/ ./src/parser/japi.flex
+    java -jar ./lib/jflex-1.6.0.jar -d ./src/parser/ $1 --nobak \
+            ./src/parser/japi.flex
     java -cp ./lib/ -jar ./lib/java-cup-11b.jar -destdir ./src/parser/ \
             -parser Parser ./src/parser/japi.cup
-    javac $1 -cp ./lib/java-cup-11b-runtime.jar -g -sourcepath ./src/ \
+    javac $2 -cp ./lib/java-cup-11b-runtime.jar -g -sourcepath ./src/ \
             -d ./bin/ ./src/main/*.java
     echo "Done."
 }
@@ -32,7 +33,7 @@ case $@ in
 
     # Do the build operation, but tell javac to be verbose, if the argument
     # "verbose" was supplied
-    "verbose")  doBuild -Xlint ;;
+    "verbose")  doBuild -v -Xlint ;;
 
     # Clean the build if the argument was "clean"
     "clean")    doClean ;;

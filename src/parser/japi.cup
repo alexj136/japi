@@ -63,6 +63,8 @@ precedence left BSLASH;
 precedence left IDENT;
 precedence left APP;
 
+start with piTerm;
+
 piTerm        ::= IDENT:c names:n DOT piTerm:s     {: RESULT = new Receive<String>(c, n, s);        :}
                 | IDENT:c lamTerms:e DOT piTerm:s  {: RESULT = new Send<String>(c, e, s);           :}
                 | parTerms:s                       {: RESULT = new Parallel<String>(s);             :}
