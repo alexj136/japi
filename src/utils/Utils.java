@@ -2,6 +2,8 @@ package utils;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * General purpose functions ('static methods').
@@ -55,5 +57,39 @@ public final class Utils {
             return out + close;
 
         }
+    }
+
+    /**
+     * Generate a HashMap that is the reverse mapping of a given HashMap, i.e.
+     * make a map whose keys are the values, and values are the keys of the
+     * given map. Throw an exception if there are value duplicates in the given
+     * map.
+     * @param map the map to flip
+     * @return the flipped map
+     */
+    public static <T, U> HashMap<U, T> flipMap(HashMap<T, U> map) {
+        HashMap<U, T> flipped = new HashMap<U, T>();
+        for(T key : map.keySet()) {
+            if(flipped.containsKey(map.get(key))) {
+                throw new IllegalArgumentException("Given map contained " +
+                        "duplicate values");
+            }
+            else {
+                flipped.put(map.get(key), key);
+            }
+        }
+        return flipped;
+    }
+
+    /**
+     * Obtain a HashSet of the keys in a HashMap. The generated set is not
+     * backed by the map (like ones obtained with HashMap.keySet()).
+     * @param map the map to obtain keys from
+     * @return a set of the keys in the map
+     */
+    public static <T, U> HashSet<T> keys(HashMap<T, U> map) {
+        HashSet<T> set = new HashSet<T>();
+        for(T key : map.keySet()) { set.add(key); }
+        return set;
     }
 }

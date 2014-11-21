@@ -3,7 +3,6 @@ package main;
 import parser.*;
 import syntax.PiTerm;
 import utils.Triple;
-import interpreter.SyntaxTranslator;
 import interpreter.Interpreter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,16 +51,14 @@ public class Main {
 
         // Print either the prettyPrint of the AST or the error message supplied
         // with the ParseException if parsing fails.
-        PiTerm<String> term;
+        Triple<PiTerm<Integer>, HashMap<String, Integer>, Integer> res;
         try {
-            term = Parser.parseStream(input);
+            res = Parser.parseStream(input);
         }
-        catch(/*Parse*/Exception e) {
+        catch(Exception e) {
             System.out.println("Could not parse the file:\n" + e.getMessage());
             return;
         }
-        Triple<PiTerm<Integer>, HashMap<String, Integer>, Integer> res =
-                SyntaxTranslator.translate(term);
         Interpreter interpreter = Interpreter.fromTranslation(res);
         System.out.println(interpreter);
         boolean reductionOccurred = true;

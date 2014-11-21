@@ -4,9 +4,6 @@
 function doBuild() {
     echo "Building..."
     mkdir -p ./bin/
-    #pushd ./src/parser/ > /dev/null
-    #java -cp ../../lib/javacc-6.0.jar javacc japi.jj
-    #popd > /dev/null
     java -jar ./lib/jflex-1.6.0.jar -d ./src/parser/ $1 --nobak \
             ./src/parser/japi.flex
     java -cp ./lib/ -jar ./lib/java-cup-11b.jar -destdir ./src/parser/ \
