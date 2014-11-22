@@ -27,7 +27,7 @@ public abstract class LambdaTerm extends Term {
      * @param from names of this value are renamed
      * @param to renamed names are renamed to this value
      */
-    public abstract void renameFree(int from, int to);
+    public abstract void renameFree(Integer from, Integer to);
 
     /**
      * Rename all occurences of the name 'from' to the name 'to', in and after
@@ -35,5 +35,5 @@ public abstract class LambdaTerm extends Term {
      * @param from names of this value are renamed
      * @param to renamed names are renamed to this value
      */
-    public abstract void renameNonFree(int from, int to);
+    public abstract void renameNonFree(Integer from, Integer to);
 }

@@ -14,8 +14,7 @@ public final class PiReducer {
      * @param with replaced names are replaced with this LambdaTerm
      * @param in replace inside this PiTerm
      */
-    public static <T> void msgPass(T replacing, LambdaTerm<T> with,
-            PiTerm<T> in) {
+    public static void msgPass(Integer replacing, LambdaTerm with, PiTerm in) {
 
         if(in instanceof Send) {
             Send send = (Send) in;
@@ -25,13 +24,13 @@ public final class PiReducer {
                         "channel name with an expression");
             }
             if(replacing.equals(send.chnl()) && with instanceof Variable) {
-                Variable<T> var = (Variable) with;
+                Variable var = (Variable) with;
                 send.setChnl(var.name());
             }
             for(int i = 0; i < send.arity(); i++) {
                 if(with instanceof Variable) {
                     send.exp(i).renameFree(replacing,
-                            ((Variable<T>) with).name());
+                            ((Variable) with).name());
                 }
                 else {
                     throw new UnsupportedOperationException("Not yet " +
@@ -85,8 +84,8 @@ public final class PiReducer {
         }
     }
 
-    public static <T> void msgPass(T replacing, LambdaTerm<T> with,
-            LambdaTerm<T> in) {
+    public static void msgPass(Integer replacing, LambdaTerm with,
+            LambdaTerm in) {
 
         if(in instanceof Variable) {
             Variable var = (Variable) in;

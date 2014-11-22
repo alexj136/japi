@@ -18,7 +18,7 @@ public final class Send extends PiTermComm {
      * @param exps the message (a list of expressions) to evaluate an send
      * @param subterm the term to 'become' once the message is sent
      */
-    public Send(int chnl, ArrayList<LambdaTerm> exps, PiTerm subterm) {
+    public Send(Integer chnl, ArrayList<LambdaTerm> exps, PiTerm subterm) {
         super(chnl, subterm);
         this.exps = exps;
     }
@@ -78,7 +78,7 @@ public final class Send extends PiTermComm {
      * @param from all names with this value are renamed
      * @param to all names being renamed are renamed to this name
      */
-    public void blindRename(int from, int to) {
+    public void blindRename(Integer from, Integer to) {
         if(this.chnl.equals(from)) { this.chnl = to; }
         for(int i = 0; i < this.arity(); i++) {
             this.exp(i).blindRename(from, to);

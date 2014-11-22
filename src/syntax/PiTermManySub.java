@@ -62,7 +62,7 @@ public abstract class PiTermManySub extends PiTerm implements Iterable<PiTerm> {
      * @param from names with this value are renamed
      * @param to names being renamed are renamed to this name
      */
-    public void blindRename(int from, int to) {
+    public void blindRename(Integer from, Integer to) {
         for(PiTerm subterm : this.subterms) {
             subterm.blindRename(from, to);
         }

@@ -51,7 +51,7 @@ public class Main {
 
         // Print either the prettyPrint of the AST or the error message supplied
         // with the ParseException if parsing fails.
-        Triple<PiTerm<Integer>, HashMap<String, Integer>, Integer> res;
+        Triple<PiTerm, HashMap<String, Integer>, Integer> res;
         try {
             res = Parser.parseStream(input);
         }

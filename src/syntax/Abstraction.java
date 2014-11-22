@@ -8,7 +8,7 @@ import java.util.HashMap;
  */
 public final class Abstraction extends LambdaTerm {
 
-    private int name;
+    private Integer name;
     private LambdaTerm body;
 
     /**
@@ -16,7 +16,7 @@ public final class Abstraction extends LambdaTerm {
      * @param name the name to bind
      * @param body the body of the Abstraction
      */
-    public Abstraction(int name, LambdaTerm body) {
+    public Abstraction(Integer name, LambdaTerm body) {
         this.name = name;
         this.body = body;
     }
@@ -25,7 +25,7 @@ public final class Abstraction extends LambdaTerm {
      * Access the name bound by the Abstraction.
      * @return the name bound by the Abstraction
      */
-    public int name() { return this.name; }
+    public Integer name() { return this.name; }
 
     /**
      * Access the body of the Abstraction.
@@ -76,7 +76,7 @@ public final class Abstraction extends LambdaTerm {
      * @return a string representing the Abstraction, printing names of a
      * different type, the values of which are mapped to by the contained names
      */
-    public <U> String toStringWithNameMap(HashMap<Integer, U> nameMap) {
+    public String toStringWithNameMap(HashMap<Integer, String> nameMap) {
         return "(" + LambdaTerm.LAM + nameMap.get(this.name).toString() + " " +
                 LambdaTerm.DOT + " " + this.body.toStringWithNameMap(nameMap) +
                 ")";
@@ -95,7 +95,7 @@ public final class Abstraction extends LambdaTerm {
      * @param from all occurrences of this name are changed
      * @param to names being changed are replaced with this value
      */
-    public void blindRename(int from, int to) {
+    public void blindRename(Integer from, Integer to) {
         if(this.name.equals(from)) {
             this.name = to;
         }
@@ -107,7 +107,7 @@ public final class Abstraction extends LambdaTerm {
      * @param from all occurrences of this name are changed
      * @param to names being changed are replaced with this value
      */
-    public void renameFree(int from, int to) {
+    public void renameFree(Integer from, Integer to) {
         if(!this.name.equals(from)) {
             this.body.renameFree(from, to);
         }
@@ -118,7 +118,7 @@ public final class Abstraction extends LambdaTerm {
      * @param from the name to change from
      * @param to the name to change to
      */
-    public void renameNonFree(int from, int to) {
+    public void renameNonFree(Integer from, Integer to) {
         if(this.name.equals(from)) {
             this.name = to;
             this.body.blindRename(from, to);

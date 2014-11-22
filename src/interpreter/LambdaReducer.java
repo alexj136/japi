@@ -24,13 +24,13 @@ public final class LambdaReducer {
      * @return the binder names that should be renamed in T1 for T2 to be safely
      * substituted in
      */
-    public static <T> HashSet<T> toRename(HashSet<T> freeVars,
-            HashSet<T> binders) {
+    public static HashSet<Integer> toRename(HashSet<Integer> freeVars,
+            HashSet<Integer> binders) {
 
-        HashSet<T> atRisk = new HashSet<T>();
+        HashSet<Integer> atRisk = new HashSet<Integer>();
 
-        for(T freeVarI : freeVars) {
-            for(T binderI : binders) {
+        for(Integer freeVarI : freeVars) {
+            for(Integer binderI : binders) {
                 if(freeVarI.equals(binderI)) {
                     atRisk.add(freeVarI);
                 }
@@ -47,7 +47,7 @@ public final class LambdaReducer {
      * @param nameGenerator
      * @return the reduced term
      */
-    public static LambdaTerm<Integer> reduce(LambdaTerm<Integer> term,
+    public static LambdaTerm reduce(LambdaTerm term,
             UnaryOperator<Integer> nameGenerator,
             Supplier<Integer> nextAvailableName) {
 
@@ -70,8 +70,8 @@ public final class LambdaReducer {
              *     /     \
              *   name    body
              */
-            Application<Integer> app = (Application) term;
-            Abstraction<Integer> abs = (Abstraction) app.func();
+            Application app = (Application) term;
+            Abstraction abs = (Abstraction) app.func();
 
             /*
              * Prevent name clashes occuring.
@@ -111,8 +111,8 @@ public final class LambdaReducer {
      * @param with the term to substitute in
      * @return a pointer to the generated term
      */
-    public static <T> LambdaTerm<T> substitute(T replacing, LambdaTerm<T> with,
-            LambdaTerm<T> in) {
+    public static LambdaTerm substitute(Integer replacing, LambdaTerm with,
+            LambdaTerm in) {
 
         if(in instanceof Abstraction) {
             Abstraction abs = (Abstraction) in;

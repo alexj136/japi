@@ -8,13 +8,13 @@ import java.util.HashMap;
  */
 public final class Variable extends LambdaTerm {
 
-    private int name;
+    private Integer name;
 
     /**
      * Construct a new Variable.
      * @param name the name of the Variable
      */
-    public Variable(int name) {
+    public Variable(Integer name) {
         this.name = name;
     }
 
@@ -22,7 +22,7 @@ public final class Variable extends LambdaTerm {
      * Access the name of this Variable.
      * @return the name of this Variable
      */
-    public int name() { return this.name; }
+    public Integer name() { return this.name; }
 
     /**
      * Enumerate the free variable names in this Variable (which will always be
@@ -70,7 +70,7 @@ public final class Variable extends LambdaTerm {
      * @param from rename the stored variable name if it matches this name
      * @param to if renaming the stored variable, rename it to this value
      */
-    public void blindRename(int from, int to) {
+    public void blindRename(Integer from, Integer to) {
         if(this.name.equals(from)) { this.name = to; }
     }
 
@@ -80,7 +80,7 @@ public final class Variable extends LambdaTerm {
      * @param from rename the stored variable name if it matches this name
      * @param to if renaming the stored variable, rename it to this value
      */
-    public void renameFree(int from, int to) {
+    public void renameFree(Integer from, Integer to) {
         if(this.name.equals(from)) { this.name = to; }
     }
 
@@ -90,5 +90,5 @@ public final class Variable extends LambdaTerm {
      * @param from rename variable names of this value
      * @param to those variable names being renamed are renamed to this value
      */
-    public void renameNonFree(int from, int to) {}
+    public void renameNonFree(Integer from, Integer to) {}
 }

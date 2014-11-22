@@ -21,7 +21,9 @@ public final class Receive extends PiTermComm {
      * @param subterm the process to 'become' when the message is received
      * @return a new Receive object
      */
-    public Receive(int chnl, ArrayList<Integer> boundNames, PiTerm subterm) {
+    public Receive(Integer chnl, ArrayList<Integer> boundNames,
+            PiTerm subterm) {
+
         super(chnl, subterm);
         this.boundNames = boundNames;
     }
@@ -31,7 +33,7 @@ public final class Receive extends PiTermComm {
      * @param i the index of the bound name to be retrieved
      * @return the i^th bound name
      */
-    public int name(int i) { return this.boundNames.get(i); }
+    public Integer name(Integer i) { return this.boundNames.get(i); }
 
     /**
      * Determine the arity (the number of bound names) of this Receive.
@@ -44,7 +46,7 @@ public final class Receive extends PiTermComm {
      * @param name the name to test
      * @return true if name is bound by this Receive, false otherwise
      */
-    public boolean binds(int name) {
+    public boolean binds(Integer name) {
         return this.boundNames.contains(name);
     }
 
@@ -101,7 +103,7 @@ public final class Receive extends PiTermComm {
      * @param from all names with this value are renamed
      * @param to all names being renamed are renamed to this name
      */
-    public void blindRename(int from, int to) {
+    public void blindRename(Integer from, Integer to) {
         if(this.chnl.equals(from)) { this.chnl = to; }
         for(int i = 0; i < this.arity(); i++) {
             if(this.name(i).equals(from)) {

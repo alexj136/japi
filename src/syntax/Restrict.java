@@ -9,7 +9,7 @@ import java.util.HashSet;
  */
 public final class Restrict extends PiTermOneSub {
 
-    private int boundName;
+    private Integer boundName;
 
     /**
      * Construct a new Restrict object.
@@ -17,7 +17,7 @@ public final class Restrict extends PiTermOneSub {
      * @param subterm the subprocess within which to restrict the name
      * @return a new Restrict object
      */
-    public Restrict(int boundName, PiTerm subterm) {
+    public Restrict(Integer boundName, PiTerm subterm) {
         super(subterm);
         this.boundName = boundName;
     }
@@ -26,7 +26,7 @@ public final class Restrict extends PiTermOneSub {
      * Access the name bound in this restriction.
      * @return the name bound in this restriction
      */
-    public int boundName() { return this.boundName; }
+    public Integer boundName() { return this.boundName; }
 
     /**
      * Enumerate the binders in this Restrict.
@@ -66,7 +66,7 @@ public final class Restrict extends PiTermOneSub {
      * @param from all names of this value are renamed
      * @param to all names being renamed are renamed to this value
      */
-    public void blindRename(int from, int to) {
+    public void blindRename(Integer from, Integer to) {
         if(this.boundName.equals(from)) {
             this.boundName = to;
         }

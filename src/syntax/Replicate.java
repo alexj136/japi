@@ -38,7 +38,7 @@ public final class Replicate extends PiTermOneSub {
      * @param from all names of this value are renamed
      * @param to all names being renamed are renamed to this value
      */
-    public void blindRename(int from, int to) {
+    public void blindRename(Integer from, Integer to) {
         this.subterm.blindRename(from, to);
     }
 

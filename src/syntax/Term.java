@@ -14,7 +14,7 @@ public abstract class Term {
      * @return a HashSet of all the variable names that have their binders
      * within the given LambdaTerm
      */
-    public abstract HashSet binders();
+    public abstract HashSet<Integer> binders();
 
     /**
      * Obtain a string representation of this Term.
@@ -38,7 +38,7 @@ public abstract class Term {
      * @param from all names of this value must be renamed
      * @param to names being renamed are renamed to this value
      */
-    public abstract void blindRename(int from, int to);
+    public abstract void blindRename(Integer from, Integer to);
 
     /**
      * Copy a Term. Contained name objects need not be deeply copied.

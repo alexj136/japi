@@ -65,17 +65,17 @@ public final class Application extends LambdaTerm {
         return new Application(this.func.copy(), this.arg.copy());
     }
 
-    public void blindRename(int from, int to) {
+    public void blindRename(Integer from, Integer to) {
         this.func.blindRename(from, to);
         this.arg.blindRename(from, to);
     }
 
-    public void renameFree(int from, int to) {
+    public void renameFree(Integer from, Integer to) {
         this.func.renameFree(from, to);
         this.arg.renameFree(from, to);
     }
 
-    public void renameNonFree(int from, int to) {
+    public void renameNonFree(Integer from, Integer to) {
         this.func.renameNonFree(from, to);
         this.arg.renameNonFree(from, to);
     }
