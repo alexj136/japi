@@ -6,10 +6,10 @@ import java.util.HashMap;
 /**
  * Represents lambda calculus function application.
  */
-public final class Application<T> extends LambdaTerm<T> {
+public final class Application extends LambdaTerm {
 
-    private LambdaTerm<T> func;
-    private LambdaTerm<T> arg;
+    private LambdaTerm func;
+    private LambdaTerm arg;
 
     /**
      * Construct a new Application.
@@ -17,7 +17,7 @@ public final class Application<T> extends LambdaTerm<T> {
      * @param arg the argument (RHS term) of the Application
      * @return The application of func to arg as a LambdaTerm
      */
-    public Application(LambdaTerm<T> func, LambdaTerm<T> arg) {
+    public Application(LambdaTerm func, LambdaTerm arg) {
         this.func = func;
         this.arg = arg;
     }
@@ -26,29 +26,29 @@ public final class Application<T> extends LambdaTerm<T> {
      * Access the function (LHS term) of the Application.
      * @return the function (LHS term) of the Application
      */
-    public LambdaTerm<T> func() { return this.func; }
+    public LambdaTerm func() { return this.func; }
 
     /**
      * Access the argument (RHS term) of the Application.
      * @return the argument (RHS term) of the Application
      */
-    public LambdaTerm<T> arg() { return this.arg; }
+    public LambdaTerm arg() { return this.arg; }
 
-    public void setFunc(LambdaTerm<T> func) { this.func = func; }
+    public void setFunc(LambdaTerm func) { this.func = func; }
 
-    public void setArg(LambdaTerm<T> arg) { this.arg = arg; }
+    public void setArg(LambdaTerm arg) { this.arg = arg; }
 
-    public HashSet<T> freeVars() {
-        HashSet<T> fvFunc = this.func.freeVars();
-        HashSet<T> fvArg = this.arg.freeVars();
-        for(T name : fvFunc) { fvArg.add(name); }
+    public HashSet<Integer> freeVars() {
+        HashSet<Integer> fvFunc = this.func.freeVars();
+        HashSet<Integer> fvArg = this.arg.freeVars();
+        for(Integer name : fvFunc) { fvArg.add(name); }
         return fvArg;
     }
 
-    public HashSet<T> binders() {
-        HashSet<T> bindersFunc = this.func.binders();
-        HashSet<T> bindersArg = this.arg.binders();
-        for(T name : bindersFunc) { bindersArg.add(name); }
+    public HashSet<Integer> binders() {
+        HashSet<Integer> bindersFunc = this.func.binders();
+        HashSet<Integer> bindersArg = this.arg.binders();
+        for(Integer name : bindersFunc) { bindersArg.add(name); }
         return bindersArg;
     }
 
@@ -56,26 +56,26 @@ public final class Application<T> extends LambdaTerm<T> {
         return "(" + this.func + " " + this.arg + ")";
     }
 
-    public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
+    public String toStringWithNameMap(HashMap<Integer, String> nameMap) {
         return "(" + this.func.toStringWithNameMap(nameMap) + " " +
                 this.arg.toStringWithNameMap(nameMap) + ")";
     }
 
-    public Application<T> copy() {
+    public Application copy() {
         return new Application(this.func.copy(), this.arg.copy());
     }
 
-    public void blindRename(T from, T to) {
+    public void blindRename(int from, int to) {
         this.func.blindRename(from, to);
         this.arg.blindRename(from, to);
     }
 
-    public void renameFree(T from, T to) {
+    public void renameFree(int from, int to) {
         this.func.renameFree(from, to);
         this.arg.renameFree(from, to);
     }
 
-    public void renameNonFree(T from, T to) {
+    public void renameNonFree(int from, int to) {
         this.func.renameNonFree(from, to);
         this.arg.renameNonFree(from, to);
     }

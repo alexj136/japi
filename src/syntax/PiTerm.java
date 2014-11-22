@@ -4,22 +4,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
- * A PiTerm is a pi-calculus expression. This is a generic class since different
- * data types can be (and are) used to represent names in the pi-calculus. For
- * example, the parser parses a PiTerm<String>, whereas the interpreter operates
- * over PiTerm<Integer>s. Thus a translation from String to Integer names must
- * occur before interpretation. The only constraint on the type of name that can
- * be used is that it must have a reasonable definition of equality (i.e. it
- * override java.lang.Object.equals(Object o) in a sensible way. Unfortunately,
- * java's type system does not allow one to actually enforce such a constraint.
- */
-public abstract class PiTerm<T> extends Term<T> {
+ * A PiTerm is a pi-calculus expression.
+ * */
+public abstract class PiTerm extends Term {
 
     /**
      * Copy a PiTerm. Contained name objects need not be deeply copied.
      * @return a copy of this PiTerm.
      */
-    public abstract PiTerm<T> copy();
+    public abstract PiTerm copy();
 
     /**
      * Determine if two terms will exchange a message. Two terms are defined as
@@ -33,12 +26,12 @@ public abstract class PiTerm<T> extends Term<T> {
      * @param t2 the second term
      * @return true if the terms will exchange a message, false otherwise
      */
-    public static <T> boolean talksTo(PiTerm<T> t1, PiTerm<T> t2) {
-        return PiTerm.talksTo(t1, t2, new HashSet<T>(),
-                new HashSet<T>());
+    public static boolean talksTo(PiTerm t1, PiTerm t2) {
+        return PiTerm.talksTo(t1, t2, new HashSet<Integer>(),
+                new HashSet<Integer>());
     }
-    private static <T> boolean talksTo(PiTerm<T> t1, PiTerm<T> t2,
-            HashSet<T> t1Restricted, HashSet<T> t2Restricted) {
+    private static boolean talksTo(PiTerm t1, PiTerm t2,
+            HashSet<Integer> t1Restricted, HashSet<Integer> t2Restricted) {
 
         // If we have a send and a receive, return true if they are on the same
         // channel and neither of them have that channel restricted

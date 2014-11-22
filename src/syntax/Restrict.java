@@ -7,9 +7,9 @@ import java.util.HashSet;
  * Restrict objects behave somewhat like lambda abstractions - they bind
  * occurences of names in a process.
  */
-public final class Restrict<T> extends PiTermOneSub<T> {
+public final class Restrict extends PiTermOneSub {
 
-    private T boundName;
+    private int boundName;
 
     /**
      * Construct a new Restrict object.
@@ -17,7 +17,7 @@ public final class Restrict<T> extends PiTermOneSub<T> {
      * @param subterm the subprocess within which to restrict the name
      * @return a new Restrict object
      */
-    public Restrict(T boundName, PiTerm<T> subterm) {
+    public Restrict(int boundName, PiTerm subterm) {
         super(subterm);
         this.boundName = boundName;
     }
@@ -26,15 +26,15 @@ public final class Restrict<T> extends PiTermOneSub<T> {
      * Access the name bound in this restriction.
      * @return the name bound in this restriction
      */
-    public T boundName() { return this.boundName; }
+    public int boundName() { return this.boundName; }
 
     /**
      * Enumerate the binders in this Restrict.
      * @return a HashSey of the binders in this Restrict
      */
     @Override
-    public HashSet<T> binders() {
-        HashSet<T> subBinders = super.binders();
+    public HashSet<Integer> binders() {
+        HashSet<Integer> subBinders = super.binders();
         subBinders.add(this.boundName());
         return subBinders;
     }
@@ -56,7 +56,7 @@ public final class Restrict<T> extends PiTermOneSub<T> {
      * @return a string representing the Restrict, printing names of a
      * different type, the values of which are mapped to by the contained names.
      */
-    public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
+    public String toStringWithNameMap(HashMap<Integer, String> nameMap) {
         return "new " + nameMap.get(this.boundName) + " in " +
                 this.subterm.toStringWithNameMap(nameMap);
     }
@@ -66,7 +66,7 @@ public final class Restrict<T> extends PiTermOneSub<T> {
      * @param from all names of this value are renamed
      * @param to all names being renamed are renamed to this value
      */
-    public void blindRename(T from, T to) {
+    public void blindRename(int from, int to) {
         if(this.boundName.equals(from)) {
             this.boundName = to;
         }
@@ -78,7 +78,7 @@ public final class Restrict<T> extends PiTermOneSub<T> {
      * reference
      * @return a copy of this Restrict
      */
-    public Restrict<T> copy() {
+    public Restrict copy() {
         return new Restrict(this.boundName, this.subterm.copy());
     }
 }

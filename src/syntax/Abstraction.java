@@ -6,17 +6,17 @@ import java.util.HashMap;
 /**
  * Represents a lambda calculus abstraction.
  */
-public final class Abstraction<T> extends LambdaTerm<T> {
+public final class Abstraction extends LambdaTerm {
 
-    private T name;
-    private LambdaTerm<T> body;
+    private int name;
+    private LambdaTerm body;
 
     /**
      * Construct a new Abstraction.
      * @param name the name to bind
      * @param body the body of the Abstraction
      */
-    public Abstraction(T name, LambdaTerm<T> body) {
+    public Abstraction(int name, LambdaTerm body) {
         this.name = name;
         this.body = body;
     }
@@ -25,26 +25,26 @@ public final class Abstraction<T> extends LambdaTerm<T> {
      * Access the name bound by the Abstraction.
      * @return the name bound by the Abstraction
      */
-    public T name() { return this.name; }
+    public int name() { return this.name; }
 
     /**
      * Access the body of the Abstraction.
      * @return the body of the Abstraction
      */
-    public LambdaTerm<T> body() { return this.body; }
+    public LambdaTerm body() { return this.body; }
 
     /**
      * Reassign the body of the Abstraction.
      * @param body the body of the Abstraction
      */
-    public void setBody(LambdaTerm<T> body) { this.body = body; }
+    public void setBody(LambdaTerm body) { this.body = body; }
 
     /**
      * Enumerate the free variables of this Abstraction.
      * @return a HashSet of the free variables of this Abstraction
      */
-    public HashSet<T> freeVars() {
-        HashSet<T> fv = this.body.freeVars();
+    public HashSet<Integer> freeVars() {
+        HashSet<Integer> fv = this.body.freeVars();
         fv.remove(this.name);
         return fv;
     }
@@ -55,8 +55,8 @@ public final class Abstraction<T> extends LambdaTerm<T> {
      * @return a HashSet of all binders contained in this term including the
      * name bound in this Abstraction.
      */
-    public HashSet<T> binders() {
-        HashSet<T> binders = this.body.binders();
+    public HashSet<Integer> binders() {
+        HashSet<Integer> binders = this.body.binders();
         binders.add(this.name);
         return binders;
     }
@@ -76,7 +76,7 @@ public final class Abstraction<T> extends LambdaTerm<T> {
      * @return a string representing the Abstraction, printing names of a
      * different type, the values of which are mapped to by the contained names
      */
-    public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
+    public <U> String toStringWithNameMap(HashMap<Integer, U> nameMap) {
         return "(" + LambdaTerm.LAM + nameMap.get(this.name).toString() + " " +
                 LambdaTerm.DOT + " " + this.body.toStringWithNameMap(nameMap) +
                 ")";
@@ -86,7 +86,7 @@ public final class Abstraction<T> extends LambdaTerm<T> {
      * Copy this Abstraction.
      * @return a copy of this Abstraction
      */
-    public Abstraction<T> copy() {
+    public Abstraction copy() {
         return new Abstraction(this.name, this.body.copy());
     }
 
@@ -95,7 +95,7 @@ public final class Abstraction<T> extends LambdaTerm<T> {
      * @param from all occurrences of this name are changed
      * @param to names being changed are replaced with this value
      */
-    public void blindRename(T from, T to) {
+    public void blindRename(int from, int to) {
         if(this.name.equals(from)) {
             this.name = to;
         }
@@ -107,7 +107,7 @@ public final class Abstraction<T> extends LambdaTerm<T> {
      * @param from all occurrences of this name are changed
      * @param to names being changed are replaced with this value
      */
-    public void renameFree(T from, T to) {
+    public void renameFree(int from, int to) {
         if(!this.name.equals(from)) {
             this.body.renameFree(from, to);
         }
@@ -118,7 +118,7 @@ public final class Abstraction<T> extends LambdaTerm<T> {
      * @param from the name to change from
      * @param to the name to change to
      */
-    public void renameNonFree(T from, T to) {
+    public void renameNonFree(int from, int to) {
         if(this.name.equals(from)) {
             this.name = to;
             this.body.blindRename(from, to);

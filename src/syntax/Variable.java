@@ -6,15 +6,15 @@ import java.util.HashMap;
 /**
  * Represents lambda calculus variables.
  */
-public final class Variable<T> extends LambdaTerm<T> {
+public final class Variable extends LambdaTerm {
 
-    private T name;
+    private int name;
 
     /**
      * Construct a new Variable.
      * @param name the name of the Variable
      */
-    public Variable(T name) {
+    public Variable(int name) {
         this.name = name;
     }
 
@@ -22,15 +22,15 @@ public final class Variable<T> extends LambdaTerm<T> {
      * Access the name of this Variable.
      * @return the name of this Variable
      */
-    public T name() { return this.name; }
+    public int name() { return this.name; }
 
     /**
      * Enumerate the free variable names in this Variable (which will always be
      * this Variable name only).
      * @return a HashSet of the free variable names of this Variable
      */
-    public HashSet<T> freeVars() {
-        HashSet<T> fv = new HashSet<T>();
+    public HashSet<Integer> freeVars() {
+        HashSet<Integer> fv = new HashSet<Integer>();
         fv.add(this.name);
         return fv;
     }
@@ -39,7 +39,7 @@ public final class Variable<T> extends LambdaTerm<T> {
      * Enumerate all the variable names bound in this Variable (always none).
      * @return A HashSet of all variable names bound in this Variable
      */
-    public HashSet<T> binders() { return new HashSet<T>(); }
+    public HashSet<Integer> binders() { return new HashSet<Integer>(); }
 
     /**
      * Obtain a String representation of this Variable.
@@ -54,7 +54,7 @@ public final class Variable<T> extends LambdaTerm<T> {
      * @return a String representation of this Variable, printing the Object
      * mapped to in nameMap by the Variable name
      */
-    public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
+    public String toStringWithNameMap(HashMap<Integer, String> nameMap) {
         return nameMap.get(this.name).toString();
     }
 
@@ -62,7 +62,7 @@ public final class Variable<T> extends LambdaTerm<T> {
      * Copy this Variable.
      * @return a copy of this Variable
      */
-    public Variable<T> copy() { return new Variable(this.name); }
+    public Variable copy() { return new Variable(this.name); }
 
     /**
      * Carelessly rename every occurence of a specific variable name within this
@@ -70,7 +70,7 @@ public final class Variable<T> extends LambdaTerm<T> {
      * @param from rename the stored variable name if it matches this name
      * @param to if renaming the stored variable, rename it to this value
      */
-    public void blindRename(T from, T to) {
+    public void blindRename(int from, int to) {
         if(this.name.equals(from)) { this.name = to; }
     }
 
@@ -80,7 +80,7 @@ public final class Variable<T> extends LambdaTerm<T> {
      * @param from rename the stored variable name if it matches this name
      * @param to if renaming the stored variable, rename it to this value
      */
-    public void renameFree(T from, T to) {
+    public void renameFree(int from, int to) {
         if(this.name.equals(from)) { this.name = to; }
     }
 
@@ -90,5 +90,5 @@ public final class Variable<T> extends LambdaTerm<T> {
      * @param from rename variable names of this value
      * @param to those variable names being renamed are renamed to this value
      */
-    public void renameNonFree(T from, T to) {}
+    public void renameNonFree(int from, int to) {}
 }

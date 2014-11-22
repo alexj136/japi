@@ -10,9 +10,9 @@ import java.util.HashSet;
  * receives its message, it binds the message to a variable and 'disappears',
  * leaving behind its subterm in its place.
  */
-public final class Receive<T> extends PiTermComm<T> {
+public final class Receive extends PiTermComm {
 
-    private ArrayList<T> boundNames;
+    private ArrayList<Integer> boundNames;
 
     /**
      * Construct a new recieving process.
@@ -21,7 +21,7 @@ public final class Receive<T> extends PiTermComm<T> {
      * @param subterm the process to 'become' when the message is received
      * @return a new Receive object
      */
-    public Receive(T chnl, ArrayList<T> boundNames, PiTerm<T> subterm) {
+    public Receive(int chnl, ArrayList<Integer> boundNames, PiTerm subterm) {
         super(chnl, subterm);
         this.boundNames = boundNames;
     }
@@ -31,7 +31,7 @@ public final class Receive<T> extends PiTermComm<T> {
      * @param i the index of the bound name to be retrieved
      * @return the i^th bound name
      */
-    public T name(int i) { return this.boundNames.get(i); }
+    public int name(int i) { return this.boundNames.get(i); }
 
     /**
      * Determine the arity (the number of bound names) of this Receive.
@@ -44,7 +44,7 @@ public final class Receive<T> extends PiTermComm<T> {
      * @param name the name to test
      * @return true if name is bound by this Receive, false otherwise
      */
-    public boolean binds(T name) {
+    public boolean binds(int name) {
         return this.boundNames.contains(name);
     }
 
@@ -53,9 +53,9 @@ public final class Receive<T> extends PiTermComm<T> {
      * @return a HashSet of the binders in this Receive
      */
     @Override
-    public HashSet<T> binders() {
-        HashSet<T> subBinders = super.binders();
-        for(T name : this.boundNames) { subBinders.add(name); }
+    public HashSet<Integer> binders() {
+        HashSet<Integer> subBinders = super.binders();
+        for(Integer name : this.boundNames) { subBinders.add(name); }
         return subBinders;
     }
 
@@ -76,9 +76,9 @@ public final class Receive<T> extends PiTermComm<T> {
      * @return a string representing the Receive, printing names of a different
      * type, the values of which are mapped to by the contained names.
      */
-    public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
+    public String toStringWithNameMap(HashMap<Integer, String> nameMap) {
         ArrayList<String> nameStrs = new ArrayList<String>();
-        for(T name : this.boundNames) {
+        for(Integer name : this.boundNames) {
             nameStrs.add(nameMap.get(name).toString());
         }
         return nameMap.get(this.chnl) + " " +
@@ -90,8 +90,9 @@ public final class Receive<T> extends PiTermComm<T> {
      * Copy this Receive.
      * @return a copy of this Receive.
      */
-    public Receive<T> copy() {
-        return new Receive<T>(this.chnl, (ArrayList<T>) this.boundNames.clone(),
+    public Receive copy() {
+        return new Receive(this.chnl,
+                (ArrayList<Integer>) this.boundNames.clone(),
                 this.subterm.copy());
     }
 
@@ -100,7 +101,7 @@ public final class Receive<T> extends PiTermComm<T> {
      * @param from all names with this value are renamed
      * @param to all names being renamed are renamed to this name
      */
-    public void blindRename(T from, T to) {
+    public void blindRename(int from, int to) {
         if(this.chnl.equals(from)) { this.chnl = to; }
         for(int i = 0; i < this.arity(); i++) {
             if(this.name(i).equals(from)) {

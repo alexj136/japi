@@ -8,13 +8,13 @@ import java.util.HashMap;
  * The Parallel class represents parallel composition - it contains two
  * concurrently executing processes.
  */
-public final class Parallel<T> extends PiTermManySub<T> {
+public final class Parallel extends PiTermManySub {
 
     /**
      * Construct a new Parallel object using a list of concurrent processes.
      * @param subterms a list of the subterms of this Parallel
      */
-    public Parallel(ArrayList<PiTerm<T>> subterms) { super(subterms); }
+    public Parallel(ArrayList<PiTerm> subterms) { super(subterms); }
 
     /**
      * Obtain a string representation of this Parallel, using a different name
@@ -22,11 +22,11 @@ public final class Parallel<T> extends PiTermManySub<T> {
      * @return a string representing the Parallel, printing names of a different
      * type, the values of which are mapped to by the contained names.
      */
-    public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
+    public String toStringWithNameMap(HashMap<Integer, String> nameMap) {
         if(this.arity() < 1) { return "0"; }
         else {
             ArrayList<String> strSubs = new ArrayList<String>();
-            for(PiTerm<T> subterm : this.subterms) {
+            for(PiTerm subterm : this.subterms) {
                 strSubs.add(subterm.toStringWithNameMap(nameMap));
             }
             return Utils.stringifyList("[ ", " ]", " | ", strSubs);
@@ -47,7 +47,7 @@ public final class Parallel<T> extends PiTermManySub<T> {
      * Deep copy this Parallel.
      * @return a deep copy of this Parallel
      */
-    public Parallel<T> copy() {
+    public Parallel copy() {
         return new Parallel(this.copySubs());
     }
 }

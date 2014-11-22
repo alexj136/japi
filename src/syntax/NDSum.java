@@ -8,13 +8,13 @@ import java.util.HashMap;
  * The NDSum class represents n-ary nondeterministic sums. An NDSum PiTerm can
  * behave as though it were any one of its contained subterms.
  */
-public final class NDSum<T> extends PiTermManySub<T> {
+public final class NDSum extends PiTermManySub {
 
     /**
      * Construct a new NDSum object using a list of processes.
      * @param subterms the list of processes
      */
-    public NDSum(ArrayList<PiTerm<T>> subterms) {
+    public NDSum(ArrayList<PiTerm> subterms) {
         super(subterms);
         if(subterms.size() < 2) {
             throw new IllegalArgumentException("Tried to create an NDSum " +
@@ -37,9 +37,9 @@ public final class NDSum<T> extends PiTermManySub<T> {
      * @return a string representing the NDSum, printing names of a different
      * type, the values of which are mapped to by the contained names.
      */
-    public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
+    public String toStringWithNameMap(HashMap<Integer, String> nameMap) {
         ArrayList<String> strSubs = new ArrayList<String>();
-        for(PiTerm<T> subterm : this.subterms) {
+        for(PiTerm subterm : this.subterms) {
             strSubs.add(subterm.toStringWithNameMap(nameMap));
         }
         return Utils.stringifyList("{ ", " }", " + ", strSubs);
@@ -49,7 +49,7 @@ public final class NDSum<T> extends PiTermManySub<T> {
      * Copy this NDSum.
      * @return a copy of this NDSum
      */
-    public NDSum<T> copy() {
+    public NDSum copy() {
         return new NDSum(this.copySubs());
     }
 }

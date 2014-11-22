@@ -5,7 +5,7 @@ import java.util.HashSet;
 /**
  * LambdaTerms are terms in the lambda calculus.
  */
-public abstract class LambdaTerm<T> extends Term<T> {
+public abstract class LambdaTerm extends Term {
 
     public static final String LAM = "\\";
     public static final String DOT = "->";
@@ -14,20 +14,20 @@ public abstract class LambdaTerm<T> extends Term<T> {
      * Copy a LambdaTerm. Contained name objects need not be deeply copied.
      * @return a copy of this LambdaTerm.
      */
-    public abstract LambdaTerm<T> copy();
+    public abstract LambdaTerm copy();
 
     /**
      * Enumerate the free variables in this LambdaTerm.
      * @return a HashSet of all the free variable names in this LambdaTerm
      */
-    public abstract HashSet<T> freeVars();
+    public abstract HashSet freeVars();
 
     /**
      * Rename all free occurences of the name 'from' to the name 'to'.
      * @param from names of this value are renamed
      * @param to renamed names are renamed to this value
      */
-    public abstract void renameFree(T from, T to);
+    public abstract void renameFree(int from, int to);
 
     /**
      * Rename all occurences of the name 'from' to the name 'to', in and after
@@ -35,5 +35,5 @@ public abstract class LambdaTerm<T> extends Term<T> {
      * @param from names of this value are renamed
      * @param to renamed names are renamed to this value
      */
-    public abstract void renameNonFree(T from, T to);
+    public abstract void renameNonFree(int from, int to);
 }

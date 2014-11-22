@@ -3,7 +3,10 @@ package syntax;
 import java.util.HashSet;
 import java.util.HashMap;
 
-public abstract class Term<T> {
+/**
+ * An overarchin Term class - represents any kind of term, lambda or pi.
+ */
+public abstract class Term {
     
     /**
      * Enumerate the variable names that have their binders within the given
@@ -11,7 +14,7 @@ public abstract class Term<T> {
      * @return a HashSet of all the variable names that have their binders
      * within the given LambdaTerm
      */
-    public abstract HashSet<T> binders();
+    public abstract HashSet binders();
 
     /**
      * Obtain a string representation of this Term.
@@ -26,7 +29,8 @@ public abstract class Term<T> {
      * @return a string representing the Term, printing names of a different
      * type, the values of which are mapped to by the contained names.
      */
-    public abstract <U> String toStringWithNameMap(HashMap<T, U> nameMap);
+    public abstract String toStringWithNameMap(
+            HashMap<Integer, String> nameMap);
 
     /**
      * Rename every single occurence of the first given name with the second
@@ -34,11 +38,11 @@ public abstract class Term<T> {
      * @param from all names of this value must be renamed
      * @param to names being renamed are renamed to this value
      */
-    public abstract void blindRename(T from, T to);
+    public abstract void blindRename(int from, int to);
 
     /**
      * Copy a Term. Contained name objects need not be deeply copied.
      * @return a copy of this Term.
      */
-    public abstract Term<T> copy();
+    public abstract Term copy();
 }

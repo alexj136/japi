@@ -5,14 +5,14 @@ import java.util.HashMap;
 /**
  * Replicate elements repeatedly copy a process.
  */
-public final class Replicate<T> extends PiTermOneSub<T> {
+public final class Replicate extends PiTermOneSub {
 
     /**
      * Construct a new replicating process.
      * @param subterm the process that will be replicated
      * @return a new Replicate object
      */
-    public Replicate(PiTerm<T> subterm) {
+    public Replicate(PiTerm subterm) {
         super(subterm);
     }
 
@@ -29,7 +29,7 @@ public final class Replicate<T> extends PiTermOneSub<T> {
      * @return a string representing the Replicate, printing names of a
      * different type, the values of which are mapped to by the contained names.
      */
-    public <U> String toStringWithNameMap(HashMap<T, U> nameMap) {
+    public String toStringWithNameMap(HashMap<Integer, String> nameMap) {
         return "! " + this.subterm.toStringWithNameMap(nameMap);
     }
 
@@ -38,7 +38,7 @@ public final class Replicate<T> extends PiTermOneSub<T> {
      * @param from all names of this value are renamed
      * @param to all names being renamed are renamed to this value
      */
-    public void blindRename(T from, T to) {
+    public void blindRename(int from, int to) {
         this.subterm.blindRename(from, to);
     }
 
@@ -46,5 +46,5 @@ public final class Replicate<T> extends PiTermOneSub<T> {
      * Copy this Replicate.
      * @return a copy of this Replicate
      */
-    public Replicate<T> copy() { return new Replicate<T>(this.subterm.copy()); }
+    public Replicate copy() { return new Replicate(this.subterm.copy()); }
 }
