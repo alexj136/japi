@@ -86,7 +86,8 @@ public abstract class PiTerm extends Term {
         // other term
         else if(t1 instanceof Restrict) {
             Restrict r1 = (Restrict) t1;
-            HashSet t1RestrictedNew = (HashSet) t1Restricted.clone();
+            HashSet<Integer> t1RestrictedNew =
+                    new HashSet<Integer>(t1Restricted);
             t1RestrictedNew.add(r1.boundName());
             return PiTerm.talksTo(r1.subterm(), t2, t1RestrictedNew,
                     t2Restricted);

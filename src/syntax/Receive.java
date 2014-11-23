@@ -94,7 +94,7 @@ public final class Receive extends PiTermComm {
      */
     public Receive copy() {
         return new Receive(this.chnl,
-                (ArrayList<Integer>) this.boundNames.clone(),
+                new ArrayList<Integer>(this.boundNames),
                 this.subterm.copy());
     }
 

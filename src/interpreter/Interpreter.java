@@ -82,8 +82,7 @@ public class Interpreter {
         return new Interpreter(result.frst, result.scnd, result.thrd);
     }
 
-    /**
-     * Try to do a reduction.
+    /** * Try to do a reduction.
      * @return true if a reduction was performed, false otherwise
      */
     public boolean doReduction() {

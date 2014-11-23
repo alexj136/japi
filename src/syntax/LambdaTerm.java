@@ -20,7 +20,7 @@ public abstract class LambdaTerm extends Term {
      * Enumerate the free variables in this LambdaTerm.
      * @return a HashSet of all the free variable names in this LambdaTerm
      */
-    public abstract HashSet freeVars();
+    public abstract HashSet<Integer> freeVars();
 
     /**
      * Rename all free occurences of the name 'from' to the name 'to'.

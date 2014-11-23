@@ -45,8 +45,8 @@ public final class Utils {
      *     integers, yields:
      *     "(1, 2, 3, 4)"
      */
-    public static String stringifyList(String open, String close,
-            String delimiter, ArrayList elems) {
+    public static <T> String stringifyList(String open, String close,
+            String delimiter, ArrayList<T> elems) {
 
         if(elems.isEmpty()) { return open + close; }
         else {
