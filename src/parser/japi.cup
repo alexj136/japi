@@ -43,8 +43,7 @@ terminal            LANGLE, // <
                     BANG,   // !
                     ZERO,   // 0
                     BSLASH, // \
-                    ARROW,  // ->
-                    APP;    // PRECEDENCE DECLARATOR
+                    PRN, ABS, VAR, APP; // PRECEDENCE DECLARATORS
 terminal Integer    IDENT;  // [a-z_]+
 
 /* The pi-calculus grammar used is as follows:
@@ -65,10 +64,10 @@ non terminal ArrayList<LambdaTerm>  moreLamTerms;
 non terminal ArrayList<Integer>     names;
 non terminal ArrayList<Integer>     moreNames;
 
-precedence left LPAREN;
-precedence left BSLASH;
-precedence left IDENT;
+precedence left PRN;
+precedence left VAR;
 precedence left APP;
+precedence left ABS;
 
 start with piTerm;
 
@@ -113,8 +112,8 @@ moreSumTerms  ::= RCURLY                           {: RESULT = new ArrayList<PiT
                 | SUM piTerm:s moreSumTerms:ss     {: ss.add(0, s); RESULT = ss;             :}
                 ;
 
-lamTerm       ::= LPAREN lamTerm:s RPAREN          {: RESULT = s;                            :}
-                | BSLASH IDENT:c ARROW lamTerm:s   {: RESULT = new Abstraction(c, s);        :}
-                | IDENT:c                          {: RESULT = new Variable(c);              :}
+lamTerm       ::= LPAREN lamTerm:s RPAREN          {: RESULT = s;                            :} %prec PRN
+                | BSLASH IDENT:c DOT lamTerm:s     {: RESULT = new Abstraction(c, s);        :} %prec ABS
+                | IDENT:c                          {: RESULT = new Variable(c);              :} %prec VAR
                 | lamTerm:s1 lamTerm:s2            {: RESULT = new Application(s1, s2);      :} %prec APP
                 ;

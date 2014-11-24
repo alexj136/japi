@@ -130,7 +130,6 @@ Comment = "//" [^\r\n]* {NewLine}?
     "!"       { return symbol(sym.BANG);   }
     "0"       { return symbol(sym.ZERO);   }
     "\\"      { return symbol(sym.BSLASH); }
-    "->"      { return symbol(sym.ARROW);  }
 
     {Ident}   { return symbol(sym.IDENT, yytext()); }
 

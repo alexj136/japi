@@ -8,7 +8,7 @@ import java.util.HashSet;
 public abstract class LambdaTerm extends Term {
 
     public static final String LAM = "\\";
-    public static final String DOT = "->";
+    public static final String DOT = ".";
 
     /**
      * Copy a LambdaTerm. Contained name objects need not be deeply copied.
