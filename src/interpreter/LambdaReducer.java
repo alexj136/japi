@@ -1,5 +1,6 @@
 package interpreter;
 
+import syntax.Term;
 import syntax.LambdaTerm;
 import syntax.Abstraction;
 import syntax.Application;
@@ -15,36 +16,12 @@ import java.util.function.Supplier;
 public final class LambdaReducer {
 
     /**
-     * Given that a LambdaTerm T1 whose body binds 'binders', will have a
-     * LambdaTerm T2, with free variables 'freeVars', substituted into it,
-     * compute the bound names in T1 that have to be alpha converted to avoid
-     * erroneous capture of free variables in T2.
-     * @param freeVars the free variables of T2
-     * @param binders the names bound in T1
-     * @return the binder names that should be renamed in T1 for T2 to be safely
-     * substituted in
-     */
-    public static HashSet<Integer> toRename(HashSet<Integer> freeVars,
-            HashSet<Integer> binders) {
-
-        HashSet<Integer> atRisk = new HashSet<Integer>();
-
-        for(Integer freeVarI : freeVars) {
-            for(Integer binderI : binders) {
-                if(freeVarI.equals(binderI)) {
-                    atRisk.add(freeVarI);
-                }
-            }
-        }
-
-        return atRisk;
-    }
-
-    /**
      * Reduce a LambdaTerm until it is in weak-head normal form. Mutates the
      * given term - do not keep any pointers to it after calling.
      * @param term the term to reduce
-     * @param nameGenerator
+     * @param nameGenerator Function to obtain fresh names
+     * @param nextAvailableName Accessor to the nextAvailableName field in the
+     * Interpreter
      * @return the reduced term
      */
     public static LambdaTerm reduce(LambdaTerm term,
@@ -73,31 +50,11 @@ public final class LambdaReducer {
             Application app = (Application) term;
             Abstraction abs = (Abstraction) app.func();
 
-            /*
-             * Prevent name clashes occuring.
-             */
-            HashSet<Integer> atRisk = LambdaReducer.toRename(
-                    app.arg().freeVars(), abs.body().binders());
-            HashMap<Integer, Integer> oldToNew =
-                new HashMap<Integer, Integer>();
-            for(Integer name : atRisk) {
-                oldToNew.put(name, nameGenerator.apply(name));
-            }
-            int firstIntermediate = nextAvailableName.get();
-            int curIntermediate = firstIntermediate;
-            for(Integer name : atRisk) {
-                abs.body().renameNonFree(name, curIntermediate);
-                curIntermediate++;
-            }
-            curIntermediate = firstIntermediate;
-            for(Integer name : atRisk) {
-                abs.body().renameNonFree(curIntermediate, oldToNew.get(name));
-                curIntermediate++;
-            }
+            // Prevent name clashes occuring.
+            PiReducer.preventClashes(app.arg(), abs.body(), nameGenerator,
+                    nextAvailableName);
 
-            /*
-             * Do the substitution.
-             */
+            // Do the substitution.
             term = LambdaReducer.substitute(abs.name(), app.arg(), abs.body());
         }
         return term;

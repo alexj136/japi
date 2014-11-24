@@ -48,6 +48,41 @@ public abstract class PiTermManySub extends PiTerm implements Iterable<PiTerm> {
     }
 
     /**
+     * Enumerate the free names in this PiTermManySub.
+     * @return a Hashset of the free names in this PiTermManySub
+     */
+    public HashSet<Integer> freeVars() {
+        HashSet<Integer> freeVars = new HashSet<Integer>();
+        for(PiTerm subterm : subterms) {
+            for(Integer free : subterm.freeVars()) { freeVars.add(free); }
+        }
+        return freeVars;
+    }
+
+    /**
+     * Rename the free occurences of 'from' to 'to' in this PiTermManySub.
+     * @param from free names of this value are renamed
+     * @param to renamed names are given this value
+     */
+    public void renameFree(Integer from, Integer to) {
+        for(PiTerm subterm : subterms) {
+            subterm.renameFree(from, to);
+        }
+    }
+
+    /**
+     * Rename the binders and bound occurrences of 'from' to 'to' in this
+     * PiTermManySub.
+     * @param from binders and bound names of this value are renamed
+     * @param to renamed names are given this value
+     */
+    public void renameNonFree(Integer from, Integer to) {
+        for(PiTerm subterm : subterms) {
+            subterm.renameNonFree(from, to);
+        }
+    }
+
+    /**
      * Obtain an ArrayList with copies of the contained subterms.
      * @return an ArrayList with copies of the contained subterms
      */

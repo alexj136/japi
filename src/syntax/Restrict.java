@@ -30,13 +30,45 @@ public final class Restrict extends PiTermOneSub {
 
     /**
      * Enumerate the binders in this Restrict.
-     * @return a HashSey of the binders in this Restrict
+     * @return a HashSet of the binders in this Restrict
      */
-    @Override
     public HashSet<Integer> binders() {
-        HashSet<Integer> subBinders = super.binders();
+        HashSet<Integer> subBinders = this.subterm.binders();
         subBinders.add(this.boundName());
         return subBinders;
+    }
+
+    /**
+     * Enumerate the free variables in this Restrict.
+     * @return a HashSet of the free variables in this Restrict
+     */
+    public HashSet<Integer> freeVars() {
+        HashSet<Integer> freeVars = this.subterm.freeVars();
+        freeVars.remove(this.boundName());
+        return freeVars;
+    }
+
+    /**
+     * Rename all free occurrences of 'from' to 'to' in this Restrict.
+     * @param from all free occurrences of this name are changed
+     * @param to names being changed are replaced with this value
+     */
+    public void renameFree(Integer from, Integer to) {
+        if(!this.boundName.equals(from)) { this.subterm.renameFree(from, to); }
+    }
+
+    /**
+     * Rename all binding and bound occurrences of 'from' to 'to' in this
+     * Restrict.
+     * @param from all binding and bound occurrences of this name are changed
+     * @param to names being changed are replaced with this value
+     */
+    public void renameNonFree(Integer from, Integer to) {
+        if(this.boundName.equals(from)) {
+            this.boundName = to;
+            this.subterm.blindRename(from, to);
+        }
+        else { this.subterm.renameNonFree(from, to); }
     }
 
     /**

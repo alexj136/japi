@@ -3,6 +3,7 @@ package interpreter;
 import syntax.*;
 import interpreter.LambdaReducer;
 import utils.*;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,39 +103,39 @@ public class Interpreter {
 
         // The lists of terms that can interact. The order of the pair does not
         // matter.
-        ArrayList[][] pairings = {
-            { this.senders          , this.replReceivers    },
-            { this.receivers        , this.replSenders      },
-            { this.senders          , this.restricts        },
-            { this.receivers        , this.restricts        },
-            { this.restricts        , this.replSenders      },
-            { this.restricts        , this.replReceivers    },
-            { this.senders          , this.replRestricts    },
-            { this.receivers        , this.replRestricts    },
-            { this.restricts        , this.restricts        },
-            { this.restricts        , this.replRestricts    },
-            { this.sums             , this.sums             },
-            { this.sums             , this.senders          },
-            { this.sums             , this.receivers        },
-            { this.sums             , this.restricts        },
-            { this.sums             , this.replSenders      },
-            { this.sums             , this.replReceivers    },
-            { this.sums             , this.replRestricts    },
-            { this.sums             , this.replSums         },
-            { this.senders          , this.replSums         },
-            { this.receivers        , this.replSums         },
-            { this.restricts        , this.replSums         }
-        };
-
-        // Convert the pairings array into an ArrayList for easier processing
-        ArrayList<ArrayList[]> todo = new ArrayList<ArrayList[]>();
-        for(ArrayList[] pair : pairings) { todo.add(pair); }
+        ArrayList<Pair<ArrayList<? extends PiTerm>,
+                ArrayList<? extends PiTerm>>> pairings =
+                new ArrayList<Pair<ArrayList<? extends PiTerm>,
+                ArrayList<? extends PiTerm>>>(Arrays.asList(
+                Pair.make(  this.senders    , this.replReceivers    ),
+                Pair.make(  this.receivers  , this.replSenders      ),
+                Pair.make(  this.senders    , this.restricts        ),
+                Pair.make(  this.receivers  , this.restricts        ),
+                Pair.make(  this.restricts  , this.replSenders      ),
+                Pair.make(  this.restricts  , this.replReceivers    ),
+                Pair.make(  this.senders    , this.replRestricts    ),
+                Pair.make(  this.receivers  , this.replRestricts    ),
+                Pair.make(  this.restricts  , this.restricts        ),
+                Pair.make(  this.restricts  , this.replRestricts    ),
+                Pair.make(  this.sums       , this.sums             ),
+                Pair.make(  this.sums       , this.senders          ),
+                Pair.make(  this.sums       , this.receivers        ),
+                Pair.make(  this.sums       , this.restricts        ),
+                Pair.make(  this.sums       , this.replSenders      ),
+                Pair.make(  this.sums       , this.replReceivers    ),
+                Pair.make(  this.sums       , this.replRestricts    ),
+                Pair.make(  this.sums       , this.replSums         ),
+                Pair.make(  this.senders    , this.replSums         ),
+                Pair.make(  this.receivers  , this.replSums         ),
+                Pair.make(  this.restricts  , this.replSums         )));
 
         // Keep trying the possible reductions in random order until one works
-        while(!(todo.isEmpty() || doneReduction)) {
-            ArrayList[] pair = Utils.arbitraryElement(todo);
-            todo.remove(pair);
-            doneReduction = tryRandomReductionBetweenLists(pair[0], pair[1]);
+        while(!(pairings.isEmpty() || doneReduction)) {
+            Pair<ArrayList<? extends PiTerm>, ArrayList<? extends PiTerm>>
+                    pair = Utils.arbitraryElement(pairings);
+            pairings.remove(pair);
+            doneReduction =
+                    tryRandomReductionBetweenLists(pair.frst, pair.scnd);
         }
         return doneReduction;
     }
@@ -282,18 +283,29 @@ public class Interpreter {
         this.integrateNewlyExposedTerm(send.subterm());
         PiTerm receiverSub = rece.subterm();
 
+        // Evaluate the expressions contained in the sender
+        for(int i = 0; i < send.arity(); i++) {
+            send.setExp(i, LambdaReducer.reduce(send.exp(i),
+                    (Integer name) -> this.leaseNewName(name),
+                    () -> this.getNextAvailableName()));
+        }
+
         // To avoid clashes, first rename all sent names to a fresh name, and
         // then rename those fresh names with the sent ones.
         for(int i = 0, firstIntermediateName = this.nextAvailableName;
                 i < rece.arity(); i++, firstIntermediateName++) {
 
             PiReducer.msgPass(rece.name(i),
-                    new Variable(firstIntermediateName), receiverSub);
+                    new Variable(firstIntermediateName), receiverSub,
+                    (Integer name) -> this.leaseNewName(name),
+                    () -> this.getNextAvailableName());
         }
         for(int i = 0, firstIntermediateName = this.nextAvailableName;
                 i < rece.arity(); i++, firstIntermediateName++) {
 
-            PiReducer.msgPass(firstIntermediateName, send.exp(i), receiverSub);
+            PiReducer.msgPass(firstIntermediateName, send.exp(i), receiverSub,
+                    (Integer name) -> this.leaseNewName(name),
+                    () -> this.getNextAvailableName());
         }
 
         this.integrateNewlyExposedTerm(receiverSub);

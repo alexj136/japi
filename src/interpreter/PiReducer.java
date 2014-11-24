@@ -1,6 +1,10 @@
 package interpreter;
 
 import syntax.*;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.function.UnaryOperator;
+import java.util.function.Supplier;
 
 /**
  * Contains static functions for reducing PiTerms.
@@ -14,7 +18,16 @@ public final class PiReducer {
      * @param with replaced names are replaced with this LambdaTerm
      * @param in replace inside this PiTerm
      */
-    public static void msgPass(Integer replacing, LambdaTerm with, PiTerm in) {
+    public static void msgPass(Integer replacing, LambdaTerm with, PiTerm in,
+            UnaryOperator<Integer> nameGenerator,
+            Supplier<Integer> nextAvailableName) {
+
+        PiReducer.preventClashes(with, in, nameGenerator, nextAvailableName);
+        PiReducer.msgPassNoClashAssumed(replacing, with, in);
+    }
+
+    private static void msgPassNoClashAssumed(Integer replacing,
+            LambdaTerm with, PiTerm in) {
 
         if(in instanceof Send) {
             Send send = (Send) in;
@@ -28,16 +41,10 @@ public final class PiReducer {
                 send.setChnl(var.name());
             }
             for(int i = 0; i < send.arity(); i++) {
-                if(with instanceof Variable) {
-                    send.exp(i).renameFree(replacing,
-                            ((Variable) with).name());
-                }
-                else {
-                    throw new UnsupportedOperationException("Not yet " +
-                            "implemented");
-                }
+                LambdaTerm exp = send.exp(i);
+                send.setExp(i, LambdaReducer.substitute(replacing, with, exp));
             }
-            PiReducer.msgPass(replacing, with, send.subterm());
+            PiReducer.msgPassNoClashAssumed(replacing, with, send.subterm());
         }
 
         else if(in instanceof Receive) {
@@ -54,19 +61,22 @@ public final class PiReducer {
             // semantics of the pi calculus. Only rename in the subprocess if
             // the message did not contain 'from'.
             if(!rece.binds(replacing)) {
-                PiReducer.msgPass(replacing, with, rece.subterm());
+                PiReducer.msgPassNoClashAssumed(replacing, with,
+                        rece.subterm());
             }
         }
 
         else if(in instanceof Replicate) {
-            PiReducer.msgPass(replacing, with, ((Replicate) in).subterm());
+            PiReducer.msgPassNoClashAssumed(replacing, with,
+                    ((Replicate) in).subterm());
         }
 
         else if(in instanceof Restrict) {
             Restrict rest = (Restrict) in;
 
             if(!rest.boundName().equals(replacing)) {
-                PiReducer.msgPass(replacing, with, rest.subterm());
+                PiReducer.msgPassNoClashAssumed(replacing, with,
+                        rest.subterm());
             }
         }
 
@@ -74,7 +84,8 @@ public final class PiReducer {
             PiTermManySub ptms = (PiTermManySub) in;
 
             for(int i = 0; i < ptms.arity(); i++) {
-                PiReducer.msgPass(replacing, with, ptms.subterm(i));
+                PiReducer.msgPassNoClashAssumed(replacing, with,
+                        ptms.subterm(i));
             }
         }
 
@@ -84,17 +95,61 @@ public final class PiReducer {
         }
     }
 
-    public static void msgPass(Integer replacing, LambdaTerm with,
-            LambdaTerm in) {
+    /**
+     * Rename binders and their variables within a Term 'subWithin' where they
+     * may erroneously capture free variables within a Term 'toSubstitute'.
+     * @param toSubstitute
+     * @param subWithin
+     * @param nameGenerator Function to obtain fresh names
+     * @param nextAvailableName Accessor to the nextAvailableName field in the
+     */
+    public static void preventClashes(Term toSubstitute, Term subWithin,
+            UnaryOperator<Integer> nameGenerator,
+            Supplier<Integer> nextAvailableName) {
 
-        if(in instanceof Variable) {
-            Variable var = (Variable) in;
+        HashSet<Integer> atRisk = PiReducer.toRename(
+                toSubstitute.freeVars(), subWithin.binders());
+        HashMap<Integer, Integer> oldToNew =
+            new HashMap<Integer, Integer>();
+        for(Integer name : atRisk) {
+            oldToNew.put(name, nameGenerator.apply(name));
+        }
+        int firstIntermediate = nextAvailableName.get();
+        int curIntermediate = firstIntermediate;
+        for(Integer name : atRisk) {
+            subWithin.renameNonFree(name, curIntermediate);
+            curIntermediate++;
+        }
+        curIntermediate = firstIntermediate;
+        for(Integer name : atRisk) {
+            subWithin.renameNonFree(curIntermediate, oldToNew.get(name));
+            curIntermediate++;
+        }
+    }
 
-            if(replacing.equals(var.name())) {
-                //var.
+    /**
+     * Given that a Term T1 whose body binds 'binders', will have a Term T2,
+     * with free variables 'freeVars', substituted into it, compute the bound
+     * names in T1 that have to be alpha converted to avoid erroneous capture of
+     * free variables in T2.
+     * @param freeVars the free variables of T2
+     * @param binders the names bound in T1
+     * @return the binder names that should be renamed in T1 for T2 to be safely
+     * substituted in
+     */
+    public static HashSet<Integer> toRename(HashSet<Integer> freeVars,
+            HashSet<Integer> binders) {
+
+        HashSet<Integer> atRisk = new HashSet<Integer>();
+
+        for(Integer freeVarI : freeVars) {
+            for(Integer binderI : binders) {
+                if(freeVarI.equals(binderI)) {
+                    atRisk.add(freeVarI);
+                }
             }
         }
 
-        throw new UnsupportedOperationException("Not yet implemented");
+        return atRisk;
     }
 }

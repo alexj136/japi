@@ -104,7 +104,7 @@ public final class Abstraction extends LambdaTerm {
 
     /**
      * Rename all free occurrences of 'from' with 'to' in this Abstraction.
-     * @param from all occurrences of this name are changed
+     * @param from all free occurrences of this name are changed
      * @param to names being changed are replaced with this value
      */
     public void renameFree(Integer from, Integer to) {

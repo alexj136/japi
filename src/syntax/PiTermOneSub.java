@@ -21,12 +21,4 @@ public abstract class PiTermOneSub extends PiTerm {
      * @return the stored subterm
      */
     public PiTerm subterm() { return this.subterm; }
-
-    /**
-     * Enumerate the binders in this PiTermOneSub.
-     * @return a HashSet of the binders in this PiTermOneSub
-     */
-    public HashSet<Integer> binders() {
-        return this.subterm.binders();
-    }
 }

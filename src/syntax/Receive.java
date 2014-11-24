@@ -25,6 +25,9 @@ public final class Receive extends PiTermComm {
             PiTerm subterm) {
 
         super(chnl, subterm);
+        if(new HashSet<Integer>(boundNames).size() < boundNames.size()) {
+            throw new IllegalArgumentException("Duplicate binders in Receive");
+        }
         this.boundNames = boundNames;
     }
 
@@ -51,14 +54,67 @@ public final class Receive extends PiTermComm {
     }
 
     /**
+     * Set the value of a particular name in this Receive.
+     * @param index the binder to reset
+     * @param name the new value
+     */
+    public void setName(int index, Integer name) {
+        this.boundNames.remove(index);
+        this.boundNames.add(index, name);
+    }
+
+    /**
      * Enumerate the binders in this Receive.
      * @return a HashSet of the binders in this Receive
      */
     @Override
     public HashSet<Integer> binders() {
-        HashSet<Integer> subBinders = super.binders();
+        HashSet<Integer> subBinders = this.subterm.binders();
         for(Integer name : this.boundNames) { subBinders.add(name); }
         return subBinders;
+    }
+
+    /**
+     * Enumerate the free variable names in this Receive.
+     * @return a HashSet of the free variable names in this Receive
+     */
+    public HashSet<Integer> freeVars() {
+        HashSet<Integer> freeVars = this.subterm.freeVars();
+        for(Integer name : this.boundNames) {
+            if(freeVars.contains(name)) { freeVars.remove(name); }
+        }
+        freeVars.add(this.chnl);
+        return freeVars;
+    }
+
+    /**
+     * Rename the free occurrences of 'from' to 'to' in this Receive.
+     * @param from all free occurrences of this name are changed
+     * @param to names being changed are replaced with this value
+     */
+    public void renameFree(Integer from, Integer to) {
+        if(this.chnl.equals(from)) { this.chnl = to; }
+        if(!this.binds(from)) { this.subterm.renameFree(from, to); }
+    }
+
+    /**
+     * Rename the binding or bound occurrences of 'from' to 'to' in this
+     * Receive.
+     * @param from all binding or bound occurrences of this name are changed
+     * @param to names being changed are replaced with this value
+     */
+    public void renameNonFree(Integer from, Integer to) {
+        boolean found = false;
+        int i = 0;
+        while(i < this.arity() && !found) {
+            if(this.name(i).equals(from)) {
+                this.subterm.blindRename(from, to);
+                this.setName(i, to);
+                found = true;
+            }
+            i++;
+        }
+        if(!found) { this.subterm.renameNonFree(from, to); }
     }
 
     /**

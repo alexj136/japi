@@ -17,6 +17,35 @@ public abstract class Term {
     public abstract HashSet<Integer> binders();
 
     /**
+     * Enumerate the free variables in this LambdaTerm.
+     * @return a HashSet of all the free variable names in this LambdaTerm
+     */
+    public abstract HashSet<Integer> freeVars();
+
+    /**
+     * Rename all free occurences of the name 'from' to the name 'to'.
+     * @param from names of this value are renamed
+     * @param to renamed names are renamed to this value
+     */
+    public abstract void renameFree(Integer from, Integer to);
+
+    /**
+     * Rename all occurences of the name 'from' to the name 'to', in and after
+     * the first abstraction that binds this name.
+     * @param from names of this value are renamed
+     * @param to renamed names are renamed to this value
+     */
+    public abstract void renameNonFree(Integer from, Integer to);
+
+    /**
+     * Rename every single occurence of the first given name with the second
+     * given name.
+     * @param from all names of this value must be renamed
+     * @param to names being renamed are renamed to this value
+     */
+    public abstract void blindRename(Integer from, Integer to);
+
+    /**
      * Obtain a string representation of this Term.
      * @return a string representing the Term
      */
@@ -31,14 +60,6 @@ public abstract class Term {
      */
     public abstract String toStringWithNameMap(
             HashMap<Integer, String> nameMap);
-
-    /**
-     * Rename every single occurence of the first given name with the second
-     * given name.
-     * @param from all names of this value must be renamed
-     * @param to names being renamed are renamed to this value
-     */
-    public abstract void blindRename(Integer from, Integer to);
 
     /**
      * Copy a Term. Contained name objects need not be deeply copied.
