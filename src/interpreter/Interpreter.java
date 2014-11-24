@@ -1,7 +1,6 @@
 package interpreter;
 
 import syntax.*;
-import interpreter.LambdaReducer;
 import utils.*;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,11 +23,13 @@ public class Interpreter {
     private ArrayList<Receive> receivers;
     private ArrayList<Restrict> restricts;
     private ArrayList<NDSum> sums;
+    private ArrayList<Tau> taus;
 
     private ArrayList<Send> replSenders;
     private ArrayList<Receive> replReceivers;
     private ArrayList<Restrict> replRestricts;
     private ArrayList<NDSum> replSums;
+    private ArrayList<Tau> replTaus;
 
     private HashSet<Integer> boundNames;
 
@@ -59,11 +60,13 @@ public class Interpreter {
         this.receivers = new ArrayList<Receive>();
         this.restricts = new ArrayList<Restrict>();
         this.sums = new ArrayList<NDSum>();
+        this.taus = new ArrayList<Tau>();
 
         this.replSenders = new ArrayList<Send>();
         this.replReceivers = new ArrayList<Receive>();
         this.replRestricts = new ArrayList<Restrict>();
         this.replSums = new ArrayList<NDSum>();
+        this.replTaus = new ArrayList<Tau>();
 
         this.boundNames = new HashSet<Integer>();
 
@@ -97,47 +100,73 @@ public class Interpreter {
 
         // Always send messages if possible. If not, do another kind of
         // reduction in arbitrary order
-        boolean doneReduction =
-                tryRandomReductionBetweenLists(this.senders, this.receivers);
+        boolean doneReduction = tryRandomReductionBetweenLists(
+                Pair.make(this.senders, this.receivers));
         if(doneReduction) { return true; }
 
         // The lists of terms that can interact. The order of the pair does not
         // matter.
-        ArrayList<Pair<ArrayList<? extends PiTerm>,
-                ArrayList<? extends PiTerm>>> pairings =
-                new ArrayList<Pair<ArrayList<? extends PiTerm>,
-                ArrayList<? extends PiTerm>>>(Arrays.asList(
-                Pair.make(  this.senders    , this.replReceivers    ),
-                Pair.make(  this.receivers  , this.replSenders      ),
-                Pair.make(  this.senders    , this.restricts        ),
-                Pair.make(  this.receivers  , this.restricts        ),
-                Pair.make(  this.restricts  , this.replSenders      ),
-                Pair.make(  this.restricts  , this.replReceivers    ),
-                Pair.make(  this.senders    , this.replRestricts    ),
-                Pair.make(  this.receivers  , this.replRestricts    ),
-                Pair.make(  this.restricts  , this.restricts        ),
-                Pair.make(  this.restricts  , this.replRestricts    ),
-                Pair.make(  this.sums       , this.sums             ),
-                Pair.make(  this.sums       , this.senders          ),
-                Pair.make(  this.sums       , this.receivers        ),
-                Pair.make(  this.sums       , this.restricts        ),
-                Pair.make(  this.sums       , this.replSenders      ),
-                Pair.make(  this.sums       , this.replReceivers    ),
-                Pair.make(  this.sums       , this.replRestricts    ),
-                Pair.make(  this.sums       , this.replSums         ),
-                Pair.make(  this.senders    , this.replSums         ),
-                Pair.make(  this.receivers  , this.replSums         ),
-                Pair.make(  this.restricts  , this.replSums         )));
+        ArrayList<Either<
+                Pair<ArrayList<? extends PiTerm>, ArrayList<? extends PiTerm>>,
+                ArrayList<? extends PiTerm>
+                >> reductions =
+                new ArrayList<Either<
+                Pair<ArrayList<? extends PiTerm>, ArrayList<? extends PiTerm>>,
+                ArrayList<? extends PiTerm>
+                >>(Arrays.asList(
+                Either.frst(Pair.make(this.senders  , this.replReceivers)),
+                Either.frst(Pair.make(this.receivers, this.replSenders  )),
+                Either.frst(Pair.make(this.senders  , this.restricts    )),
+                Either.frst(Pair.make(this.receivers, this.restricts    )),
+                Either.frst(Pair.make(this.restricts, this.replSenders  )),
+                Either.frst(Pair.make(this.restricts, this.replReceivers)),
+                Either.frst(Pair.make(this.senders  , this.replRestricts)),
+                Either.frst(Pair.make(this.receivers, this.replRestricts)),
+                Either.frst(Pair.make(this.restricts, this.restricts    )),
+                Either.frst(Pair.make(this.restricts, this.replRestricts)),
+                Either.frst(Pair.make(this.sums     , this.sums         )),
+                Either.frst(Pair.make(this.sums     , this.senders      )),
+                Either.frst(Pair.make(this.sums     , this.receivers    )),
+                Either.frst(Pair.make(this.sums     , this.restricts    )),
+                Either.frst(Pair.make(this.sums     , this.replSenders  )),
+                Either.frst(Pair.make(this.sums     , this.replReceivers)),
+                Either.frst(Pair.make(this.sums     , this.replRestricts)),
+                Either.frst(Pair.make(this.sums     , this.replSums     )),
+                Either.frst(Pair.make(this.senders  , this.replSums     )),
+                Either.frst(Pair.make(this.receivers, this.replSums     )),
+                Either.frst(Pair.make(this.restricts, this.replSums     )),
+                Either.scnd(this.sums),
+                Either.scnd(this.taus)));
 
         // Keep trying the possible reductions in random order until one works
-        while(!(pairings.isEmpty() || doneReduction)) {
-            Pair<ArrayList<? extends PiTerm>, ArrayList<? extends PiTerm>>
-                    pair = Utils.arbitraryElement(pairings);
-            pairings.remove(pair);
-            doneReduction =
-                    tryRandomReductionBetweenLists(pair.frst, pair.scnd);
+        while(!(reductions.isEmpty() || doneReduction)) {
+            Either<Pair<ArrayList<? extends PiTerm>,
+                    ArrayList<? extends PiTerm>>,
+                    ArrayList<? extends PiTerm>>
+                    reduction = Utils.arbitraryElement(reductions);
+            reductions.remove(reduction);
+            if(reduction.frst.isPresent()) {
+                doneReduction =
+                        tryRandomReductionBetweenLists(reduction.frst.get());
+            }
+            else if(reduction.scnd.isPresent()) {
+                doneReduction =
+                    tryInternalActionReduction(reduction.scnd.get());
+            }
+            else {
+                throw new IllegalStateException("Logic is no more.");
+            }
         }
         return doneReduction;
+    }
+
+    /*
+     * Attempt to find and perform an internal action on a term within the given
+     * list.
+     */
+    private boolean tryInternalActionReduction(
+            ArrayList<? extends PiTerm> list) {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     /*
@@ -146,8 +175,11 @@ public class Interpreter {
      * false.
      */
     private boolean tryRandomReductionBetweenLists(
-            ArrayList<? extends PiTerm> list1,
-            ArrayList<? extends PiTerm> list2) {
+            Pair<ArrayList<? extends PiTerm>,
+            ArrayList<? extends PiTerm>> lists) {
+
+        ArrayList<? extends PiTerm> list1 = lists.frst;
+        ArrayList<? extends PiTerm> list2 = lists.scnd;
 
         // Enumerate all matches between the given lists
         ArrayList<Pair<PiTerm, PiTerm>> matches =
@@ -573,6 +605,11 @@ public class Interpreter {
             else if(subterm instanceof Replicate) {
                 this.integrateNewlyExposedTerm(subterm);
             }
+            else if(subterm instanceof Tau) {
+                if(!(this.replTaus.contains(subterm))) {
+                    this.replTaus.add((Tau) subterm);
+                }
+            }
             else if(subterm instanceof NDSum) {
                 if(!(this.replSums.contains(subterm))) {
                     this.replSums.add((NDSum) subterm);
@@ -583,6 +620,9 @@ public class Interpreter {
                         "found in program");
             }
 
+        }
+        else if(term instanceof Tau) {
+            this.taus.add((Tau) term);
         }
         else if(term instanceof Parallel) {
             Parallel para = (Parallel) term;
@@ -626,6 +666,9 @@ public class Interpreter {
         for(NDSum sum : this.sums) {
             termStrings.add(sum.toStringWithNameMap(this.nameMap));
         }
+        for(Tau tau : this.taus) {
+            termStrings.add(tau.toStringWithNameMap(this.nameMap));
+        }
         for(Send send : this.replSenders) {
             termStrings.add("! " + send.toStringWithNameMap(this.nameMap));
         }
@@ -637,6 +680,9 @@ public class Interpreter {
         }
         for(NDSum sum : this.replSums) {
             termStrings.add("! " + sum.toStringWithNameMap(this.nameMap));
+        }
+        for(Tau tau : this.replTaus) {
+            termStrings.add("! " + tau.toStringWithNameMap(this.nameMap));
         }
         String procs = termStrings.isEmpty() ? "" : termStrings.remove(0);
         while(!termStrings.isEmpty()) {

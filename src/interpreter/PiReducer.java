@@ -71,6 +71,11 @@ public final class PiReducer {
                     ((Replicate) in).subterm());
         }
 
+        else if(in instanceof Tau) {
+            PiReducer.msgPassNoClashAssumed(replacing, with,
+                    ((Tau) in).subterm());
+        }
+
         else if(in instanceof Restrict) {
             Restrict rest = (Restrict) in;
 

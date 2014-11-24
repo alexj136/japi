@@ -43,6 +43,7 @@ terminal            LANGLE, // <
                     BANG,   // !
                     ZERO,   // 0
                     BSLASH, // \
+                    TILDE,  // ~
                     PRN, ABS, VAR, APP; // PRECEDENCE DECLARATORS
 terminal Integer    IDENT;  // [a-z_]+
 
@@ -77,6 +78,7 @@ piTerm        ::= IDENT:c names:n DOT piTerm:s     {: RESULT = new Receive(c, n,
                 | NEW IDENT:c IN piTerm:s          {: RESULT = new Restrict(c, s);           :}
                 | BANG piTerm:s                    {: RESULT = new Replicate(s);             :}
                 | sumTerms:s                       {: RESULT = new NDSum(s);                 :}
+                | TILDE DOT piTerm:s               {: RESULT = new Tau(s);                   :}
                 | ZERO                    {: RESULT = new Parallel(new ArrayList<PiTerm>()); :}
                 ;
 

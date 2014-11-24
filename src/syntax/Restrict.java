@@ -32,6 +32,7 @@ public final class Restrict extends PiTermOneSub {
      * Enumerate the binders in this Restrict.
      * @return a HashSet of the binders in this Restrict
      */
+    @Override
     public HashSet<Integer> binders() {
         HashSet<Integer> subBinders = this.subterm.binders();
         subBinders.add(this.boundName());
@@ -42,6 +43,7 @@ public final class Restrict extends PiTermOneSub {
      * Enumerate the free variables in this Restrict.
      * @return a HashSet of the free variables in this Restrict
      */
+    @Override
     public HashSet<Integer> freeVars() {
         HashSet<Integer> freeVars = this.subterm.freeVars();
         freeVars.remove(this.boundName());
@@ -53,6 +55,7 @@ public final class Restrict extends PiTermOneSub {
      * @param from all free occurrences of this name are changed
      * @param to names being changed are replaced with this value
      */
+    @Override
     public void renameFree(Integer from, Integer to) {
         if(!this.boundName.equals(from)) { this.subterm.renameFree(from, to); }
     }
@@ -63,12 +66,26 @@ public final class Restrict extends PiTermOneSub {
      * @param from all binding and bound occurrences of this name are changed
      * @param to names being changed are replaced with this value
      */
+    @Override
     public void renameNonFree(Integer from, Integer to) {
         if(this.boundName.equals(from)) {
             this.boundName = to;
             this.subterm.blindRename(from, to);
         }
         else { this.subterm.renameNonFree(from, to); }
+    }
+
+    /**
+     * Carelessly rename this Restrict.
+     * @param from all names of this value are renamed
+     * @param to all names being renamed are renamed to this value
+     */
+    @Override
+    public void blindRename(Integer from, Integer to) {
+        if(this.boundName.equals(from)) {
+            this.boundName = to;
+        }
+        this.subterm.blindRename(from, to);
     }
 
     /**
@@ -91,18 +108,6 @@ public final class Restrict extends PiTermOneSub {
     public String toStringWithNameMap(HashMap<Integer, String> nameMap) {
         return "new " + nameMap.get(this.boundName) + " in " +
                 this.subterm.toStringWithNameMap(nameMap);
-    }
-
-    /**
-     * Carelessly rename this Restrict.
-     * @param from all names of this value are renamed
-     * @param to all names being renamed are renamed to this value
-     */
-    public void blindRename(Integer from, Integer to) {
-        if(this.boundName.equals(from)) {
-            this.boundName = to;
-        }
-        this.subterm.blindRename(from, to);
     }
 
     /**

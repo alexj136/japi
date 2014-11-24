@@ -56,6 +56,9 @@ public abstract class PiTerm extends Term {
             return PiTerm.talksTo(t2, t1, t2Restricted, t1Restricted);
         }
 
+        // Terms under Tau actions cannot talk
+        else if(t1 instanceof Tau || t2 instanceof Tau) { return false; }
+
         // If one of the terms is a parallel composition, return true if either
         // of its subprocesses would talk to the other term
         else if(t1 instanceof PiTermManySub) {

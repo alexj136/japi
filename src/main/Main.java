@@ -7,6 +7,7 @@ import interpreter.Interpreter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 
 public class Main {
@@ -54,17 +55,17 @@ public class Main {
         Triple<PiTerm, HashMap<String, Integer>, Integer> res;
         try {
             res = Parser.parseStream(input);
+            input.close();
         }
         catch(Exception e) {
             System.out.println("Could not parse the file:\n" + e.getMessage());
             return;
         }
         Interpreter interpreter = Interpreter.fromTranslation(res);
-        System.out.println(interpreter);
         boolean reductionOccurred = true;
         while(reductionOccurred) {
+            System.out.println(interpreter);
             reductionOccurred = interpreter.doReduction();
-            if(reductionOccurred) { System.out.println(interpreter); }
         }
     }
 }
