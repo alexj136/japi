@@ -1,5 +1,6 @@
 package syntax;
 
+import utils.Utils;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -101,5 +102,30 @@ public abstract class PiTerm extends Term {
 
         // No other possibilities, so return false if no other conditions catch
         else { return false; }
+    }
+
+    /**
+     * Determine if a term can do an internal action.
+     * @param term the term to test
+     * @return true if the given term has an internal action, false otherwise.
+     */
+    public static boolean hasInternalAction(PiTerm term) {
+        if(term instanceof PiTermComm) { return false; }
+        else if(term instanceof Restrict || term instanceof Replicate) {
+            return PiTerm.hasInternalAction(((PiTermOneSub) term).subterm());
+        }
+        else if(term instanceof NDSum) {
+            return Utils.any((PiTerm tm) -> PiTerm.hasInternalAction(tm),
+                    ((NDSum) term).subterms());
+        }
+        else if(term instanceof Parallel) {
+            return Utils.any((PiTerm tm) -> PiTerm.hasInternalAction(tm),
+                    ((Parallel) term).subterms()) || PiTerm.talksTo(term, term);
+        }
+        else if(term instanceof Tau) { return true; }
+        else {
+            throw new IllegalArgumentException("Unrecognised PiTerm type in " +
+                    "PiTerm.hasInternalAction()");
+        }
     }
 }

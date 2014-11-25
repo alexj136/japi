@@ -24,6 +24,12 @@ public abstract class PiTermManySub extends PiTerm implements Iterable<PiTerm> {
     public PiTerm subterm(int index) { return this.subterms.get(index); }
 
     /**
+     * Access all stored subterms as an ArrayList.
+     * @return the ArrayList of stored subterms
+     */
+    public ArrayList<PiTerm> subterms() { return this.subterms; }
+
+    /**
      * Determine the number of terms in this parallel composition.
      * @return  the number of terms in this parallel composition
      */

@@ -1,9 +1,12 @@
 package utils;
 
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * General purpose functions ('static methods').
@@ -19,6 +22,10 @@ public final class Utils {
      * @return an arbitrary element of the given list
      */
     public static <E> E arbitraryElement(ArrayList<E> list) {
+        if(list.isEmpty()) {
+            throw new IllegalArgumentException("Utils.arbitraryElement(): " +
+                    "cannot retrieve an element from an empty list");
+        }
         return list.get(Utils.rand.nextInt(list.size()));
     }
 
@@ -91,5 +98,54 @@ public final class Utils {
         HashSet<T> set = new HashSet<T>();
         for(T key : map.keySet()) { set.add(key); }
         return set;
+    }
+
+    /**
+     * Determine if any elements of the given List return true for the
+     * given predicate.
+     * @param list the list to test
+     * @param test the test operation
+     * @return true if the test passes for one or more elements of the list,
+     * false otherwise
+     */
+    public static <T> boolean any(Predicate<T> pred, ArrayList<T> list) {
+        ArrayList<Boolean> bools = Utils.map((T t) -> pred.test(t), list);
+        for(Boolean b : bools) { if(b) { return true; } }
+        return false;
+    }
+
+    /**
+     * Apply a function to all elements of a list, to generate a new list.
+     * @param list the list to apply the function to
+     * @param function the function to apply
+     * @return a list containing elements that are the result of applying the
+     * function to the elements of the list, in the corresponding order.
+     */
+    public static <T, U> ArrayList<U> map(Function<T, U> function,
+            ArrayList<T> list) {
+
+        ArrayList<U> newList = new ArrayList<U>();
+        for(T elem : list) { newList.add(function.apply(elem)); }
+        return newList;
+    }
+
+    /**
+     * Create a new ArrayList from the given ArrayList, with all elements from
+     * the given list in the given order, omitting elements that do not pass the
+     * given predicate. Does not modify the given list.
+     * @param pred the predicate to test with
+     * @param list the list to filter
+     * @return the filtered list
+     */
+    public static <T> ArrayList<T> filter(Predicate<T> pred,
+            ArrayList<T> list) {
+
+        ArrayList<T> newList = new ArrayList<T>();
+        for(T elem : list) {
+            if(pred.test(elem)) {
+                newList.add(elem);
+            }
+        }
+        return newList;
     }
 }

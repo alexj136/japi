@@ -112,31 +112,30 @@ public class Interpreter {
                 >> reductions =
                 new ArrayList<Either<
                 Pair<ArrayList<? extends PiTerm>, ArrayList<? extends PiTerm>>,
-                ArrayList<? extends PiTerm>
-                >>(Arrays.asList(
-                Either.frst(Pair.make(this.senders  , this.replReceivers)),
-                Either.frst(Pair.make(this.receivers, this.replSenders  )),
-                Either.frst(Pair.make(this.senders  , this.restricts    )),
-                Either.frst(Pair.make(this.receivers, this.restricts    )),
-                Either.frst(Pair.make(this.restricts, this.replSenders  )),
-                Either.frst(Pair.make(this.restricts, this.replReceivers)),
-                Either.frst(Pair.make(this.senders  , this.replRestricts)),
-                Either.frst(Pair.make(this.receivers, this.replRestricts)),
-                Either.frst(Pair.make(this.restricts, this.restricts    )),
-                Either.frst(Pair.make(this.restricts, this.replRestricts)),
-                Either.frst(Pair.make(this.sums     , this.sums         )),
-                Either.frst(Pair.make(this.sums     , this.senders      )),
-                Either.frst(Pair.make(this.sums     , this.receivers    )),
-                Either.frst(Pair.make(this.sums     , this.restricts    )),
-                Either.frst(Pair.make(this.sums     , this.replSenders  )),
-                Either.frst(Pair.make(this.sums     , this.replReceivers)),
-                Either.frst(Pair.make(this.sums     , this.replRestricts)),
-                Either.frst(Pair.make(this.sums     , this.replSums     )),
-                Either.frst(Pair.make(this.senders  , this.replSums     )),
-                Either.frst(Pair.make(this.receivers, this.replSums     )),
-                Either.frst(Pair.make(this.restricts, this.replSums     )),
-                Either.scnd(this.sums),
-                Either.scnd(this.taus)));
+                ArrayList<? extends PiTerm>>>();
+        reductions.add(Either.frst(Pair.make(this.senders  , this.replReceivers)));
+        reductions.add(Either.frst(Pair.make(this.receivers, this.replSenders  )));
+        reductions.add(Either.frst(Pair.make(this.senders  , this.restricts    )));
+        reductions.add(Either.frst(Pair.make(this.receivers, this.restricts    )));
+        reductions.add(Either.frst(Pair.make(this.restricts, this.replSenders  )));
+        reductions.add(Either.frst(Pair.make(this.restricts, this.replReceivers)));
+        reductions.add(Either.frst(Pair.make(this.senders  , this.replRestricts)));
+        reductions.add(Either.frst(Pair.make(this.receivers, this.replRestricts)));
+        reductions.add(Either.frst(Pair.make(this.restricts, this.restricts    )));
+        reductions.add(Either.frst(Pair.make(this.restricts, this.replRestricts)));
+        reductions.add(Either.frst(Pair.make(this.sums     , this.sums         )));
+        reductions.add(Either.frst(Pair.make(this.sums     , this.senders      )));
+        reductions.add(Either.frst(Pair.make(this.sums     , this.receivers    )));
+        reductions.add(Either.frst(Pair.make(this.sums     , this.restricts    )));
+        reductions.add(Either.frst(Pair.make(this.sums     , this.replSenders  )));
+        reductions.add(Either.frst(Pair.make(this.sums     , this.replReceivers)));
+        reductions.add(Either.frst(Pair.make(this.sums     , this.replRestricts)));
+        reductions.add(Either.frst(Pair.make(this.sums     , this.replSums     )));
+        reductions.add(Either.frst(Pair.make(this.senders  , this.replSums     )));
+        reductions.add(Either.frst(Pair.make(this.receivers, this.replSums     )));
+        reductions.add(Either.frst(Pair.make(this.restricts, this.replSums     )));
+        reductions.add(Either.scnd(this.sums));
+        reductions.add(Either.scnd(this.taus));
 
         // Keep trying the possible reductions in random order until one works
         while(!(reductions.isEmpty() || doneReduction)) {
@@ -166,7 +165,34 @@ public class Interpreter {
      */
     private boolean tryInternalActionReduction(
             ArrayList<? extends PiTerm> list) {
-        throw new UnsupportedOperationException("Not yet implemented");
+
+        if(list.isEmpty()) { return false; }
+        else {
+
+            // Get the elements of the list that have internal actions
+            ArrayList<? extends PiTerm> haveInternal = Utils.filter(
+                    tm -> PiTerm.hasInternalAction(tm), list);
+
+            // If none have internal actions, we can't do anything here
+            if(haveInternal.isEmpty()) { return false; }
+
+            // Else do an internal action
+            PiTerm internalActor = Utils.arbitraryElement(haveInternal);
+
+            if(internalActor instanceof NDSum) {
+                doInternalAction((NDSum) internalActor);
+            }
+            else if(internalActor instanceof Tau) {
+                doInternalAction((Tau) internalActor);
+            }
+            else {
+                throw new IllegalStateException(
+                        "Interpreter.tryInternalActionReduction() was passed " +
+                        "a list containing elements of types other than " +
+                        "NDSum or Tau");
+            }
+            return true;
+        }
     }
 
     /*
@@ -341,6 +367,32 @@ public class Interpreter {
         }
 
         this.integrateNewlyExposedTerm(receiverSub);
+    }
+
+    /*
+     * Perform the specified Tau action
+     */
+    public void doInternalAction(Tau tau) {
+
+        if(!(this.taus.contains(tau) || this.replTaus.contains(tau))) {
+            throw new IllegalArgumentException("Tau tau parameter must be a " +
+                    "member of the taus or replTaus ArrayLists");
+        }
+
+        if(this.taus.contains(tau)) {
+            this.taus.remove(tau);
+            this.integrateNewlyExposedTerm(tau.subterm());
+        }
+        else if(this.replTaus.contains(tau)) {
+            this.integrateNewlyExposedTerm(tau.subterm().copy());
+        }
+    }
+
+    /*
+     * Perform an internal action with the specified sum term
+     */
+    public void doInternalAction(NDSum sum) {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     /*
