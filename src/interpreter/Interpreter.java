@@ -33,9 +33,9 @@ public class Interpreter {
 
     private HashSet<Integer> boundNames;
 
-    // This pair should not belong to a PiTerm list. Replicated terms should
-    // have the Replicate wrapper, Parallels can be present, etc.
-    private Optional<Pair<PiTerm, PiTerm>> actingTerms;
+    // This PiTerm(s) should not belong to a PiTerm list. Replicated terms
+    // should have the Replicate wrapper, Parallels can be present, etc.
+    private Optional<Either<Pair<PiTerm, PiTerm>, PiTerm>> actingTerms;
 
     /**
      * Construct a new Interpreter.
@@ -56,19 +56,19 @@ public class Interpreter {
 
         this.nextAvailableName = nextAvailableName;
 
-        this.senders = new ArrayList<Send>();
-        this.receivers = new ArrayList<Receive>();
-        this.restricts = new ArrayList<Restrict>();
-        this.sums = new ArrayList<NDSum>();
-        this.taus = new ArrayList<Tau>();
+        this.senders = new ArrayList<>();
+        this.receivers = new ArrayList<>();
+        this.restricts = new ArrayList<>();
+        this.sums = new ArrayList<>();
+        this.taus = new ArrayList<>();
 
-        this.replSenders = new ArrayList<Send>();
-        this.replReceivers = new ArrayList<Receive>();
-        this.replRestricts = new ArrayList<Restrict>();
-        this.replSums = new ArrayList<NDSum>();
-        this.replTaus = new ArrayList<Tau>();
+        this.replSenders = new ArrayList<>();
+        this.replReceivers = new ArrayList<>();
+        this.replRestricts = new ArrayList<>();
+        this.replSums = new ArrayList<>();
+        this.replTaus = new ArrayList<>();
 
-        this.boundNames = new HashSet<Integer>();
+        this.boundNames = new HashSet<>();
 
         this.actingTerms = Optional.empty();
 
@@ -109,10 +109,7 @@ public class Interpreter {
         ArrayList<Either<
                 Pair<ArrayList<? extends PiTerm>, ArrayList<? extends PiTerm>>,
                 ArrayList<? extends PiTerm>
-                >> reductions =
-                new ArrayList<Either<
-                Pair<ArrayList<? extends PiTerm>, ArrayList<? extends PiTerm>>,
-                ArrayList<? extends PiTerm>>>();
+                >> reductions = new ArrayList<>();
         reductions.add(Either.frst(Pair.make(this.senders  , this.replReceivers)));
         reductions.add(Either.frst(Pair.make(this.receivers, this.replSenders  )));
         reductions.add(Either.frst(Pair.make(this.senders  , this.restricts    )));
@@ -515,7 +512,7 @@ public class Interpreter {
         }
 
         // Obtain a list of all the subterms of sum that talk to other.
-        ArrayList<PiTerm> commSubs = new ArrayList<PiTerm>();
+        ArrayList<PiTerm> commSubs = new ArrayList<>();
         for(int i = 0; i < sum.arity(); i++) {
             if(PiTerm.talksTo(sum.subterm(i), other)) {
                 commSubs.add(sum.subterm(i));
@@ -547,7 +544,7 @@ public class Interpreter {
                     "sums, senders or receivers lists.");
         }
 
-        this.actingTerms = Optional.of(Pair.make(chosen, other));
+        this.actingTerms = Optional.of(Either.frst(Pair.make(chosen, other)));
     }
 
     /*
@@ -559,80 +556,129 @@ public class Interpreter {
             throw new IllegalStateException("continueInProgressReduction was " +
                     "called when no reduction was in progress");
         }
+        else if(this.actingTerms.get().frst.isPresent()) {
 
-        PiTerm t1 = this.actingTerms.get().frst;
-        PiTerm t2 = this.actingTerms.get().scnd;
+            PiTerm t1 = this.actingTerms.get().frst.get().frst;
+            PiTerm t2 = this.actingTerms.get().frst.get().scnd;
 
-        if(t1 instanceof Send) {
-            if(t2 instanceof Receive) {
-                this.integrateNewlyExposedTerm(t1);
-                this.integrateNewlyExposedTerm(t2);
-                this.doCommunicate((Send) t1, (Receive) t2);
-                this.actingTerms = Optional.empty();
-            }
-            else {
-                this.actingTerms = Optional.of(Pair.make(t2, t1));
-                this.continueInProgressReduction();
-            }
-        }
-        else if(t1 instanceof Receive) {
-            if(t2 instanceof Send) {
-                this.integrateNewlyExposedTerm(t1);
-                this.integrateNewlyExposedTerm(t2);
-                this.doCommunicate((Send) t2, (Receive) t1);
-                this.actingTerms = Optional.empty();
-            }
-            else {
-                this.actingTerms = Optional.of(Pair.make(t2, t1));
-                this.continueInProgressReduction();
-            }
-        }
-        else if(t1 instanceof PiTermManySub) {
-            PiTermManySub ptms = (PiTermManySub) t1;
-            ArrayList<PiTerm> commSubs =
-                    new ArrayList<PiTerm>();
-
-            // Enumerate the subterms which will communicate
-            for(int i = 0; i < ptms.arity(); i++) {
-                if(PiTerm.talksTo(ptms.subterm(i), t2)) {
-                    commSubs.add(ptms.subterm(i));
+            if(t1 instanceof Send) {
+                if(t2 instanceof Receive) {
+                    this.integrateNewlyExposedTerm(t1);
+                    this.integrateNewlyExposedTerm(t2);
+                    this.doCommunicate((Send) t1, (Receive) t2);
+                    this.actingTerms = Optional.empty();
+                }
+                else {
+                    this.actingTerms = Optional.of(
+                            Either.frst(Pair.make(t2, t1)));
+                    this.continueInProgressReduction();
                 }
             }
-
-            // Pick one to use
-            PiTerm chosen = Utils.arbitraryElement(commSubs);
-
-            // Either discard the others (for a sum) or integrate them (for a
-            // parallel composition)
-            if(t1 instanceof NDSum) {
-                // Do nothing - unselected options will be discarded
+            else if(t1 instanceof Receive) {
+                if(t2 instanceof Send) {
+                    this.integrateNewlyExposedTerm(t1);
+                    this.integrateNewlyExposedTerm(t2);
+                    this.doCommunicate((Send) t2, (Receive) t1);
+                    this.actingTerms = Optional.empty();
+                }
+                else {
+                    this.actingTerms = Optional.of(
+                            Either.frst(Pair.make(t2, t1)));
+                    this.continueInProgressReduction();
+                }
             }
-            else if(t1 instanceof Parallel) {
-                // Integrate unselected terms
+            else if(t1 instanceof PiTermManySub) {
+                PiTermManySub ptms = (PiTermManySub) t1;
+                ArrayList<PiTerm> commSubs =
+                        new ArrayList<PiTerm>();
+
+                // Enumerate the subterms which will communicate
                 for(int i = 0; i < ptms.arity(); i++) {
-                    if(ptms.subterm(i) != chosen) {
-                        this.integrateNewlyExposedTerm(ptms.subterm(i));
+                    if(PiTerm.talksTo(ptms.subterm(i), t2)) {
+                        commSubs.add(ptms.subterm(i));
                     }
                 }
+
+                // Pick one to use
+                PiTerm chosen = Utils.arbitraryElement(commSubs);
+
+                // Either discard the others (for a sum) or integrate them (for
+                // a parallel composition)
+                if(t1 instanceof NDSum) {
+                    // Do nothing - unselected options will be discarded
+                }
+                else if(t1 instanceof Parallel) {
+                    // Integrate unselected terms
+                    for(int i = 0; i < ptms.arity(); i++) {
+                        if(ptms.subterm(i) != chosen) {
+                            this.integrateNewlyExposedTerm(ptms.subterm(i));
+                        }
+                    }
+                }
+                else {
+                    throw new IllegalStateException("Unrecognised " +
+                            "PiTermManySub type in actingterms");
+                }
+                this.actingTerms = Optional.of(
+                        Either.frst(Pair.make(chosen, t2)));
+            }
+            else if(t1 instanceof Replicate) {
+                PiTerm t1SubCopy = ((Replicate) t1).subterm().copy();
+                this.integrateNewlyExposedTerm(t1);
+                this.actingTerms = Optional.of(
+                        Either.frst(Pair.make(t1SubCopy, t2)));
+            }
+            else if(t1 instanceof Restrict) {
+                PiTerm t1Sub = this.doScopeExtrusion((Restrict) t1);
+                this.actingTerms = Optional.of(
+                        Either.frst(Pair.make(t1Sub, t2)));
             }
             else {
-                throw new IllegalStateException("Unrecognised PiTermManySub " +
-                        "type in actingterms");
+                throw new IllegalStateException("Unrecognised PiTerm type in " +
+                        "actingTerms");
             }
-            this.actingTerms = Optional.of(Pair.make(chosen, t2));
         }
-        else if(t1 instanceof Replicate) {
-            PiTerm t1SubCopy = ((Replicate) t1).subterm().copy();
-            this.integrateNewlyExposedTerm(t1);
-            this.actingTerms = Optional.of(Pair.make(t1SubCopy, t2));
+
+        else if(this.actingTerms.get().scnd.isPresent()) {
+
+            PiTerm tm = this.actingTerms.get().scnd.get();
+
+            if(tm instanceof Parallel) {
+                Parallel para = (Parallel) tm;
+
+                ArrayList<Pair<PiTerm, PiTerm>> matches = new ArrayList<>();
+
+                for(PiTerm subterm1 : para.subterms()) {
+                    for(PiTerm subterm2 : para.subterms()) {
+                        if(PiTerm.talksTo(subterm1, subterm2)) {
+                            matches.add(Pair.make(subterm1, subterm2));
+                        }
+                    }
+                }
+
+                Pair<PiTerm, PiTerm> chosenMatch =
+                        Utils.arbitraryElement(matches);
+
+                ArrayList<PiTerm> subterms = new ArrayList<>(para.subterms());
+
+                subterms.remove(chosenMatch.frst);
+                subterms.remove(chosenMatch.scnd);
+
+                for(PiTerm subterm : subterms) {
+                    this.integrateNewlyExposedTerm(subterm);
+                }
+
+                this.actingTerms = Optional.of(Either.frst(chosenMatch));
+            }
+            else {
+                throw new IllegalStateException("Single actingTerm was of "
+                        + "an invalid PiTerm type. Must be of type Parallel.");
+            }
         }
-        else if(t1 instanceof Restrict) {
-            PiTerm t1Sub = this.doScopeExtrusion((Restrict) t1);
-            this.actingTerms = Optional.of(Pair.make(t1Sub, t2));
-        }
+
         else {
-            throw new IllegalStateException("Unrecognised PiTerm type in " +
-                    "actingTerms");
+            throw new IllegalStateException("actingTerms was present but " +
+                    "neither Either option was present");
         }
     }
 
@@ -715,12 +761,18 @@ public class Interpreter {
      * @return a String representation of the 'term' in its current state
      */
     public String toString() {
-        ArrayList<String> termStrings = new ArrayList<String>();
+        ArrayList<String> termStrings = new ArrayList<>();
         if(this.actingTerms.isPresent()) {
-            termStrings.add(this.actingTerms.get().frst
-                    .toStringWithNameMap(this.nameMap));
-            termStrings.add(this.actingTerms.get().scnd
-                    .toStringWithNameMap(this.nameMap));
+            if(this.actingTerms.get().frst.isPresent()) {
+                termStrings.add(this.actingTerms.get().frst.get().frst
+                        .toStringWithNameMap(this.nameMap));
+                termStrings.add(this.actingTerms.get().frst.get().scnd
+                        .toStringWithNameMap(this.nameMap));
+            }
+            else {
+                termStrings.add(this.actingTerms.get().scnd.get()
+                        .toStringWithNameMap(this.nameMap));
+            }
         }
         for(Send send : this.senders) {
             termStrings.add(send.toStringWithNameMap(this.nameMap));
