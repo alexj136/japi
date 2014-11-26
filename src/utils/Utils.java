@@ -30,6 +30,53 @@ public final class Utils {
     }
 
     /**
+     * Slice a list from the start up to the given index (exclusive). Equivalent
+     * to Utils.slice(list, 0, index).
+     * @param list the list to slice
+     * @param index the index after the index of the last element included in
+     * the slice
+     * @return the desired slice
+     */
+    public static <T> ArrayList<T> sliceStart(ArrayList<T> list, int index) {
+        return Utils.slice(list, 0, index);
+    }
+
+    /**
+     * Slice a list from the given index (inclusive) to the end of the list.
+     * Equivalent to Utils.slice(list, index, list.size()).
+     * @param list the list to slice
+     * @param index the index of the first element to include in the slice
+     * @return the desired slice
+     */
+    public static <T> ArrayList<T> sliceEnd(ArrayList<T> list, int index) {
+        return Utils.slice(list, index, list.size());
+    }
+
+    /**
+     * Obtain a slice of the given list from beginIndex (inclusive), to endIndex
+     * (exclusive). Returns a new list and the original list is not modified.
+     * @param list the list to slice
+     * @param beginIndex the index of the first element in the slice
+     * @param endIndex the index after the index of the last element in the
+     * slice
+     * @return the desired slice
+     */
+    public static <T> ArrayList<T> slice(ArrayList<T> list, int beginIndex,
+            int endIndex) {
+
+        if(beginIndex < 0 || endIndex < 0 || beginIndex >= list.size() ||
+                endIndex > list.size() || (beginIndex >= endIndex)) {
+
+            throw new IllegalArgumentException("Invalid indices");
+        }
+        ArrayList<T> newList = new ArrayList<T>();
+        for(int i = beginIndex; i < endIndex; i++) {
+            newList.add(list.get(i));
+        }
+        return newList;
+    }
+
+    /**
      * Generate a string of the given number of tabs, for use when pretty-
      * printing terms. The generated tabs are actually 4 space characters.
      * @param numTabs the desired number of tabs

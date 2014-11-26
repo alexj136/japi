@@ -392,7 +392,23 @@ public class Interpreter {
      * Perform an internal action with the specified sum term
      */
     public void doInternalAction(NDSum sum) {
-        throw new UnsupportedOperationException("Not yet implemented");
+
+        if(!(this.sums.contains(sum) || this.replSums.contains(sum))) {
+            throw new IllegalArgumentException("NDSum sum parameter must be " +
+                    "a member of the sums or replSums ArrayLists");
+        }
+
+        PiTerm chosen = Utils.arbitraryElement(Utils.filter(
+                (PiTerm tm) -> PiTerm.hasInternalAction(tm),
+                sum.subterms()));
+
+        if(this.sums.contains(sum)) {
+            this.sums.remove(sum);
+            this.integrateNewlyExposedTerm(chosen);
+        }
+        else if(this.replSums.contains(sum)) {
+            this.integrateNewlyExposedTerm(chosen.copy());
+        }
     }
 
     /*
