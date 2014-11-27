@@ -35,6 +35,19 @@ public final class LambdaReducer {
             throw new IllegalArgumentException("Unrecognised LambdaTerm type " +
                     "in LambdaTerm.reduce()");
         }
+
+        // Delve into the term to find reductions if there isn't one at the top
+        if(term instanceof Application
+                && (!(((Application) term).func() instanceof Abstraction))) {
+
+            Application app = (Application) term;
+            app.setFunc(LambdaReducer.reduce(app.func(), nameGenerator,
+                    nextAvailableName));
+            app.setArg(LambdaReducer.reduce(app.arg(), nameGenerator,
+                    nextAvailableName));
+        }
+
+        // If there is a redex, reduce it
         while(term instanceof Application
                 && ((Application) term).func() instanceof Abstraction) {
 
